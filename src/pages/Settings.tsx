@@ -1,9 +1,12 @@
 
+import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 const Settings = () => {
+  const { theme, setTheme } = useTheme();
+
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Settings</h1>
@@ -20,7 +23,10 @@ const Settings = () => {
                   Toggle dark mode on/off
                 </p>
               </div>
-              <Switch />
+              <Switch
+                checked={theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
