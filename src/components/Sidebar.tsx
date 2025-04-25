@@ -26,7 +26,11 @@ const menuItems = [
   { title: "Profile", icon: User, path: "/profile" },
 ];
 
-export function MainSidebar() {
+interface MainSidebarProps {
+  children: React.ReactNode;
+}
+
+export function MainSidebar({ children }: MainSidebarProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -53,6 +57,7 @@ export function MainSidebar() {
         </Sidebar>
         <div className="flex-1">
           <SidebarTrigger className="m-2" />
+          {children}
         </div>
       </div>
     </SidebarProvider>
