@@ -15,6 +15,11 @@ import VoiceConversation from "./pages/VoiceConversation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import DescribePicture from "./pages/exercises/DescribePicture";
+import Grammar from "./pages/exercises/Grammar";
+import VocabularyCategorized from "./pages/vocabulary/Categorized";
+import VocabularyCustom from "./pages/vocabulary/Custom";
+import VocabularyExercises from "./pages/vocabulary/Exercises";
 
 const queryClient = new QueryClient();
 
@@ -30,8 +35,13 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/vocabulary" element={<Vocabulary />} />
+              <Route path="/vocabulary/categorized" element={<VocabularyCategorized />} />
+              <Route path="/vocabulary/custom" element={<VocabularyCustom />} />
+              <Route path="/vocabulary/exercises" element={<VocabularyExercises />} />
               <Route path="/flashcards" element={<Flashcards />} />
               <Route path="/exercises" element={<Exercises />} />
+              <Route path="/exercises/describe-picture" element={<DescribePicture />} />
+              <Route path="/exercises/grammar" element={<Grammar />} />
               <Route path="/voice-conversation" element={<VoiceConversation />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profile" element={<Profile />} />

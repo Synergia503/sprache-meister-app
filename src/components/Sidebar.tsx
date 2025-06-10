@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Book, FileText, Home, LayoutDashboard, Settings, User, CreditCard, Mic } from "lucide-react";
+import { Book, FileText, Home, LayoutDashboard, Settings, User, CreditCard, Mic, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,17 +13,35 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-const menuItems = [
+const basicMenuItems = [
   { title: "Home", icon: Home, path: "/" },
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { title: "Vocabulary", icon: Book, path: "/vocabulary" },
   { title: "Flashcards", icon: CreditCard, path: "/flashcards" },
-  { title: "Exercises", icon: FileText, path: "/exercises" },
   { title: "Voice Conversation", icon: Mic, path: "/voice-conversation" },
   { title: "Settings", icon: Settings, path: "/settings" },
   { title: "Profile", icon: User, path: "/profile" },
+];
+
+const vocabularySubItems = [
+  { title: "Categorized", path: "/vocabulary/categorized" },
+  { title: "Custom", path: "/vocabulary/custom" },
+  { title: "Exercises", path: "/vocabulary/exercises" },
+];
+
+const exercisesSubItems = [
+  { title: "Describe a Picture", path: "/exercises/describe-picture" },
+  { title: "Grammar", path: "/exercises/grammar" },
+  { title: "Mixed", path: "/exercises/mixed" },
 ];
 
 interface MainSidebarProps {
@@ -31,6 +49,9 @@ interface MainSidebarProps {
 }
 
 export function MainSidebar({ children }: MainSidebarProps) {
+  const [vocabularyOpen, setVocabularyOpen] = useState(false);
+  const [exercisesOpen, setExercisesOpen] = useState(false);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -40,7 +61,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {menuItems.map((item) => (
+                  {basicMenuItems.map((item) => (
                     <SidebarMenuItem key={item.path}>
                       <SidebarMenuButton asChild>
                         <Link to={item.path} className="flex items-center gap-2">
@@ -50,6 +71,68 @@ export function MainSidebar({ children }: MainSidebarProps) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
+                  
+                  <Collapsible open={vocabularyOpen} onOpenChange={setVocabularyOpen}>
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <Book className="h-4 w-4" />
+                            <span>Vocabulary</span>
+                          </div>
+                          {vocabularyOpen ? (
+                            <ChevronDown className="h-3 w-3" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {vocabularySubItems.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.path}>
+                              <SidebarMenuSubButton asChild>
+                                <Link to={subItem.path}>
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+
+                  <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span>Exercises</span>
+                          </div>
+                          {exercisesOpen ? (
+                            <ChevronDown className="h-3 w-3" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {exercisesSubItems.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.path}>
+                              <SidebarMenuSubButton asChild>
+                                <Link to={subItem.path}>
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
