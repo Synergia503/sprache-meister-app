@@ -1,3 +1,4 @@
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainSidebar } from "./components/Sidebar";
@@ -8,12 +9,12 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Vocabulary from "./pages/Vocabulary";
+import Flashcards from "./pages/Flashcards";
 import Exercises from "./pages/Exercises";
+import VoiceConversation from "./pages/VoiceConversation";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import DescribePicture from "./pages/exercises/DescribePicture";
-import Grammar from "./pages/exercises/Grammar";
-import Mixed from "./pages/exercises/Mixed";
 
 const queryClient = new QueryClient();
 
@@ -29,11 +30,11 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/vocabulary" element={<Vocabulary />} />
+              <Route path="/flashcards" element={<Flashcards />} />
               <Route path="/exercises" element={<Exercises />} />
-              <Route path="/exercises/describe-picture" element={<DescribePicture />} />
-              <Route path="/exercises/grammar" element={<Grammar />} />
-              <Route path="/exercises/mixed" element={<Mixed />} />
+              <Route path="/voice-conversation" element={<VoiceConversation />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </MainSidebar>
