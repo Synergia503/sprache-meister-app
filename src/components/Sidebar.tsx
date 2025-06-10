@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Book, FileText, Home, Image, LayoutDashboard, Merge, Settings, User } from "lucide-react";
+import { Book, FileText, Home, Image, LayoutDashboard, Merge, Settings, User, FolderOpen, Plus, Dumbbell } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,7 +21,16 @@ import {
 const menuItems = [
   { title: "Home", icon: Home, path: "/" },
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { title: "Vocabulary", icon: Book, path: "/vocabulary" },
+  { 
+    title: "Vocabulary", 
+    icon: Book, 
+    path: "/vocabulary",
+    subItems: [
+      { title: "Categorized", icon: FolderOpen, path: "/vocabulary/categorized" },
+      { title: "Custom", icon: Plus, path: "/vocabulary/custom" },
+      { title: "Exercises", icon: Dumbbell, path: "/vocabulary/exercises" },
+    ]
+  },
   { 
     title: "Exercises", 
     icon: FileText, 
