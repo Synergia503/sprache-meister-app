@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { edit, trash-2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Flashcard } from './FlashcardForm';
 
 interface FlashcardListProps {
@@ -39,14 +39,14 @@ export const FlashcardList = ({ flashcards, onEdit, onDelete }: FlashcardListPro
                   size="sm"
                   onClick={() => onEdit(flashcard)}
                 >
-                  <edit className="h-4 w-4" />
+                  <Edit className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onDelete(flashcard.id)}
                 >
-                  <trash-2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>

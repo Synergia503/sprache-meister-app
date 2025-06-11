@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { book-plus, list } from "lucide-react";
+import { BookPlus, List } from "lucide-react";
 import { FlashcardForm, Flashcard } from '@/components/FlashcardForm';
 import { FlashcardList } from '@/components/FlashcardList';
 import { useToast } from '@/hooks/use-toast';
@@ -110,7 +110,7 @@ const Flashcards = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Flashcards</h1>
         <Button onClick={handleAddNew}>
-          <book-plus className="mr-2 h-4 w-4" />
+          <BookPlus className="mr-2 h-4 w-4" />
           Add Flashcard
         </Button>
       </div>
@@ -129,7 +129,7 @@ const Flashcards = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <list className="h-5 w-5" />
+                <List className="h-5 w-5" />
                 My Flashcards ({filteredFlashcards.length})
               </CardTitle>
             </CardHeader>
