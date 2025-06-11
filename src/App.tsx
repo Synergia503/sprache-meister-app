@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import DescribePicture from "./pages/exercises/DescribePicture";
 import Grammar from "./pages/exercises/Grammar";
+import Mixed from "./pages/exercises/Mixed";
 import VocabularyCategorized from "./pages/vocabulary/Categorized";
 import VocabularyCustom from "./pages/vocabulary/Custom";
 import VocabularyExercises from "./pages/vocabulary/Exercises";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/exercises/all" element={<ExercisesAll />} />
               <Route path="/exercises/describe-picture" element={<DescribePicture />} />
               <Route path="/exercises/grammar" element={<Grammar />} />
+              <Route path="/exercises/mixed" element={<Mixed />} />
               <Route path="/voice-conversation" element={<VoiceConversation />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profile" element={<Profile />} />
