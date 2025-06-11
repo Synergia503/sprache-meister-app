@@ -20,6 +20,7 @@ import Grammar from "./pages/exercises/Grammar";
 import VocabularyCategorized from "./pages/vocabulary/Categorized";
 import VocabularyCustom from "./pages/vocabulary/Custom";
 import VocabularyExercises from "./pages/vocabulary/Exercises";
+import ExercisesAll from "./pages/exercises/All";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/vocabulary/exercises" element={<VocabularyExercises />} />
               <Route path="/flashcards" element={<Flashcards />} />
               <Route path="/exercises" element={<Exercises />} />
+              <Route path="/exercises/all" element={<ExercisesAll />} />
               <Route path="/exercises/describe-picture" element={<DescribePicture />} />
               <Route path="/exercises/grammar" element={<Grammar />} />
               <Route path="/voice-conversation" element={<VoiceConversation />} />

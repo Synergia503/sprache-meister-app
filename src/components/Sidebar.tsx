@@ -39,6 +39,7 @@ const vocabularySubItems = [
 ];
 
 const exercisesSubItems = [
+  { title: "All", path: "/exercises/all" },
   { title: "Describe a Picture", path: "/exercises/describe-picture" },
   { title: "Grammar", path: "/exercises/grammar" },
   { title: "Mixed", path: "/exercises/mixed" },
