@@ -14,6 +14,8 @@ import Exercises from "./pages/Exercises";
 import VoiceConversation from "./pages/VoiceConversation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import DescribePicture from "./pages/exercises/DescribePicture";
 import Grammar from "./pages/exercises/Grammar";
@@ -32,26 +34,32 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <MainSidebar>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/vocabulary" element={<Vocabulary />} />
-              <Route path="/vocabulary/categorized" element={<VocabularyCategorized />} />
-              <Route path="/vocabulary/custom" element={<VocabularyCustom />} />
-              <Route path="/vocabulary/exercises" element={<VocabularyExercises />} />
-              <Route path="/flashcards" element={<Flashcards />} />
-              <Route path="/exercises" element={<Exercises />} />
-              <Route path="/exercises/all" element={<ExercisesAll />} />
-              <Route path="/exercises/describe-picture" element={<DescribePicture />} />
-              <Route path="/exercises/grammar" element={<Grammar />} />
-              <Route path="/exercises/mixed" element={<Mixed />} />
-              <Route path="/voice-conversation" element={<VoiceConversation />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </MainSidebar>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={
+              <MainSidebar>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/vocabulary" element={<Vocabulary />} />
+                  <Route path="/vocabulary/categorized" element={<VocabularyCategorized />} />
+                  <Route path="/vocabulary/custom" element={<VocabularyCustom />} />
+                  <Route path="/vocabulary/exercises" element={<VocabularyExercises />} />
+                  <Route path="/flashcards" element={<Flashcards />} />
+                  <Route path="/exercises" element={<Exercises />} />
+                  <Route path="/exercises/all" element={<ExercisesAll />} />
+                  <Route path="/exercises/describe-picture" element={<DescribePicture />} />
+                  <Route path="/exercises/grammar" element={<Grammar />} />
+                  <Route path="/exercises/mixed" element={<Mixed />} />
+                  <Route path="/voice-conversation" element={<VoiceConversation />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </MainSidebar>
+            } />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
