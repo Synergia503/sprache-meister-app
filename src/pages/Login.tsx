@@ -8,32 +8,41 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Facebook, Linkedin, Twitter } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@german-learning.com');
+  const [password, setPassword] = useState('demo123');
   const [rememberMe, setRememberMe] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual login logic
-    toast({
-      title: "Login attempted",
-      description: `Email: ${email}`,
-    });
+    const success = login(email, password);
+    
+    if (success) {
+      toast({
+        title: "Login successful",
+        description: "Welcome to German Learning!",
+      });
+    } else {
+      toast({
+        title: "Login failed",
+        description: "Invalid email or password. Try: demo@german-learning.com / demo123",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
-    // TODO: Implement actual social login
     toast({
       title: "Social login",
-      description: `Login with ${provider} clicked`,
+      description: `${provider} login not implemented yet`,
     });
   };
 
   const handleForgotPassword = () => {
-    // TODO: Implement forgot password logic
     toast({
       title: "Password reset",
       description: "Password reset functionality would be implemented here",
@@ -46,6 +55,11 @@ const Login = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <p className="text-muted-foreground">Sign in to your account</p>
+          <div className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
+            <strong>Demo credentials:</strong><br />
+            Email: demo@german-learning.com<br />
+            Password: demo123
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <form onSubmit={handleLogin} className="space-y-4">

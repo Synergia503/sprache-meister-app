@@ -1,8 +1,41 @@
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { LogOut } from "lucide-react";
+
 const Index = () => {
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="text-center max-w-2xl">
+      <div className="text-center max-w-2xl space-y-6">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Welcome, {user?.firstName}!</span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              Logged in as: {user?.email}
+            </p>
+          </CardContent>
+        </Card>
+
         <h1 className="text-4xl font-bold mb-4">Welcome to German Learning</h1>
         <p className="text-xl text-muted-foreground">
           Start your journey to master the German language with our comprehensive learning tools.
