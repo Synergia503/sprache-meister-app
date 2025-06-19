@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -141,7 +140,7 @@ const Register = () => {
                 </p>
               )}
               <p className="text-xs text-muted-foreground">
-                Password must contain at least 8 characters with uppercase, lowercase, number, and special character.
+                Password must be at least 8 characters.
               </p>
             </div>
 
