@@ -1,44 +1,69 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
+import { registerSchema, checkRateLimit, sanitizeInput } from '@/lib/validation';
+import type { z } from 'zod';
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema)
+  });
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
+  const onSubmit = async (data: RegisterFormData) => {
+    // Rate limiting check
+    if (!checkRateLimit('registration_attempts', 3, 600000)) { // 3 attempts per 10 minutes
       toast({
-        title: "Error",
-        description: "Passwords do not match",
+        title: "Too many attempts",
+        description: "Please wait 10 minutes before trying to register again.",
         variant: "destructive",
       });
       return;
     }
-    // TODO: Implement actual registration logic
-    toast({
-      title: "Registration attempted",
-      description: `Email: ${formData.email}`,
-    });
+
+    setIsLoading(true);
+    
+    try {
+      // Sanitize inputs
+      const sanitizedData = {
+        firstName: sanitizeInput(data.firstName),
+        lastName: sanitizeInput(data.lastName),
+        email: sanitizeInput(data.email),
+        password: data.password // Don't sanitize password as it may contain special characters
+      };
+
+      // TODO: Implement actual registration logic
+      console.log('Registration data:', { ...sanitizedData, password: '[REDACTED]' });
+      
+      toast({
+        title: "Registration attempted",
+        description: `Account creation requested for: ${sanitizedData.email}`,
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Registration error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,29 +74,37 @@ const Register = () => {
           <p className="text-muted-foreground">Sign up for German Learning</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleRegister} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
-                  name="firstName"
                   placeholder="First name"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
+                  {...register('firstName')}
+                  autoComplete="given-name"
+                  aria-invalid={errors.firstName ? 'true' : 'false'}
                 />
+                {errors.firstName && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {errors.firstName.message}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
-                  name="lastName"
                   placeholder="Last name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
+                  {...register('lastName')}
+                  autoComplete="family-name"
+                  aria-invalid={errors.lastName ? 'true' : 'false'}
                 />
+                {errors.lastName && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {errors.lastName.message}
+                  </p>
+                )}
               </div>
             </div>
             
@@ -79,43 +112,58 @@ const Register = () => {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                required
+                {...register('email')}
+                autoComplete="email"
+                aria-invalid={errors.email ? 'true' : 'false'}
               />
+              {errors.email && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 placeholder="Create a password"
-                value={formData.password}
-                onChange={handleChange}
-                required
+                {...register('password')}
+                autoComplete="new-password"
+                aria-invalid={errors.password ? 'true' : 'false'}
               />
+              {errors.password && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.password.message}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Password must contain at least 8 characters with uppercase, lowercase, number, and special character.
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <Input
                 id="confirmPassword"
-                name="confirmPassword"
                 type="password"
                 placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
+                {...register('confirmPassword')}
+                autoComplete="new-password"
+                aria-invalid={errors.confirmPassword ? 'true' : 'false'}
               />
+              {errors.confirmPassword && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
 
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
 

@@ -1,6 +1,8 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,33 +11,87 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Facebook, Linkedin, Twitter } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { loginSchema, checkRateLimit, sanitizeInput } from '@/lib/validation';
+import type { z } from 'zod';
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const [email, setEmail] = useState('demo@german-learning.com');
-  const [password, setPassword] = useState('demo123');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const success = login(email, password);
-    
-    if (success) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'demo@german-learning.com',
+      password: 'demo123',
+      rememberMe: false
+    }
+  });
+
+  const rememberMe = watch('rememberMe');
+
+  const onSubmit = async (data: LoginFormData) => {
+    // Rate limiting check
+    if (!checkRateLimit('login_attempts', 5, 300000)) { // 5 attempts per 5 minutes
       toast({
-        title: "Login successful",
-        description: "Welcome to German Learning!",
-      });
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password. Try: demo@german-learning.com / demo123",
+        title: "Too many attempts",
+        description: "Please wait 5 minutes before trying again.",
         variant: "destructive",
       });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Sanitize inputs
+      const sanitizedEmail = sanitizeInput(data.email);
+      const sanitizedPassword = sanitizeInput(data.password);
+      
+      const success = login(sanitizedEmail, sanitizedPassword);
+      
+      if (success) {
+        toast({
+          title: "Login successful",
+          description: "Welcome to German Learning!",
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Invalid email or password. Try: demo@german-learning.com / demo123",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSocialLogin = (provider: string) => {
+    if (!checkRateLimit(`social_login_${provider}`, 3, 60000)) {
+      toast({
+        title: "Too many attempts",
+        description: "Please wait before trying social login again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Social login",
       description: `${provider} login not implemented yet`,
@@ -62,17 +118,22 @@ const Login = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register('email')}
+                autoComplete="email"
+                aria-invalid={errors.email ? 'true' : 'false'}
               />
+              {errors.email && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -81,10 +142,15 @@ const Login = () => {
                 id="password"
                 type="password"
                 placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                {...register('password')}
+                autoComplete="current-password"
+                aria-invalid={errors.password ? 'true' : 'false'}
               />
+              {errors.password && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
@@ -92,7 +158,7 @@ const Login = () => {
                 <Checkbox
                   id="remember"
                   checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  onCheckedChange={(checked) => setValue('rememberMe', checked as boolean)}
                 />
                 <Label htmlFor="remember" className="text-sm">Remember me</Label>
               </div>
@@ -106,8 +172,8 @@ const Login = () => {
               </Button>
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
 
