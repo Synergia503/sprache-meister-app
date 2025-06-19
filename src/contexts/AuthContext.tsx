@@ -35,7 +35,7 @@ const DEFAULT_USER: User = {
 
 const DEFAULT_CREDENTIALS = {
   email: 'demo@german-learning.com',
-  password: 'demo123'
+  password: 'Demo123!'
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {

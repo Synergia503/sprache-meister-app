@@ -31,7 +31,7 @@ const Login = () => {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: 'demo@german-learning.com',
-      password: 'demo123',
+      password: 'Demo123!',
       rememberMe: false
     }
   });
@@ -114,7 +114,7 @@ const Login = () => {
           <div className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
             <strong>Demo credentials:</strong><br />
             Email: demo@german-learning.com<br />
-            Password: demo123
+            Password: Demo123!
           </div>
         </CardHeader>
         <CardContent className="space-y-6">

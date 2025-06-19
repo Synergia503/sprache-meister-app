@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 // Login validation schema
@@ -29,7 +30,9 @@ export const registerSchema = z.object({
     .max(254, 'Email is too long'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password is too long'),
+    .max(128, 'Password is too long')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+           'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
