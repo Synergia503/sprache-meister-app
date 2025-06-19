@@ -40,6 +40,10 @@ const vocabularySubItems = [
 
 const exercisesSubItems = [
   { title: "All", path: "/exercises/all" },
+  { title: "Gap-Fill", path: "/exercises/gap-fill" },
+  { title: "Multiple Choice", path: "/exercises/multiple-choice" },
+  { title: "Translation", path: "/exercises/translation" },
+  { title: "Matching", path: "/exercises/matching" },
   { title: "Describe a Picture", path: "/exercises/describe-picture" },
   { title: "Grammar", path: "/exercises/grammar" },
   { title: "Mixed", path: "/exercises/mixed" },
