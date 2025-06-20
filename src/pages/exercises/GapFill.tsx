@@ -56,26 +56,24 @@ const GapFill = () => {
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >
-      {!currentExercise ? (
-        <WordInputForm
-          onGenerateExercise={generateExercise}
-          isLoading={isLoading}
-          apiKey={apiKey}
-          initialWords={mistakeWords.length > 0 ? mistakeWords : ['']}
-          description="Add up to 20 German words or phrases. The exercise will generate 2-4 times as many sentences with gaps."
-          title="Create New Gap-Fill Exercise"
-        />
-      ) : (
-        <ExerciseDisplay
-          exercise={currentExercise}
-          userAnswers={userAnswers}
-          showResults={showResults}
-          onAnswerChange={handleAnswerChange}
-          onCheckAnswers={checkAnswers}
-          onPracticeMistakes={handlePracticeMistakes}
-          onNewExercise={resetExercise}
-        />
-      )}
+      <ExerciseDisplay
+        exercise={currentExercise}
+        userAnswers={userAnswers}
+        showResults={showResults}
+        onAnswerChange={handleAnswerChange}
+        onCheckAnswers={checkAnswers}
+        onPracticeMistakes={handlePracticeMistakes}
+        onNewExercise={resetExercise}
+      />
+      
+      <WordInputForm
+        onGenerateExercise={generateExercise}
+        isLoading={isLoading}
+        apiKey={apiKey}
+        initialWords={mistakeWords.length > 0 ? mistakeWords : ['']}
+        description="Add up to 20 German words or phrases. The exercise will generate 2-4 times as many sentences with gaps."
+        title="Create New Gap-Fill Exercise"
+      />
     </ExerciseLayout>
   );
 };

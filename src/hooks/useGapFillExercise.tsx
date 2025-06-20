@@ -1,8 +1,42 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { GapFillExercise } from '@/types/gapFill';
+
+const SAMPLE_EXERCISE: GapFillExercise = {
+  id: 'sample-gapfill',
+  words: ['sein', 'haben', 'gehen'],
+  sentences: [
+    {
+      sentenceOrder: 1,
+      sentence: "Ich ___ heute sehr müde.",
+      solution: "bin"
+    },
+    {
+      sentenceOrder: 2,
+      sentence: "Wir ___ ein schönes Haus.",
+      solution: "haben"
+    },
+    {
+      sentenceOrder: 3,
+      sentence: "Sie ___ morgen ins Kino.",
+      solution: "geht"
+    },
+    {
+      sentenceOrder: 4,
+      sentence: "Du ___ ein guter Freund.",
+      solution: "bist"
+    },
+    {
+      sentenceOrder: 5,
+      sentence: "Ihr ___ viel Glück gehabt.",
+      solution: "habt"
+    }
+  ],
+  userAnswers: {},
+  isCompleted: false,
+  createdAt: new Date()
+};
 
 export const useGapFillExercise = () => {
   const [currentExercise, setCurrentExercise] = useState<GapFillExercise | null>(null);
@@ -11,6 +45,17 @@ export const useGapFillExercise = () => {
   const [previousExercises, setPreviousExercises] = useState<GapFillExercise[]>([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
+
+  // Load sample exercise on mount
+  useEffect(() => {
+    loadSampleExercise();
+  }, []);
+
+  const loadSampleExercise = () => {
+    setCurrentExercise(SAMPLE_EXERCISE);
+    setUserAnswers({});
+    setShowResults(false);
+  };
 
   const generateExercise = async (words: string[]) => {
     const validWords = words.filter(word => word.trim());
@@ -89,7 +134,7 @@ Return only a JSON object with this exact format:
   };
 
   const createNewExerciseFromMistakes = () => {
-    if (!currentExercise || !showResults) return;
+    if (!currentExercise || !showResults) return [];
 
     const incorrectWords: string[] = [];
     currentExercise.sentences.forEach(sentence => {
@@ -108,9 +153,7 @@ Return only a JSON object with this exact format:
   };
 
   const resetExercise = () => {
-    setCurrentExercise(null);
-    setShowResults(false);
-    setUserAnswers({});
+    loadSampleExercise();
   };
 
   const loadPreviousExercise = (exercise: GapFillExercise) => {

@@ -27,6 +27,42 @@ export const MatchingExerciseDisplay = ({
   onNewExercise,
   getMatchingResult
 }: MatchingExerciseDisplayProps) => {
+  const isEnglishWordUsed = (englishIndex: number) => {
+    return Object.values(userMatches).includes(englishIndex);
+  };
+
+  const handleGermanClick = (germanIndex: number) => {
+    if (showResults) return;
+    
+    // If this German word is already matched, clear the match
+    if (userMatches[germanIndex] !== undefined) {
+      const newMatches = { ...userMatches };
+      delete newMatches[germanIndex];
+      onMatch(germanIndex, -1); // -1 indicates clearing the match
+    }
+  };
+
+  const handleEnglishClick = (englishIndex: number) => {
+    if (showResults) return;
+    
+    // Find if this English word is already matched to a German word
+    const germanIndexUsingThis = Object.keys(userMatches).find(
+      key => userMatches[parseInt(key)] === englishIndex
+    );
+    
+    if (germanIndexUsingThis) {
+      // Clear the existing match first
+      const newMatches = { ...userMatches };
+      delete newMatches[parseInt(germanIndexUsingThis)];
+    }
+    
+    // Find the first unmatched German word
+    const nextUnmatched = exercise.pairs.findIndex((_, i) => userMatches[i] === undefined);
+    if (nextUnmatched !== -1) {
+      onMatch(nextUnmatched, englishIndex);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -47,9 +83,10 @@ export const MatchingExerciseDisplay = ({
                       ? 'bg-red-100 border-red-300'
                       : 'bg-gray-50'
                     : userMatches[index] !== undefined 
-                    ? 'bg-blue-100 border-blue-300' 
+                    ? 'bg-blue-100 border-blue-300 opacity-60' 
                     : 'hover:bg-gray-50'
                 }`}
+                onClick={() => handleGermanClick(index)}
               >
                 <span className="font-medium">{index + 1}. {pair.germanWord}</span>
                 {userMatches[index] !== undefined && (
@@ -67,19 +104,10 @@ export const MatchingExerciseDisplay = ({
               <Button
                 key={index}
                 variant="outline"
-                className="w-full justify-start h-auto p-3"
-                onClick={() => {
-                  const germanIndex = Object.keys(userMatches).find(k => userMatches[parseInt(k)] === index);
-                  if (germanIndex) {
-                    const newMatches = { ...userMatches };
-                    delete newMatches[parseInt(germanIndex)];
-                    // Handle clearing match
-                  }
-                  const nextUnmatched = exercise.pairs.findIndex((_, i) => userMatches[i] === undefined);
-                  if (nextUnmatched !== -1) {
-                    onMatch(nextUnmatched, index);
-                  }
-                }}
+                className={`w-full justify-start h-auto p-3 ${
+                  isEnglishWordUsed(index) ? 'bg-blue-100 border-blue-300 opacity-60' : ''
+                }`}
+                onClick={() => handleEnglishClick(index)}
                 disabled={showResults}
               >
                 <span className="font-medium">{String.fromCharCode(65 + index)}. {pair.englishWord}</span>

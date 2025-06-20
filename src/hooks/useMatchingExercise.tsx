@@ -28,7 +28,6 @@ export const useMatchingExercise = () => {
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
-  // Load sample exercise on mount
   useEffect(() => {
     loadSampleExercise();
   }, []);
@@ -105,10 +104,20 @@ Return only a JSON object with this exact format:
   const handleMatch = (germanIndex: number, englishIndex: number) => {
     if (showResults) return;
     
-    setUserMatches(prev => ({
-      ...prev,
-      [germanIndex]: englishIndex
-    }));
+    if (englishIndex === -1) {
+      // Clear the match
+      setUserMatches(prev => {
+        const newMatches = { ...prev };
+        delete newMatches[germanIndex];
+        return newMatches;
+      });
+    } else {
+      // Set new match
+      setUserMatches(prev => ({
+        ...prev,
+        [germanIndex]: englishIndex
+      }));
+    }
   };
 
   const checkAnswers = () => {
