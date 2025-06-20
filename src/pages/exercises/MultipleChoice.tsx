@@ -12,25 +12,20 @@ const MultipleChoice = () => {
     userAnswers,
     showResults,
     previousExercises,
-    mistakeWords,
     isLoading,
     generateExercise,
     handleAnswerChange,
     checkAnswers,
-    createNewExerciseFromMistakes,
     resetExercise,
-    loadPreviousExercise
+    loadPreviousExercise,
+    practiceMistakes
   } = useMultipleChoiceExercise();
-
-  const handlePracticeMistakes = () => {
-    createNewExerciseFromMistakes();
-  };
 
   const downloadPDF = () => {
     if (!currentExercise) return;
     
     const content = currentExercise.sentences.map(s => 
-      `${s.sentenceOrder}. ${s.sentence}\nA) ${s.options[0]} B) ${s.options[1]} C) ${s.options[2]}`
+      `${s.sentenceOrder}. ${s.sentence}\n   Options: ${s.options.join(', ')}\n   Answer: ${s.solution}`
     ).join('\n\n');
     
     const blob = new Blob([content], { type: 'text/plain' });
@@ -51,26 +46,24 @@ const MultipleChoice = () => {
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >
-      {!currentExercise ? (
-        <WordInputForm
-          onGenerateExercise={generateExercise}
-          isLoading={isLoading}
-          apiKey={apiKey}
-          initialWords={mistakeWords.length > 0 ? mistakeWords : ['']}
-          description="Add up to 20 German words or phrases. The exercise will generate multiple choice questions with three options each."
-          title="Create New Multiple Choice Exercise"
-        />
-      ) : (
-        <MultipleChoiceExerciseDisplay
-          exercise={currentExercise}
-          userAnswers={userAnswers}
-          showResults={showResults}
-          onAnswerChange={handleAnswerChange}
-          onCheckAnswers={checkAnswers}
-          onPracticeMistakes={handlePracticeMistakes}
-          onNewExercise={resetExercise}
-        />
-      )}
+      <MultipleChoiceExerciseDisplay
+        exercise={currentExercise}
+        userAnswers={userAnswers}
+        showResults={showResults}
+        onAnswerChange={handleAnswerChange}
+        onCheckAnswers={checkAnswers}
+        onPracticeMistakes={practiceMistakes}
+        onNewExercise={resetExercise}
+      />
+      
+      <WordInputForm
+        onGenerateExercise={generateExercise}
+        isLoading={isLoading}
+        apiKey={apiKey}
+        description="Add German grammar topics to practice with multiple choice questions."
+        placeholder="Grammar topic (e.g., der/die/das, verb conjugation)"
+        title="Create New Multiple Choice Exercise"
+      />
     </ExerciseLayout>
   );
 };

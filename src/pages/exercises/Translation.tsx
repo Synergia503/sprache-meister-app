@@ -24,7 +24,7 @@ const Translation = () => {
     if (!currentExercise) return;
     
     const content = currentExercise.sentences.map(s => 
-      `${s.sentenceOrder}. German: ${s.germanSentence}\nEnglish: ${s.englishSentence}`
+      `${s.sentenceOrder}. ${s.germanSentence}\n   English: ${s.englishSentence}`
     ).join('\n\n');
     
     const blob = new Blob([content], { type: 'text/plain' });
@@ -45,25 +45,23 @@ const Translation = () => {
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >
-      {!currentExercise ? (
-        <WordInputForm
-          onGenerateExercise={generateExercise}
-          isLoading={isLoading}
-          apiKey={apiKey}
-          description="Add up to 20 German words or phrases. The exercise will generate sentences for German-to-English translation."
-          placeholder="German word"
-          title="Create New Translation Exercise"
-        />
-      ) : (
-        <TranslationExerciseDisplay
-          exercise={currentExercise}
-          userAnswers={userAnswers}
-          showResults={showResults}
-          onAnswerChange={handleAnswerChange}
-          onCheckAnswers={checkAnswers}
-          onNewExercise={resetExercise}
-        />
-      )}
+      <TranslationExerciseDisplay
+        exercise={currentExercise}
+        userAnswers={userAnswers}
+        showResults={showResults}
+        onAnswerChange={handleAnswerChange}
+        onCheckAnswers={checkAnswers}
+        onNewExercise={resetExercise}
+      />
+      
+      <WordInputForm
+        onGenerateExercise={generateExercise}
+        isLoading={isLoading}
+        apiKey={apiKey}
+        description="Add German sentences to translate into English."
+        placeholder="German sentence"
+        title="Create New Translation Exercise"
+      />
     </ExerciseLayout>
   );
 };

@@ -5,7 +5,7 @@ import { CheckCircle } from "lucide-react";
 import { MultipleChoiceExercise } from "@/types/exercises";
 
 interface MultipleChoiceExerciseDisplayProps {
-  exercise: MultipleChoiceExercise;
+  exercise: MultipleChoiceExercise | null;
   userAnswers: { [key: number]: string };
   showResults: boolean;
   onAnswerChange: (sentenceOrder: number, answer: string) => void;
@@ -23,8 +23,14 @@ export const MultipleChoiceExerciseDisplay = ({
   onPracticeMistakes,
   onNewExercise
 }: MultipleChoiceExerciseDisplayProps) => {
+  if (!exercise) return null;
+
+  const allAnswersSelected = exercise.sentences.every(sentence => 
+    userAnswers[sentence.sentenceOrder]
+  );
+
   return (
-    <Card>
+    <Card className="mb-6">
       <CardHeader>
         <CardTitle>Multiple Choice Exercise</CardTitle>
       </CardHeader>
@@ -42,9 +48,9 @@ export const MultipleChoiceExerciseDisplay = ({
                     className={`flex items-center space-x-2 p-2 rounded cursor-pointer transition-colors ${
                       showResults
                         ? option === sentence.solution
-                          ? 'bg-green-100 border-green-300'
+                          ? 'bg-green-100 border-green-300 border'
                           : userAnswers[sentence.sentenceOrder] === option
-                          ? 'bg-red-100 border-red-300'
+                          ? 'bg-red-100 border-red-300 border'
                           : 'bg-gray-50'
                         : 'hover:bg-gray-50'
                     }`}
@@ -72,7 +78,7 @@ export const MultipleChoiceExerciseDisplay = ({
           
           <div className="flex gap-2">
             {!showResults ? (
-              <Button onClick={onCheckAnswers}>
+              <Button onClick={onCheckAnswers} disabled={!allAnswersSelected}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Check Answers
               </Button>

@@ -1,44 +1,82 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { MultipleChoiceExercise } from '@/types/exercises';
+
+const SAMPLE_EXERCISE: MultipleChoiceExercise = {
+  id: 'sample-multiple-choice',
+  words: ['der/die/das', 'haben/sein', 'Adjektivendungen'],
+  sentences: [
+    {
+      sentenceOrder: 1,
+      sentence: '____ Haus ist groß.',
+      options: ['Der', 'Die', 'Das', 'Den'],
+      solution: 'Das'
+    },
+    {
+      sentenceOrder: 2,
+      sentence: 'Ich ____ heute müde.',
+      options: ['habe', 'bin', 'ist', 'sind'],
+      solution: 'bin'
+    },
+    {
+      sentenceOrder: 3,
+      sentence: 'Er trägt ein____ schwarz____ Jacke.',
+      options: ['e, e', 'en, en', 'e, en', 'er, e'],
+      solution: 'e, e'
+    }
+  ],
+  userAnswers: {},
+  isCompleted: false,
+  createdAt: new Date()
+};
 
 export const useMultipleChoiceExercise = () => {
   const [currentExercise, setCurrentExercise] = useState<MultipleChoiceExercise | null>(null);
   const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({});
   const [showResults, setShowResults] = useState(false);
   const [previousExercises, setPreviousExercises] = useState<MultipleChoiceExercise[]>([]);
-  const [mistakeWords, setMistakeWords] = useState<string[]>([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
-  const generateExercise = async (words: string[]) => {
-    const validWords = words.filter(word => word.trim());
-    if (validWords.length === 0) {
+  // Load sample exercise on mount
+  useEffect(() => {
+    loadSampleExercise();
+  }, []);
+
+  const loadSampleExercise = () => {
+    setCurrentExercise(SAMPLE_EXERCISE);
+    setUserAnswers({});
+    setShowResults(false);
+  };
+
+  const generateExercise = async (topics: string[]) => {
+    const validTopics = topics.filter(topic => topic.trim());
+    if (validTopics.length === 0) {
       toast({
-        title: "No words provided",
-        description: "Please add at least one word to generate an exercise.",
+        title: "No topics provided",
+        description: "Please add at least one topic to generate an exercise.",
         variant: "destructive",
       });
       return;
     }
 
-    const prompt = `Create a multiple-choice exercise with German words: ${validWords.join(', ')}. Generate ${validWords.length * 3} sentences where each word appears 2-4 times in different grammatical forms. Each sentence should have exactly one gap and three answer choices. Randomize the order of words throughout the sentences.
+    const prompt = `Create a German multiple choice exercise focusing on these topics: ${validTopics.join(', ')}. Create sentences with blanks and provide 4 options for each, with one correct answer.
 
 Return only a JSON object with this exact format:
 {
   "sentences": [
     {
       "sentenceOrder": 1,
-      "sentence": "Ich ___ gestern ins Kino gegangen.",
-      "options": ["bin", "ist", "war"],
-      "solution": "bin"
+      "sentence": "____ Haus ist groß.",
+      "options": ["Der", "Die", "Das", "Den"],
+      "solution": "Das"
     }
   ]
 }`;
 
-    const systemMessage = "You are a German language teacher creating multiple-choice exercises. Return only valid JSON without any additional text or explanations.";
+    const systemMessage = "You are a German language teacher creating multiple choice exercises. Return only valid JSON without any additional text or explanations.";
     
     const result = await callOpenAI(prompt, systemMessage);
     if (result) {
@@ -46,7 +84,7 @@ Return only a JSON object with this exact format:
         const exerciseData = JSON.parse(result);
         const exercise: MultipleChoiceExercise = {
           id: Date.now().toString(),
-          words: validWords,
+          words: validTopics,
           sentences: exerciseData.sentences,
           userAnswers: {},
           isCompleted: false,
@@ -84,35 +122,19 @@ Return only a JSON object with this exact format:
     setPreviousExercises(prev => [...prev, updatedExercise]);
     setShowResults(true);
     
+    // Calculate score
+    const correctAnswers = currentExercise.sentences.filter(sentence => 
+      userAnswers[sentence.sentenceOrder] === sentence.solution
+    ).length;
+
     toast({
       title: "Exercise completed!",
-      description: "Your answers have been checked and saved.",
+      description: `You got ${correctAnswers} out of ${currentExercise.sentences.length} correct.`,
     });
-  };
-
-  const createNewExerciseFromMistakes = () => {
-    if (!currentExercise || !showResults) return;
-
-    const incorrectWords: string[] = [];
-    currentExercise.sentences.forEach(sentence => {
-      const userAnswer = userAnswers[sentence.sentenceOrder] || '';
-      if (userAnswer !== sentence.solution) {
-        if (!incorrectWords.includes(sentence.solution)) {
-          incorrectWords.push(sentence.solution);
-        }
-      }
-    });
-
-    if (incorrectWords.length > 0) {
-      setMistakeWords(incorrectWords.concat(Array(Math.max(0, 20 - incorrectWords.length)).fill('')));
-      resetExercise();
-    }
   };
 
   const resetExercise = () => {
-    setCurrentExercise(null);
-    setShowResults(false);
-    setUserAnswers({});
+    loadSampleExercise();
   };
 
   const loadPreviousExercise = (exercise: MultipleChoiceExercise) => {
@@ -121,18 +143,46 @@ Return only a JSON object with this exact format:
     setShowResults(exercise.isCompleted);
   };
 
+  const practiceMistakes = () => {
+    if (!currentExercise || !showResults) return;
+
+    const incorrectSentences = currentExercise.sentences.filter(sentence => 
+      userAnswers[sentence.sentenceOrder] !== sentence.solution
+    );
+
+    if (incorrectSentences.length === 0) {
+      toast({
+        title: "Perfect score!",
+        description: "You got all answers correct. No mistakes to practice!",
+      });
+      return;
+    }
+
+    const mistakeExercise: MultipleChoiceExercise = {
+      ...currentExercise,
+      id: Date.now().toString(),
+      sentences: incorrectSentences,
+      userAnswers: {},
+      isCompleted: false,
+      createdAt: new Date()
+    };
+
+    setCurrentExercise(mistakeExercise);
+    setUserAnswers({});
+    setShowResults(false);
+  };
+
   return {
     currentExercise,
     userAnswers,
     showResults,
     previousExercises,
-    mistakeWords,
     isLoading,
     generateExercise,
     handleAnswerChange,
     checkAnswers,
-    createNewExerciseFromMistakes,
     resetExercise,
-    loadPreviousExercise
+    loadPreviousExercise,
+    practiceMistakes
   };
 };

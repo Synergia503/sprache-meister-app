@@ -1,8 +1,23 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { MatchingExercise, MatchingPair } from '@/types/exercises';
+
+const SAMPLE_EXERCISE: MatchingExercise = {
+  id: 'sample-matching',
+  words: ['Hund', 'Katze', 'Haus', 'Auto', 'Wasser'],
+  pairs: [
+    { pairOrder: 1, germanWord: 'Hund', englishWord: 'dog' },
+    { pairOrder: 2, germanWord: 'Katze', englishWord: 'cat' },
+    { pairOrder: 3, germanWord: 'Haus', englishWord: 'house' },
+    { pairOrder: 4, germanWord: 'Auto', englishWord: 'car' },
+    { pairOrder: 5, germanWord: 'Wasser', englishWord: 'water' }
+  ],
+  userAnswers: {},
+  userMatches: {},
+  isCompleted: false,
+  createdAt: new Date()
+};
 
 export const useMatchingExercise = () => {
   const [currentExercise, setCurrentExercise] = useState<MatchingExercise | null>(null);
@@ -13,6 +28,11 @@ export const useMatchingExercise = () => {
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
+  // Load sample exercise on mount
+  useEffect(() => {
+    loadSampleExercise();
+  }, []);
+
   const shuffleArray = (array: MatchingPair[]) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -20,6 +40,13 @@ export const useMatchingExercise = () => {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  };
+
+  const loadSampleExercise = () => {
+    setCurrentExercise(SAMPLE_EXERCISE);
+    setShuffledEnglish(shuffleArray(SAMPLE_EXERCISE.pairs));
+    setUserMatches({});
+    setShowResults(false);
   };
 
   const generateExercise = async (words: string[]) => {
@@ -96,9 +123,17 @@ Return only a JSON object with this exact format:
     setPreviousExercises(prev => [...prev, updatedExercise]);
     setShowResults(true);
     
+    // Calculate score
+    const correctMatches = currentExercise.pairs.filter((pair, index) => {
+      const userMatch = userMatches[index];
+      if (userMatch === undefined) return false;
+      const selectedPair = shuffledEnglish[userMatch];
+      return selectedPair.englishWord === pair.englishWord;
+    }).length;
+
     toast({
       title: "Exercise completed!",
-      description: "Your matches have been checked and saved.",
+      description: `You got ${correctMatches} out of ${currentExercise.pairs.length} correct.`,
     });
   };
 
@@ -108,17 +143,14 @@ Return only a JSON object with this exact format:
     const userMatch = userMatches[germanIndex];
     if (userMatch === undefined) return '';
     
-    const correctEnglishIndex = currentExercise.pairs.findIndex(p => p.pairOrder === germanIndex + 1);
-    const userEnglishIndex = shuffledEnglish.findIndex(p => p.pairOrder === userMatch + 1);
+    const correctPair = currentExercise.pairs[germanIndex];
+    const selectedPair = shuffledEnglish[userMatch];
     
-    return correctEnglishIndex === userEnglishIndex ? 'correct' : 'incorrect';
+    return correctPair.englishWord === selectedPair.englishWord ? 'correct' : 'incorrect';
   };
 
   const resetExercise = () => {
-    setCurrentExercise(null);
-    setShowResults(false);
-    setUserMatches({});
-    setShuffledEnglish([]);
+    loadSampleExercise();
   };
 
   const loadPreviousExercise = (exercise: MatchingExercise) => {

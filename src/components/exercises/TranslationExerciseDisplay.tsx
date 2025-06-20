@@ -6,7 +6,7 @@ import { CheckCircle } from "lucide-react";
 import { TranslationExercise } from "@/types/exercises";
 
 interface TranslationExerciseDisplayProps {
-  exercise: TranslationExercise;
+  exercise: TranslationExercise | null;
   userAnswers: { [key: number]: string };
   showResults: boolean;
   onAnswerChange: (sentenceOrder: number, answer: string) => void;
@@ -22,8 +22,14 @@ export const TranslationExerciseDisplay = ({
   onCheckAnswers,
   onNewExercise
 }: TranslationExerciseDisplayProps) => {
+  if (!exercise) return null;
+
+  const allAnswersFilled = exercise.sentences.every(sentence => 
+    userAnswers[sentence.sentenceOrder]?.trim()
+  );
+
   return (
-    <Card>
+    <Card className="mb-6">
       <CardHeader>
         <CardTitle>Translation Exercise</CardTitle>
       </CardHeader>
@@ -52,7 +58,7 @@ export const TranslationExerciseDisplay = ({
           
           <div className="flex gap-2">
             {!showResults ? (
-              <Button onClick={onCheckAnswers}>
+              <Button onClick={onCheckAnswers} disabled={!allAnswersFilled}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Check Translations
               </Button>

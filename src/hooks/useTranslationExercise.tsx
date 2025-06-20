@@ -1,8 +1,21 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { TranslationExercise } from '@/types/exercises';
+
+const SAMPLE_EXERCISE: TranslationExercise = {
+  id: 'sample-translation',
+  words: ['Ich bin müde', 'Das Wetter ist schön', 'Wo ist der Bahnhof?'],
+  sentences: [
+    { sentenceOrder: 1, germanSentence: 'Ich bin müde.', englishSentence: 'I am tired.' },
+    { sentenceOrder: 2, germanSentence: 'Das Wetter ist heute schön.', englishSentence: 'The weather is nice today.' },
+    { sentenceOrder: 3, germanSentence: 'Wo ist der Bahnhof?', englishSentence: 'Where is the train station?' }
+  ],
+  userAnswers: {},
+  isCompleted: false,
+  createdAt: new Date()
+};
 
 export const useTranslationExercise = () => {
   const [currentExercise, setCurrentExercise] = useState<TranslationExercise | null>(null);
@@ -12,26 +25,37 @@ export const useTranslationExercise = () => {
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
-  const generateExercise = async (words: string[]) => {
-    const validWords = words.filter(word => word.trim());
-    if (validWords.length === 0) {
+  // Load sample exercise on mount
+  useEffect(() => {
+    loadSampleExercise();
+  }, []);
+
+  const loadSampleExercise = () => {
+    setCurrentExercise(SAMPLE_EXERCISE);
+    setUserAnswers({});
+    setShowResults(false);
+  };
+
+  const generateExercise = async (sentences: string[]) => {
+    const validSentences = sentences.filter(sentence => sentence.trim());
+    if (validSentences.length === 0) {
       toast({
-        title: "No words provided",
-        description: "Please add at least one word to generate an exercise.",
+        title: "No sentences provided",
+        description: "Please add at least one sentence to generate an exercise.",
         variant: "destructive",
       });
       return;
     }
 
-    const prompt = `Create a German-to-English translation exercise with these German words: ${validWords.join(', ')}. Generate ${validWords.length * 2} German sentences that use these words naturally. Each sentence should be clear and contextually appropriate for language learning.
+    const prompt = `Create a German-English translation exercise with these German sentences: ${validSentences.join(', ')}. For each German sentence, provide its accurate English translation.
 
 Return only a JSON object with this exact format:
 {
   "sentences": [
     {
       "sentenceOrder": 1,
-      "germanSentence": "Ich gehe heute ins Kino.",
-      "englishSentence": "I am going to the cinema today."
+      "germanSentence": "Ich bin müde.",
+      "englishSentence": "I am tired."
     }
   ]
 }`;
@@ -44,7 +68,7 @@ Return only a JSON object with this exact format:
         const exerciseData = JSON.parse(result);
         const exercise: TranslationExercise = {
           id: Date.now().toString(),
-          words: validWords,
+          words: validSentences,
           sentences: exerciseData.sentences,
           userAnswers: {},
           isCompleted: false,
@@ -89,9 +113,7 @@ Return only a JSON object with this exact format:
   };
 
   const resetExercise = () => {
-    setCurrentExercise(null);
-    setShowResults(false);
-    setUserAnswers({});
+    loadSampleExercise();
   };
 
   const loadPreviousExercise = (exercise: TranslationExercise) => {

@@ -48,16 +48,7 @@ const Matching = () => {
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >
-      {!currentExercise ? (
-        <WordInputForm
-          onGenerateExercise={generateExercise}
-          isLoading={isLoading}
-          apiKey={apiKey}
-          description="Add up to 20 German words or phrases. The exercise will create German-English matching pairs."
-          placeholder="German word"
-          title="Create New Matching Exercise"
-        />
-      ) : (
+      {currentExercise && (
         <MatchingExerciseDisplay
           exercise={currentExercise}
           userMatches={userMatches}
@@ -70,6 +61,15 @@ const Matching = () => {
           getMatchingResult={getMatchingResult}
         />
       )}
+      
+      <WordInputForm
+        onGenerateExercise={generateExercise}
+        isLoading={isLoading}
+        apiKey={apiKey}
+        description="Add up to 20 German words or phrases. The exercise will create German-English matching pairs."
+        placeholder="German word"
+        title="Create New Matching Exercise"
+      />
     </ExerciseLayout>
   );
 };
