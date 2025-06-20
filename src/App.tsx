@@ -21,6 +21,10 @@ import NotFound from "./pages/NotFound";
 import DescribePicture from "./pages/exercises/DescribePicture";
 import Grammar from "./pages/exercises/Grammar";
 import Mixed from "./pages/exercises/Mixed";
+import GapFill from "./pages/exercises/GapFill";
+import MultipleChoice from "./pages/exercises/MultipleChoice";
+import Translation from "./pages/exercises/Translation";
+import Matching from "./pages/exercises/Matching";
 import VocabularyCategorized from "./pages/vocabulary/Categorized";
 import VocabularyCustom from "./pages/vocabulary/Custom";
 import VocabularyExercises from "./pages/vocabulary/Exercises";
@@ -57,6 +61,10 @@ const AppRoutes = () => {
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/exercises" element={<Exercises />} />
             <Route path="/exercises/all" element={<ExercisesAll />} />
+            <Route path="/exercises/gap-fill" element={<GapFill />} />
+            <Route path="/exercises/multiple-choice" element={<MultipleChoice />} />
+            <Route path="/exercises/translation" element={<Translation />} />
+            <Route path="/exercises/matching" element={<Matching />} />
             <Route path="/exercises/describe-picture" element={<DescribePicture />} />
             <Route path="/exercises/grammar" element={<Grammar />} />
             <Route path="/exercises/mixed" element={<Mixed />} />
