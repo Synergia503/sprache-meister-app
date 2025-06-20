@@ -1,11 +1,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GapFillExercise } from "@/types/gapFill";
+import { BaseExercise } from "@/types/exercises";
 
 interface PreviousExercisesProps {
-  exercises: GapFillExercise[];
-  onLoadExercise: (exercise: GapFillExercise) => void;
+  exercises: BaseExercise[];
+  onLoadExercise: (exercise: BaseExercise) => void;
 }
 
 export const PreviousExercises = ({ exercises, onLoadExercise }: PreviousExercisesProps) => {

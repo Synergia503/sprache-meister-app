@@ -10,9 +10,20 @@ interface WordInputFormProps {
   isLoading: boolean;
   apiKey: string;
   initialWords?: string[];
+  title?: string;
+  description?: string;
+  placeholder?: string;
 }
 
-export const WordInputForm = ({ onGenerateExercise, isLoading, apiKey, initialWords = [''] }: WordInputFormProps) => {
+export const WordInputForm = ({ 
+  onGenerateExercise, 
+  isLoading, 
+  apiKey, 
+  initialWords = [''],
+  title = "Create New Exercise",
+  description = "Add up to 20 German words or phrases.",
+  placeholder = "Word"
+}: WordInputFormProps) => {
   const [words, setWords] = useState<string[]>(initialWords);
 
   const addWordField = () => {
@@ -41,18 +52,18 @@ export const WordInputForm = ({ onGenerateExercise, isLoading, apiKey, initialWo
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create New Gap-Fill Exercise</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Add up to 20 German words or phrases. The exercise will generate 2-4 times as many sentences with gaps.
+            {description}
           </p>
           
           {words.map((word, index) => (
             <div key={index} className="flex gap-2">
               <Input
-                placeholder={`Word ${index + 1}`}
+                placeholder={`${placeholder} ${index + 1}`}
                 value={word}
                 onChange={(e) => updateWord(index, e.target.value)}
               />

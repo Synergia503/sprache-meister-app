@@ -1,13 +1,10 @@
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { useGapFillExercise } from '@/hooks/useGapFillExercise';
 import { WordInputForm } from '@/components/exercises/WordInputForm';
 import { ExerciseDisplay } from '@/components/exercises/ExerciseDisplay';
-import { PreviousExercises } from '@/components/exercises/PreviousExercises';
+import { ExerciseLayout } from '@/components/exercises/ExerciseLayout';
 
 const GapFill = () => {
   const [mistakeWords, setMistakeWords] = useState<string[]>([]);
@@ -51,45 +48,35 @@ const GapFill = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Gap-Fill Exercise</h1>
-        {currentExercise && (
-          <Button onClick={downloadPDF} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Download PDF
-          </Button>
-        )}
-      </div>
-      
-      <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
-
+    <ExerciseLayout
+      title="Gap-Fill Exercise"
+      apiKey={apiKey}
+      onSaveApiKey={saveApiKey}
+      onDownload={currentExercise ? downloadPDF : undefined}
+      previousExercises={previousExercises}
+      onLoadExercise={loadPreviousExercise}
+    >
       {!currentExercise ? (
         <WordInputForm
           onGenerateExercise={generateExercise}
           isLoading={isLoading}
           apiKey={apiKey}
-          initialWords={mistakeWords.length > 0 ? mistakeWords : [''] }
+          initialWords={mistakeWords.length > 0 ? mistakeWords : ['']}
+          description="Add up to 20 German words or phrases. The exercise will generate 2-4 times as many sentences with gaps."
+          title="Create New Gap-Fill Exercise"
         />
       ) : (
-        <div className="space-y-4">
-          <ExerciseDisplay
-            exercise={currentExercise}
-            userAnswers={userAnswers}
-            showResults={showResults}
-            onAnswerChange={handleAnswerChange}
-            onCheckAnswers={checkAnswers}
-            onPracticeMistakes={handlePracticeMistakes}
-            onNewExercise={resetExercise}
-          />
-        </div>
+        <ExerciseDisplay
+          exercise={currentExercise}
+          userAnswers={userAnswers}
+          showResults={showResults}
+          onAnswerChange={handleAnswerChange}
+          onCheckAnswers={checkAnswers}
+          onPracticeMistakes={handlePracticeMistakes}
+          onNewExercise={resetExercise}
+        />
       )}
-
-      <PreviousExercises 
-        exercises={previousExercises} 
-        onLoadExercise={loadPreviousExercise} 
-      />
-    </div>
+    </ExerciseLayout>
   );
 };
 
