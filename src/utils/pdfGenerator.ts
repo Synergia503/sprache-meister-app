@@ -1,6 +1,7 @@
 
 import { BaseExercise, TranslationExercise, MultipleChoiceExercise, MatchingExercise } from '@/types/exercises';
 import { GapFillExercise } from '@/types/gapFill';
+import jsPDF from 'jspdf';
 
 // Type guards to safely identify exercise types
 const isMatchingExercise = (exercise: any): exercise is MatchingExercise => {
@@ -30,82 +31,135 @@ const isGapFillExercise = (exercise: any): exercise is GapFillExercise => {
 };
 
 export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) => {
-  let content = '';
+  const doc = new jsPDF();
   let filename = '';
+  let yPosition = 20;
+  const lineHeight = 10;
+  const pageHeight = doc.internal.pageSize.height;
+
+  const addText = (text: string, fontSize = 12) => {
+    doc.setFontSize(fontSize);
+    const lines = doc.splitTextToSize(text, 180);
+    
+    lines.forEach((line: string) => {
+      if (yPosition > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      doc.text(line, 15, yPosition);
+      yPosition += lineHeight;
+    });
+  };
+
+  const addTitle = (title: string) => {
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text(title, 15, yPosition);
+    yPosition += 15;
+    doc.setFont(undefined, 'normal');
+  };
+
+  const addSection = (title: string) => {
+    yPosition += 5;
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text(title, 15, yPosition);
+    yPosition += 10;
+    doc.setFont(undefined, 'normal');
+  };
 
   if (isMatchingExercise(exercise)) {
-    // Matching exercise
-    content = `Matching Exercise
-
-German Words:
-${exercise.pairs.map((p, i) => `${i + 1}. ${p.germanWord}`).join('\n')}
-
-English Words:
-${exercise.pairs.map((p, i) => `${String.fromCharCode(65 + i)}. ${p.englishWord}`).join('\n')}
-
-Answer Key:
-${exercise.pairs.map((p, i) => `${i + 1}. ${p.germanWord} - ${p.englishWord}`).join('\n')}`;
+    addTitle('Matching Exercise');
     filename = 'matching-exercise.pdf';
+    
+    addSection('Instructions:');
+    addText('Match the German words with their English translations.');
+    
+    addSection('German Words:');
+    exercise.pairs.forEach((pair, i) => {
+      addText(`${i + 1}. ${pair.germanWord}`);
+    });
+    
+    addSection('English Words:');
+    exercise.pairs.forEach((pair, i) => {
+      addText(`${String.fromCharCode(65 + i)}. ${pair.englishWord}`);
+    });
+    
+    addSection('Answer Key:');
+    exercise.pairs.forEach((pair, i) => {
+      addText(`${i + 1}. ${pair.germanWord} - ${pair.englishWord}`);
+    });
+    
   } else if (isTranslationExercise(exercise)) {
-    // Translation exercise
-    content = `Translation Exercise
-
-Instructions: Translate the following German sentences into English.
-
-${exercise.sentences.map((s, i) => 
-  `${i + 1}. ${s.germanSentence}\n   _________________________________`
-).join('\n\n')}
-
-Answer Key:
-${exercise.sentences.map((s, i) => 
-  `${i + 1}. ${s.germanSentence}\n   Answer: ${s.englishSentence}`
-).join('\n\n')}`;
+    addTitle('Translation Exercise');
     filename = 'translation-exercise.pdf';
+    
+    addSection('Instructions:');
+    addText('Translate the following German sentences into English.');
+    
+    addSection('Questions:');
+    exercise.sentences.forEach((sentence, i) => {
+      addText(`${i + 1}. ${sentence.germanSentence}`);
+      addText('   _________________________________');
+      yPosition += 5;
+    });
+    
+    addSection('Answer Key:');
+    exercise.sentences.forEach((sentence, i) => {
+      addText(`${i + 1}. ${sentence.germanSentence}`);
+      addText(`   Answer: ${sentence.englishSentence}`);
+      yPosition += 5;
+    });
+    
   } else if (isMultipleChoiceExercise(exercise)) {
-    // Multiple choice exercise
-    content = `Multiple Choice Exercise
-
-Instructions: Choose the correct answer for each question.
-
-${exercise.sentences.map((s, i) => 
-  `${i + 1}. ${s.sentence}\n${s.options.map((opt, idx) => 
-    `   ${String.fromCharCode(65 + idx)}) ${opt}`
-  ).join('\n')}`
-).join('\n\n')}
-
-Answer Key:
-${exercise.sentences.map((s, i) => 
-  `${i + 1}. ${s.sentence}\n   Answer: ${s.solution}`
-).join('\n\n')}`;
+    addTitle('Multiple Choice Exercise');
     filename = 'multiple-choice-exercise.pdf';
+    
+    addSection('Instructions:');
+    addText('Choose the correct answer for each question.');
+    
+    addSection('Questions:');
+    exercise.sentences.forEach((sentence, i) => {
+      addText(`${i + 1}. ${sentence.sentence}`);
+      sentence.options.forEach((option, idx) => {
+        addText(`   ${String.fromCharCode(65 + idx)}) ${option}`);
+      });
+      yPosition += 5;
+    });
+    
+    addSection('Answer Key:');
+    exercise.sentences.forEach((sentence, i) => {
+      addText(`${i + 1}. ${sentence.sentence}`);
+      addText(`   Answer: ${sentence.solution}`);
+      yPosition += 5;
+    });
+    
   } else if (isGapFillExercise(exercise)) {
-    // Gap fill exercise
-    content = `Gap-Fill Exercise
-
-Instructions: Fill in the blanks with the correct word.
-
-${exercise.sentences.map((s, i) => 
-  `${i + 1}. ${s.sentence}\n   Answer: _______________`
-).join('\n\n')}
-
-Answer Key:
-${exercise.sentences.map((s, i) => 
-  `${i + 1}. ${s.sentence.replace('___', s.solution)}`
-).join('\n\n')}`;
+    addTitle('Gap-Fill Exercise');
     filename = 'gap-fill-exercise.pdf';
+    
+    addSection('Instructions:');
+    addText('Fill in the blanks with the correct word.');
+    
+    addSection('Questions:');
+    exercise.sentences.forEach((sentence, i) => {
+      addText(`${i + 1}. ${sentence.sentence}`);
+      addText('   Answer: _______________');
+      yPosition += 5;
+    });
+    
+    addSection('Answer Key:');
+    exercise.sentences.forEach((sentence, i) => {
+      const completeSentence = sentence.sentence.replace('___', sentence.solution);
+      addText(`${i + 1}. ${completeSentence}`);
+    });
+    
   } else {
-    content = 'Exercise content not available';
+    addTitle('Exercise');
+    addText('Exercise content not available');
     filename = 'exercise.pdf';
   }
 
-  // Create and download the PDF file
-  const blob = new Blob([content], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Save the PDF
+  doc.save(filename);
 };
