@@ -6,7 +6,7 @@ import { CheckCircle } from "lucide-react";
 import { GapFillExercise } from "@/types/gapFill";
 
 interface ExerciseDisplayProps {
-  exercise: GapFillExercise;
+  exercise: GapFillExercise | null;
   userAnswers: { [key: number]: string };
   showResults: boolean;
   onAnswerChange: (sentenceOrder: number, answer: string) => void;
@@ -24,6 +24,19 @@ export const ExerciseDisplay = ({
   onPracticeMistakes,
   onNewExercise
 }: ExerciseDisplayProps) => {
+  if (!exercise) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Gap-Fill Exercise</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Loading exercise...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
