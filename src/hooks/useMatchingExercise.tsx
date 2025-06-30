@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +25,8 @@ export const useMatchingExercise = () => {
   const [userMatches, setUserMatches] = useState<{ [key: number]: number }>({});
   const [showResults, setShowResults] = useState(false);
   const [shuffledEnglish, setShuffledEnglish] = useState<MatchingPair[]>([]);
+  const [selectedGerman, setSelectedGerman] = useState<number | null>(null);
+  const [selectedEnglish, setSelectedEnglish] = useState<number | null>(null);
   const [previousExercises, setPreviousExercises] = useState<MatchingExercise[]>([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
@@ -46,6 +49,8 @@ export const useMatchingExercise = () => {
     setShuffledEnglish(shuffleArray(SAMPLE_EXERCISE.pairs));
     setUserMatches({});
     setShowResults(false);
+    setSelectedGerman(null);
+    setSelectedEnglish(null);
   };
 
   const generateExercise = async (words: string[]) => {
@@ -91,6 +96,8 @@ Return only a JSON object with this exact format:
         setShuffledEnglish(shuffleArray(exerciseData.pairs));
         setUserMatches({});
         setShowResults(false);
+        setSelectedGerman(null);
+        setSelectedEnglish(null);
       } catch (error) {
         toast({
           title: "Error parsing exercise",
@@ -99,6 +106,16 @@ Return only a JSON object with this exact format:
         });
       }
     }
+  };
+
+  const handleSelectGerman = (index: number) => {
+    setSelectedGerman(selectedGerman === index ? null : index);
+    setSelectedEnglish(null);
+  };
+
+  const handleSelectEnglish = (index: number) => {
+    setSelectedEnglish(selectedEnglish === index ? null : index);
+    setSelectedGerman(null);
   };
 
   const handleMatch = (germanIndex: number, englishIndex: number) => {
@@ -118,6 +135,10 @@ Return only a JSON object with this exact format:
         [germanIndex]: englishIndex
       }));
     }
+    
+    // Clear selections after matching
+    setSelectedGerman(null);
+    setSelectedEnglish(null);
   };
 
   const checkAnswers = () => {
@@ -167,11 +188,15 @@ Return only a JSON object with this exact format:
     setShuffledEnglish(shuffleArray(exercise.pairs));
     setUserMatches(exercise.userMatches);
     setShowResults(exercise.isCompleted);
+    setSelectedGerman(null);
+    setSelectedEnglish(null);
   };
 
   const shuffleEnglishWords = () => {
     setShuffledEnglish(shuffleArray(shuffledEnglish));
     setUserMatches({});
+    setSelectedGerman(null);
+    setSelectedEnglish(null);
   };
 
   return {
@@ -179,10 +204,14 @@ Return only a JSON object with this exact format:
     userMatches,
     showResults,
     shuffledEnglish,
+    selectedGerman,
+    selectedEnglish,
     previousExercises,
     isLoading,
     generateExercise,
     handleMatch,
+    handleSelectGerman,
+    handleSelectEnglish,
     checkAnswers,
     getMatchingResult,
     resetExercise,

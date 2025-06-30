@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Shuffle } from "lucide-react";
@@ -9,10 +8,14 @@ interface MatchingExerciseDisplayProps {
   userMatches: { [key: number]: number };
   showResults: boolean;
   shuffledEnglish: MatchingPair[];
+  selectedGerman: number | null;
+  selectedEnglish: number | null;
   onMatch: (germanIndex: number, englishIndex: number) => void;
   onCheckAnswers: () => void;
   onShuffle: () => void;
   onNewExercise: () => void;
+  onSelectGerman: (index: number) => void;
+  onSelectEnglish: (index: number) => void;
   getMatchingResult: (germanIndex: number) => string;
 }
 
@@ -21,10 +24,14 @@ export const MatchingExerciseDisplay = ({
   userMatches,
   showResults,
   shuffledEnglish,
+  selectedGerman,
+  selectedEnglish,
   onMatch,
   onCheckAnswers,
   onShuffle,
   onNewExercise,
+  onSelectGerman,
+  onSelectEnglish,
   getMatchingResult
 }: MatchingExerciseDisplayProps) => {
   const isEnglishWordUsed = (englishIndex: number) => {
@@ -36,31 +43,42 @@ export const MatchingExerciseDisplay = ({
     
     // If this German word is already matched, clear the match
     if (userMatches[germanIndex] !== undefined) {
-      const newMatches = { ...userMatches };
-      delete newMatches[germanIndex];
       onMatch(germanIndex, -1); // -1 indicates clearing the match
+      return;
     }
+    
+    // If there's a selected English word, make the match
+    if (selectedEnglish !== null) {
+      onMatch(germanIndex, selectedEnglish);
+      return;
+    }
+    
+    // Otherwise, just select this German word
+    onSelectGerman(germanIndex);
   };
 
   const handleEnglishClick = (englishIndex: number) => {
     if (showResults) return;
     
-    // Find if this English word is already matched to a German word
-    const germanIndexUsingThis = Object.keys(userMatches).find(
-      key => userMatches[parseInt(key)] === englishIndex
-    );
-    
-    if (germanIndexUsingThis) {
-      // Clear the existing match first
-      const newMatches = { ...userMatches };
-      delete newMatches[parseInt(germanIndexUsingThis)];
+    // If this English word is already used in a match, clear that match
+    if (isEnglishWordUsed(englishIndex)) {
+      const germanIndexUsingThis = Object.keys(userMatches).find(
+        key => userMatches[parseInt(key)] === englishIndex
+      );
+      if (germanIndexUsingThis) {
+        onMatch(parseInt(germanIndexUsingThis), -1);
+      }
+      return;
     }
     
-    // Find the first unmatched German word
-    const nextUnmatched = exercise.pairs.findIndex((_, i) => userMatches[i] === undefined);
-    if (nextUnmatched !== -1) {
-      onMatch(nextUnmatched, englishIndex);
+    // If there's a selected German word, make the match
+    if (selectedGerman !== null) {
+      onMatch(selectedGerman, englishIndex);
+      return;
     }
+    
+    // Otherwise, just select this English word
+    onSelectEnglish(englishIndex);
   };
 
   return (
@@ -83,7 +101,9 @@ export const MatchingExerciseDisplay = ({
                       ? 'bg-red-100 border-red-300'
                       : 'bg-gray-50'
                     : userMatches[index] !== undefined 
-                    ? 'bg-blue-100 border-blue-300 opacity-60' 
+                    ? 'bg-blue-100 border-blue-300'
+                    : selectedGerman === index
+                    ? 'bg-blue-50 border-blue-200'
                     : 'hover:bg-gray-50'
                 }`}
                 onClick={() => handleGermanClick(index)}
@@ -105,7 +125,11 @@ export const MatchingExerciseDisplay = ({
                 key={index}
                 variant="outline"
                 className={`w-full justify-start h-auto p-3 ${
-                  isEnglishWordUsed(index) ? 'bg-blue-100 border-blue-300 opacity-60' : ''
+                  isEnglishWordUsed(index) 
+                    ? 'bg-blue-100 border-blue-300' 
+                    : selectedEnglish === index
+                    ? 'bg-blue-50 border-blue-200'
+                    : ''
                 }`}
                 onClick={() => handleEnglishClick(index)}
                 disabled={showResults}

@@ -14,7 +14,7 @@ export const ExerciseHeader = ({ title, onDownload }: ExerciseHeaderProps) => {
       {onDownload && (
         <Button onClick={onDownload} variant="outline">
           <Download className="h-4 w-4 mr-2" />
-          Download PDF
+          Generate PDF
         </Button>
       )}
     </div>

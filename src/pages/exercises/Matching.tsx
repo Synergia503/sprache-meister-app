@@ -12,10 +12,14 @@ const Matching = () => {
     userMatches,
     showResults,
     shuffledEnglish,
+    selectedGerman,
+    selectedEnglish,
     previousExercises,
     isLoading,
     generateExercise,
     handleMatch,
+    handleSelectGerman,
+    handleSelectEnglish,
     checkAnswers,
     getMatchingResult,
     resetExercise,
@@ -54,10 +58,14 @@ const Matching = () => {
           userMatches={userMatches}
           showResults={showResults}
           shuffledEnglish={shuffledEnglish}
+          selectedGerman={selectedGerman}
+          selectedEnglish={selectedEnglish}
           onMatch={handleMatch}
           onCheckAnswers={checkAnswers}
           onShuffle={shuffleEnglishWords}
           onNewExercise={resetExercise}
+          onSelectGerman={handleSelectGerman}
+          onSelectEnglish={handleSelectEnglish}
           getMatchingResult={getMatchingResult}
         />
       )}
