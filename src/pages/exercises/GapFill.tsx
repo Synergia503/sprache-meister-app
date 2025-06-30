@@ -38,6 +38,7 @@ const GapFill = () => {
       onSaveApiKey={saveApiKey}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
+      currentExercise={currentExercise}
     >
       <ExerciseDisplay
         exercise={currentExercise}

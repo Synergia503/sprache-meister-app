@@ -27,6 +27,7 @@ const Translation = () => {
       onSaveApiKey={saveApiKey}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
+      currentExercise={currentExercise}
     >
       <TranslationExerciseDisplay
         exercise={currentExercise}

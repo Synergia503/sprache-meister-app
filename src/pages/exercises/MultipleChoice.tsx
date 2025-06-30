@@ -28,6 +28,7 @@ const MultipleChoice = () => {
       onSaveApiKey={saveApiKey}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
+      currentExercise={currentExercise}
     >
       <MultipleChoiceExerciseDisplay
         exercise={currentExercise}
