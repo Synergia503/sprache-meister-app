@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Shuffle } from "lucide-react";
+import { CheckCircle, Shuffle, Download } from "lucide-react";
 import { MatchingExercise, MatchingPair } from "@/types/exercises";
 
 interface MatchingExerciseDisplayProps {
@@ -17,6 +17,7 @@ interface MatchingExerciseDisplayProps {
   onSelectGerman: (index: number) => void;
   onSelectEnglish: (index: number) => void;
   getMatchingResult: (germanIndex: number) => string;
+  onDownload?: () => void;
 }
 
 export const MatchingExerciseDisplay = ({
@@ -32,7 +33,8 @@ export const MatchingExerciseDisplay = ({
   onNewExercise,
   onSelectGerman,
   onSelectEnglish,
-  getMatchingResult
+  getMatchingResult,
+  onDownload
 }: MatchingExerciseDisplayProps) => {
   const isEnglishWordUsed = (englishIndex: number) => {
     return Object.values(userMatches).includes(englishIndex);
@@ -151,11 +153,25 @@ export const MatchingExerciseDisplay = ({
                 <Shuffle className="h-4 w-4 mr-2" />
                 Shuffle
               </Button>
+              {onDownload && (
+                <Button variant="outline" onClick={onDownload}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Generate PDF
+                </Button>
+              )}
             </>
           ) : (
-            <Button onClick={onNewExercise}>
-              New Exercise
-            </Button>
+            <>
+              <Button onClick={onNewExercise}>
+                New Exercise
+              </Button>
+              {onDownload && (
+                <Button variant="outline" onClick={onDownload}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Generate PDF
+                </Button>
+              )}
+            </>
           )}
         </div>
       </CardContent>

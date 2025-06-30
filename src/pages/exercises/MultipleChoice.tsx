@@ -21,28 +21,11 @@ const MultipleChoice = () => {
     practiceMistakes
   } = useMultipleChoiceExercise();
 
-  const downloadPDF = () => {
-    if (!currentExercise) return;
-    
-    const content = currentExercise.sentences.map(s => 
-      `${s.sentenceOrder}. ${s.sentence}\n   Options: ${s.options.join(', ')}\n   Answer: ${s.solution}`
-    ).join('\n\n');
-    
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'multiple-choice-exercise.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <ExerciseLayout
       title="Multiple Choice Exercise"
       apiKey={apiKey}
       onSaveApiKey={saveApiKey}
-      onDownload={currentExercise ? downloadPDF : undefined}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >

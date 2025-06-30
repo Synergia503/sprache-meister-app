@@ -8,7 +8,6 @@ interface ExerciseLayoutProps {
   title: string;
   apiKey: string;
   onSaveApiKey: (key: string) => void;
-  onDownload?: () => void;
   previousExercises: BaseExercise[];
   onLoadExercise: (exercise: BaseExercise) => void;
   children: React.ReactNode;
@@ -18,14 +17,13 @@ export const ExerciseLayout = ({
   title,
   apiKey,
   onSaveApiKey,
-  onDownload,
   previousExercises,
   onLoadExercise,
   children
 }: ExerciseLayoutProps) => {
   return (
     <div className="p-6">
-      <ExerciseHeader title={title} onDownload={onDownload} />
+      <ExerciseHeader title={title} />
       <ApiKeyInput apiKey={apiKey} onSaveApiKey={onSaveApiKey} />
       {children}
       <PreviousExercises 

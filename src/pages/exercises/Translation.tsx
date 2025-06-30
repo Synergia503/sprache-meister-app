@@ -20,28 +20,11 @@ const Translation = () => {
     loadPreviousExercise
   } = useTranslationExercise();
 
-  const downloadPDF = () => {
-    if (!currentExercise) return;
-    
-    const content = currentExercise.sentences.map(s => 
-      `${s.sentenceOrder}. ${s.germanSentence}\n   English: ${s.englishSentence}`
-    ).join('\n\n');
-    
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'translation-exercise.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <ExerciseLayout
       title="Translation Exercise"
       apiKey={apiKey}
       onSaveApiKey={saveApiKey}
-      onDownload={currentExercise ? downloadPDF : undefined}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >

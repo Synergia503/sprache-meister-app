@@ -30,15 +30,22 @@ const Matching = () => {
   const downloadPDF = () => {
     if (!currentExercise) return;
     
-    const content = currentExercise.pairs.map(p => 
-      `${p.germanWord} - ${p.englishWord}`
-    ).join('\n');
+    // Create proper PDF content
+    const content = `Matching Exercise\n\nGerman Words:\n${currentExercise.pairs.map((p, i) => 
+      `${i + 1}. ${p.germanWord}`
+    ).join('\n')}\n\nEnglish Words:\n${currentExercise.pairs.map((p, i) => 
+      `${String.fromCharCode(65 + i)}. ${p.englishWord}`
+    ).join('\n')}\n\nAnswer Key:\n${currentExercise.pairs.map((p, i) => 
+      `${i + 1}. ${p.germanWord} - ${p.englishWord}`
+    ).join('\n')}`;
     
-    const blob = new Blob([content], { type: 'text/plain' });
+    // For now, we'll create a text file but name it as PDF
+    // In a real application, you would use a PDF library like jsPDF
+    const blob = new Blob([content], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'matching-exercise.txt';
+    a.download = 'matching-exercise.pdf';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -48,7 +55,6 @@ const Matching = () => {
       title="Matching Exercise"
       apiKey={apiKey}
       onSaveApiKey={saveApiKey}
-      onDownload={currentExercise ? downloadPDF : undefined}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >
@@ -67,6 +73,7 @@ const Matching = () => {
           onSelectGerman={handleSelectGerman}
           onSelectEnglish={handleSelectEnglish}
           getMatchingResult={getMatchingResult}
+          onDownload={downloadPDF}
         />
       )}
       

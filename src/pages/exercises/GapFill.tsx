@@ -31,28 +31,11 @@ const GapFill = () => {
     }
   };
 
-  const downloadPDF = () => {
-    if (!currentExercise) return;
-    
-    const content = currentExercise.sentences.map(s => 
-      `${s.sentenceOrder}. ${s.sentence}`
-    ).join('\n\n');
-    
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'gap-fill-exercise.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <ExerciseLayout
       title="Gap-Fill Exercise"
       apiKey={apiKey}
       onSaveApiKey={saveApiKey}
-      onDownload={currentExercise ? downloadPDF : undefined}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
     >
