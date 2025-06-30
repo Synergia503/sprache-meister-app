@@ -2,71 +2,94 @@
 import { BaseExercise, TranslationExercise, MultipleChoiceExercise, MatchingExercise } from '@/types/exercises';
 import { GapFillExercise } from '@/types/gapFill';
 
+// Type guards to safely identify exercise types
+const isMatchingExercise = (exercise: any): exercise is MatchingExercise => {
+  return 'pairs' in exercise && 'userMatches' in exercise;
+};
+
+const isTranslationExercise = (exercise: any): exercise is TranslationExercise => {
+  return 'sentences' in exercise && 
+         exercise.sentences.length > 0 && 
+         'germanSentence' in exercise.sentences[0] && 
+         'englishSentence' in exercise.sentences[0];
+};
+
+const isMultipleChoiceExercise = (exercise: any): exercise is MultipleChoiceExercise => {
+  return 'sentences' in exercise && 
+         exercise.sentences.length > 0 && 
+         'options' in exercise.sentences[0] && 
+         'solution' in exercise.sentences[0];
+};
+
+const isGapFillExercise = (exercise: any): exercise is GapFillExercise => {
+  return 'sentences' in exercise && 
+         exercise.sentences.length > 0 && 
+         'solution' in exercise.sentences[0] && 
+         !('options' in exercise.sentences[0]) &&
+         !('germanSentence' in exercise.sentences[0]);
+};
+
 export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) => {
   let content = '';
   let filename = '';
 
-  if ('sentences' in exercise && 'pairs' in exercise) {
+  if (isMatchingExercise(exercise)) {
     // Matching exercise
-    const matchingEx = exercise as MatchingExercise;
     content = `Matching Exercise
 
 German Words:
-${matchingEx.pairs.map((p, i) => `${i + 1}. ${p.germanWord}`).join('\n')}
+${exercise.pairs.map((p, i) => `${i + 1}. ${p.germanWord}`).join('\n')}
 
 English Words:
-${matchingEx.pairs.map((p, i) => `${String.fromCharCode(65 + i)}. ${p.englishWord}`).join('\n')}
+${exercise.pairs.map((p, i) => `${String.fromCharCode(65 + i)}. ${p.englishWord}`).join('\n')}
 
 Answer Key:
-${matchingEx.pairs.map((p, i) => `${i + 1}. ${p.germanWord} - ${p.englishWord}`).join('\n')}`;
+${exercise.pairs.map((p, i) => `${i + 1}. ${p.germanWord} - ${p.englishWord}`).join('\n')}`;
     filename = 'matching-exercise.pdf';
-  } else if ('sentences' in exercise && exercise.sentences.every(s => 'germanSentence' in s)) {
+  } else if (isTranslationExercise(exercise)) {
     // Translation exercise
-    const translationEx = exercise as TranslationExercise;
     content = `Translation Exercise
 
 Instructions: Translate the following German sentences into English.
 
-${translationEx.sentences.map((s, i) => 
+${exercise.sentences.map((s, i) => 
   `${i + 1}. ${s.germanSentence}\n   _________________________________`
 ).join('\n\n')}
 
 Answer Key:
-${translationEx.sentences.map((s, i) => 
+${exercise.sentences.map((s, i) => 
   `${i + 1}. ${s.germanSentence}\n   Answer: ${s.englishSentence}`
 ).join('\n\n')}`;
     filename = 'translation-exercise.pdf';
-  } else if ('sentences' in exercise && exercise.sentences.every(s => 'options' in s)) {
+  } else if (isMultipleChoiceExercise(exercise)) {
     // Multiple choice exercise
-    const mcEx = exercise as MultipleChoiceExercise;
     content = `Multiple Choice Exercise
 
 Instructions: Choose the correct answer for each question.
 
-${mcEx.sentences.map((s, i) => 
+${exercise.sentences.map((s, i) => 
   `${i + 1}. ${s.sentence}\n${s.options.map((opt, idx) => 
     `   ${String.fromCharCode(65 + idx)}) ${opt}`
   ).join('\n')}`
 ).join('\n\n')}
 
 Answer Key:
-${mcEx.sentences.map((s, i) => 
+${exercise.sentences.map((s, i) => 
   `${i + 1}. ${s.sentence}\n   Answer: ${s.solution}`
 ).join('\n\n')}`;
     filename = 'multiple-choice-exercise.pdf';
-  } else if ('sentences' in exercise && exercise.sentences.every(s => 'solution' in s)) {
+  } else if (isGapFillExercise(exercise)) {
     // Gap fill exercise
-    const gapEx = exercise as GapFillExercise;
     content = `Gap-Fill Exercise
 
 Instructions: Fill in the blanks with the correct word.
 
-${gapEx.sentences.map((s, i) => 
+${exercise.sentences.map((s, i) => 
   `${i + 1}. ${s.sentence}\n   Answer: _______________`
 ).join('\n\n')}
 
 Answer Key:
-${gapEx.sentences.map((s, i) => 
+${exercise.sentences.map((s, i) => 
   `${i + 1}. ${s.sentence.replace('___', s.solution)}`
 ).join('\n\n')}`;
     filename = 'gap-fill-exercise.pdf';
