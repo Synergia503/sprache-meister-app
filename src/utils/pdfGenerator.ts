@@ -169,8 +169,28 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
     }
 
     console.log('Saving PDF with filename:', filename);
-    // Save the PDF
-    doc.save(filename);
+    
+    // Try different approaches to ensure download
+    try {
+      // Method 1: Direct save
+      doc.save(filename);
+      console.log('PDF saved using direct method');
+    } catch (saveError) {
+      console.log('Direct save failed, trying alternative method:', saveError);
+      
+      // Method 2: Create blob and download manually
+      const pdfBlob = doc.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      console.log('PDF downloaded using manual blob method');
+    }
+    
     console.log('PDF generation completed successfully');
     
   } catch (error) {
