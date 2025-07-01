@@ -7,7 +7,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BookPlus, List } from "lucide-react";
 import { FlashcardForm, Flashcard } from '@/components/FlashcardForm';
 import { FlashcardList } from '@/components/FlashcardList';
+import { AnkiExport } from '@/components/AnkiExport';
 import { useToast } from '@/hooks/use-toast';
+
+const sampleFlashcards: Flashcard[] = [
+  {
+    id: 'sample-1',
+    german: 'der Hund',
+    english: 'dog',
+    example: 'Der Hund läuft im Park.',
+    category: 'Animals'
+  },
+  {
+    id: 'sample-2',
+    german: 'das Haus',
+    english: 'house',
+    example: 'Das Haus ist sehr groß.',
+    category: 'Home'
+  },
+  {
+    id: 'sample-3',
+    german: 'essen',
+    english: 'to eat',
+    example: 'Ich esse gerne Pizza.',
+    category: 'Verbs'
+  },
+  {
+    id: 'sample-4',
+    german: 'die Schule',
+    english: 'school',
+    example: 'Die Schule beginnt um acht Uhr.',
+    category: 'Education'
+  },
+  {
+    id: 'sample-5',
+    german: 'schön',
+    english: 'beautiful',
+    example: 'Das Wetter ist heute schön.',
+    category: 'Adjectives'
+  }
+];
 
 const Flashcards = () => {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -15,6 +54,7 @@ const Flashcards = () => {
   const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [showAnkiExport, setShowAnkiExport] = useState(false);
   const { toast } = useToast();
 
   // Load flashcards from localStorage on component mount
@@ -22,10 +62,16 @@ const Flashcards = () => {
     const savedFlashcards = localStorage.getItem('german-flashcards');
     if (savedFlashcards) {
       try {
-        setFlashcards(JSON.parse(savedFlashcards));
+        const parsedFlashcards = JSON.parse(savedFlashcards);
+        setFlashcards(parsedFlashcards);
       } catch (error) {
         console.error('Error parsing saved flashcards:', error);
+        // If there's an error, use sample flashcards
+        setFlashcards(sampleFlashcards);
       }
+    } else {
+      // If no saved flashcards, use sample flashcards
+      setFlashcards(sampleFlashcards);
     }
   }, []);
 
@@ -105,14 +151,28 @@ const Flashcards = () => {
   // Get unique categories for filter dropdown
   const categories = Array.from(new Set(flashcards.map(card => card.category))).sort();
 
+  // Get Anki export items
+  const getAnkiItems = () => {
+    return filteredFlashcards.map(card => ({
+      front: `${card.german}${card.example ? `\n\n${card.example}` : ''}`,
+      back: card.english,
+      tags: ['german-flashcards', card.category.toLowerCase().replace(/\s+/g, '-')]
+    }));
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Flashcards</h1>
-        <Button onClick={handleAddNew}>
-          <BookPlus className="mr-2 h-4 w-4" />
-          Add Flashcard
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowAnkiExport(!showAnkiExport)}>
+            Export to Anki
+          </Button>
+          <Button onClick={handleAddNew}>
+            <BookPlus className="mr-2 h-4 w-4" />
+            Add Flashcard
+          </Button>
+        </div>
       </div>
 
       {showForm ? (
@@ -166,6 +226,16 @@ const Flashcards = () => {
               />
             </CardContent>
           </Card>
+
+          {/* Anki Export Section */}
+          {showAnkiExport && (
+            <div className="mb-6">
+              <AnkiExport 
+                items={getAnkiItems()}
+                defaultDeckName="German Flashcards"
+              />
+            </div>
+          )}
         </>
       )}
     </div>

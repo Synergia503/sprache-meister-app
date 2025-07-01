@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { BookOpenText, Target, Loader2 } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
+import { AnkiExport } from '@/components/AnkiExport';
 
 const Exercises = () => {
   const [activeExercise, setActiveExercise] = useState('');
   const [exerciseContent, setExerciseContent] = useState('');
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [showAnkiExport, setShowAnkiExport] = useState(false);
   const { callOpenAI, isLoading, apiKey, saveApiKey } = useOpenAI();
 
   const exercises = [
@@ -39,6 +41,7 @@ const Exercises = () => {
     setActiveExercise(exerciseId);
     setUserAnswer('');
     setFeedback('');
+    setShowAnkiExport(false);
 
     let prompt = '';
     switch (exerciseId) {
@@ -70,7 +73,31 @@ const Exercises = () => {
     const result = await callOpenAI(prompt, systemMessage);
     if (result) {
       setFeedback(result);
+      setShowAnkiExport(true);
     }
+  };
+
+  // Extract vocabulary from exercise content for Anki export
+  const getAnkiItems = () => {
+    if (!exerciseContent) return [];
+    
+    // Simple extraction - this could be enhanced based on exercise format
+    const lines = exerciseContent.split('\n');
+    const items: Array<{ front: string; back: string; tags: string[] }> = [];
+    
+    lines.forEach(line => {
+      // Look for patterns like "German word - English word" or "1. German - English"
+      const match = line.match(/([A-Za-zÄÖÜäöüß\s]+)\s*-\s*([A-Za-z\s]+)/);
+      if (match) {
+        items.push({
+          front: match[1].trim(),
+          back: match[2].trim(),
+          tags: ['vocabulary-exercise', activeExercise]
+        });
+      }
+    });
+    
+    return items;
   };
 
   return (
@@ -144,14 +171,23 @@ const Exercises = () => {
           </Card>
 
           {feedback && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Feedback</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="whitespace-pre-wrap">{feedback}</div>
-              </CardContent>
-            </Card>
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Feedback</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="whitespace-pre-wrap">{feedback}</div>
+                </CardContent>
+              </Card>
+
+              {showAnkiExport && getAnkiItems().length > 0 && (
+                <AnkiExport 
+                  items={getAnkiItems()}
+                  defaultDeckName="German Vocabulary Exercise"
+                />
+              )}
+            </div>
           )}
         </div>
       )}

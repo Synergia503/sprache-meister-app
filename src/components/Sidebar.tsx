@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Book, FileText, Home, LayoutDashboard, Settings, User, CreditCard, Mic, ChevronDown, ChevronRight } from "lucide-react";
@@ -28,8 +27,8 @@ const basicMenuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
   { title: "Flashcards", icon: CreditCard, path: "/flashcards" },
   { title: "Voice Conversation", icon: Mic, path: "/voice-conversation" },
-  { title: "Settings", icon: Settings, path: "/settings" },
   { title: "Profile", icon: User, path: "/profile" },
+  { title: "Settings", icon: Settings, path: "/settings" },
 ];
 
 const vocabularySubItems = [
@@ -66,17 +65,26 @@ export function MainSidebar({ children }: MainSidebarProps) {
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {basicMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton asChild>
-                        <Link to={item.path} className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {/* Home and Dashboard */}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/" className="flex items-center gap-2">
+                        <Home className="h-4 w-4" />
+                        <span>Home</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                   
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/dashboard" className="flex items-center gap-2">
+                        <LayoutDashboard className="h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  {/* Vocabulary Section */}
                   <Collapsible open={vocabularyOpen} onOpenChange={setVocabularyOpen}>
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
@@ -108,6 +116,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     </SidebarMenuItem>
                   </Collapsible>
 
+                  {/* Exercises Section */}
                   <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
@@ -138,6 +147,43 @@ export function MainSidebar({ children }: MainSidebarProps) {
                       </CollapsibleContent>
                     </SidebarMenuItem>
                   </Collapsible>
+                  
+                  {/* Other menu items */}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/flashcards" className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        <span>Flashcards</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/voice-conversation" className="flex items-center gap-2">
+                        <Mic className="h-4 w-4" />
+                        <span>Voice Conversation</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/profile" className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/settings" className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
