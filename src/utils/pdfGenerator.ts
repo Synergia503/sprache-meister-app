@@ -168,30 +168,30 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
       filename = 'exercise.pdf';
     }
 
-    console.log('Saving PDF with filename:', filename);
+    console.log('Preparing PDF download with filename:', filename);
     
-    // Try different approaches to ensure download
-    try {
-      // Method 1: Direct save
-      doc.save(filename);
-      console.log('PDF saved using direct method');
-    } catch (saveError) {
-      console.log('Direct save failed, trying alternative method:', saveError);
-      
-      // Method 2: Create blob and download manually
-      const pdfBlob = doc.output('blob');
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    // Generate PDF as blob and force download
+    const pdfBlob = doc.output('blob');
+    console.log('PDF blob created, size:', pdfBlob.size, 'bytes');
+    
+    // Create download link
+    const url = URL.createObjectURL(pdfBlob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = filename;
+    downloadLink.style.display = 'none';
+    
+    // Add to DOM, click, and remove
+    document.body.appendChild(downloadLink);
+    console.log('Triggering download...');
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    // Clean up the URL
+    setTimeout(() => {
       URL.revokeObjectURL(url);
-      console.log('PDF downloaded using manual blob method');
-    }
-    
-    console.log('PDF generation completed successfully');
+      console.log('PDF download completed and URL cleaned up');
+    }, 100);
     
   } catch (error) {
     console.error('Error generating PDF:', error);
