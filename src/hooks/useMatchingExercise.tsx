@@ -32,7 +32,49 @@ export const useMatchingExercise = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    loadSampleExercise();
+    // Check if there's vocabulary data from the category selection
+    const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
+    const exerciseCategory = sessionStorage.getItem('exerciseCategory');
+    
+    if (vocabularyPairsData) {
+      try {
+        const vocabularyPairs = JSON.parse(vocabularyPairsData);
+        const categoryExercise: MatchingExercise = {
+          id: `category-${Date.now()}`,
+          words: vocabularyPairs.map((pair: any) => pair.german),
+          pairs: vocabularyPairs.map((pair: any, index: number) => ({
+            pairOrder: index + 1,
+            germanWord: pair.german,
+            englishWord: pair.english
+          })),
+          userAnswers: {},
+          userMatches: {},
+          isCompleted: false,
+          createdAt: new Date()
+        };
+        
+        setCurrentExercise(categoryExercise);
+        setShuffledEnglish(shuffleArray(categoryExercise.pairs));
+        setUserMatches({});
+        setShowResults(false);
+        setSelectedGerman(null);
+        setSelectedEnglish(null);
+        
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('vocabularyPairsForExercise');
+        sessionStorage.removeItem('exerciseCategory');
+        
+        toast({
+          title: "Exercise loaded",
+          description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
+        });
+      } catch (error) {
+        console.error('Error parsing vocabulary pairs:', error);
+        loadSampleExercise();
+      }
+    } else {
+      loadSampleExercise();
+    }
   }, []);
 
   const shuffleArray = (array: MatchingPair[]) => {

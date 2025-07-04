@@ -161,9 +161,17 @@ const Categorized = () => {
 
   const sendToExercise = (exercisePath: string) => {
     if (selectedCategoryForExercise && selectedCategoryForExercise.samples) {
-      // Create word list from category samples
+      // Store the vocabulary data in different formats for different exercise types
       const wordList = selectedCategoryForExercise.samples.map((sample: any) => sample.german).join('\n');
+      const vocabularyPairs = selectedCategoryForExercise.samples.map((sample: any) => ({
+        german: sample.german,
+        english: sample.english
+      }));
+      
+      // Store both formats for different exercise types
       sessionStorage.setItem('wordListForExercise', wordList);
+      sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
+      sessionStorage.setItem('exerciseCategory', selectedCategoryForExercise.name);
     }
     navigate(exercisePath);
   };
