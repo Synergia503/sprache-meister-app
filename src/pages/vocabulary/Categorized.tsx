@@ -151,16 +151,12 @@ const Categorized = () => {
 
   const showSamples = (category: any) => {
     setSelectedCategory(category.name);
+    setSelectedCategoryForExercise(category);
     const samplesText = category.samples.map((sample: any, index: number) => 
       `${index + 1}. ${sample.german} - ${sample.english}`
     ).join('\n');
     setVocabulary(`Sample vocabulary for ${category.name}:\n\n${samplesText}`);
     setShowAnkiExport(true);
-  };
-
-  const selectCategoryForExercise = (category: any) => {
-    setSelectedCategoryForExercise(category);
-    setShowExerciseSelection(true);
   };
 
   const sendToExercise = (exercisePath: string) => {
@@ -223,12 +219,6 @@ const Categorized = () => {
                     'Generate More'
                   )}
                 </Button>
-                <Button 
-                  className="w-full"
-                  onClick={() => selectCategoryForExercise(category)}
-                >
-                  Send to Exercise
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -279,7 +269,19 @@ const Categorized = () => {
               <CardTitle>{selectedCategory} Vocabulary</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="whitespace-pre-wrap">{vocabulary}</div>
+              <div className="whitespace-pre-wrap mb-4">{vocabulary}</div>
+              
+              {/* Send to Exercise button appears only after viewing samples */}
+              {selectedCategoryForExercise && (
+                <div className="mt-4">
+                  <Button 
+                    onClick={() => setShowExerciseSelection(true)}
+                    className="w-full"
+                  >
+                    Send to Exercise
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
