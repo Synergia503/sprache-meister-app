@@ -2,15 +2,12 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { BookOpenText, Target, PenTool, Shuffle, Loader2, FileText, Languages, Link } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { useNavigate } from 'react-router-dom';
 
 const All = () => {
-  const [selectedExercise, setSelectedExercise] = useState('');
-  const [wordList, setWordList] = useState('');
   const { isLoading, apiKey, saveApiKey } = useOpenAI();
   const navigate = useNavigate();
 
@@ -67,10 +64,6 @@ const All = () => {
   ];
 
   const sendToExercise = (exercisePath: string) => {
-    if (wordList.trim()) {
-      // Store the word list in sessionStorage to pass to the exercise
-      sessionStorage.setItem('wordListForExercise', wordList.trim());
-    }
     navigate(exercisePath);
   };
 
@@ -80,30 +73,15 @@ const All = () => {
       
       <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
       
-      {/* Word List Input */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Send Word List to Exercise</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Word List (optional - one word per line)
-              </label>
-              <textarea
-                className="w-full h-32 p-3 border rounded-md resize-none"
-                placeholder="Enter German words or phrases, one per line:&#10;Hund&#10;Katze&#10;Haus&#10;Auto"
-                value={wordList}
-                onChange={(e) => setWordList(e.target.value)}
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Add words here and then click on any exercise below to create a custom exercise with these words.
+      <div className="mb-6">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground">
+              To use exercises with specific vocabulary, go to <strong>Vocabulary → Categorized</strong> or <strong>Vocabulary → Custom</strong> and use the "Send to Exercise" feature to practice with selected words.
             </p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {exercises.map((exercise) => {
@@ -124,7 +102,7 @@ const All = () => {
                   onClick={() => sendToExercise(exercise.path)}
                   disabled={isLoading}
                 >
-                  {wordList.trim() ? 'Start with Word List' : 'Start Exercise'}
+                  Start Exercise
                 </Button>
               </CardContent>
             </Card>

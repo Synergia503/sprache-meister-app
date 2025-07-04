@@ -2,16 +2,72 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, Loader2 } from "lucide-react";
+import { FolderOpen, Loader2, FileText, Target, Languages, Link, BookOpenText, PenTool, Shuffle } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { AnkiExport } from '@/components/AnkiExport';
+import { useNavigate } from 'react-router-dom';
 
 const Categorized = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [vocabulary, setVocabulary] = useState('');
   const [showAnkiExport, setShowAnkiExport] = useState(false);
+  const [showExerciseSelection, setShowExerciseSelection] = useState(false);
+  const [selectedCategoryForExercise, setSelectedCategoryForExercise] = useState<any>(null);
   const { callOpenAI, isLoading, apiKey, saveApiKey } = useOpenAI();
+  const navigate = useNavigate();
+
+  const exercises = [
+    {
+      id: 'gap-fill',
+      title: 'Gap-Fill',
+      description: 'Fill in the blanks with correct German words',
+      icon: FileText,
+      path: '/exercises/gap-fill'
+    },
+    {
+      id: 'multiple-choice',
+      title: 'Multiple Choice',
+      description: 'Choose the correct answer from multiple options',
+      icon: Target,
+      path: '/exercises/multiple-choice'
+    },
+    {
+      id: 'translation',
+      title: 'Translation',
+      description: 'Translate between German and English',
+      icon: Languages,
+      path: '/exercises/translation'
+    },
+    {
+      id: 'matching',
+      title: 'Matching',
+      description: 'Match German words with their English translations',
+      icon: Link,
+      path: '/exercises/matching'
+    },
+    {
+      id: 'describe-picture',
+      title: 'Describe a Picture',
+      description: 'Practice describing images in German',
+      icon: BookOpenText,
+      path: '/exercises/describe-picture'
+    },
+    {
+      id: 'grammar',
+      title: 'Grammar',
+      description: 'Practice German grammar rules',
+      icon: PenTool,
+      path: '/exercises/grammar'
+    },
+    {
+      id: 'mixed',
+      title: 'Mixed',
+      description: 'Mixed exercises for comprehensive practice',
+      icon: Shuffle,
+      path: '/exercises/mixed'
+    }
+  ];
 
   const categories = [
     { 
@@ -102,6 +158,20 @@ const Categorized = () => {
     setShowAnkiExport(true);
   };
 
+  const selectCategoryForExercise = (category: any) => {
+    setSelectedCategoryForExercise(category);
+    setShowExerciseSelection(true);
+  };
+
+  const sendToExercise = (exercisePath: string) => {
+    if (selectedCategoryForExercise && selectedCategoryForExercise.samples) {
+      // Create word list from category samples
+      const wordList = selectedCategoryForExercise.samples.map((sample: any) => sample.german).join('\n');
+      sessionStorage.setItem('wordListForExercise', wordList);
+    }
+    navigate(exercisePath);
+  };
+
   const getAnkiItems = () => {
     const selectedCat = categories.find(cat => cat.name === selectedCategory);
     if (!selectedCat) return [];
@@ -153,11 +223,54 @@ const Categorized = () => {
                     'Generate More'
                   )}
                 </Button>
+                <Button 
+                  className="w-full"
+                  onClick={() => selectCategoryForExercise(category)}
+                >
+                  Send to Exercise
+                </Button>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Exercise Selection Modal */}
+      {showExerciseSelection && selectedCategoryForExercise && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Choose Exercise for {selectedCategoryForExercise.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 mb-4">
+              {exercises.map((exercise) => {
+                const IconComponent = exercise.icon;
+                return (
+                  <Button
+                    key={exercise.id}
+                    variant="outline"
+                    className="h-auto p-4 flex flex-col items-center gap-2"
+                    onClick={() => sendToExercise(exercise.path)}
+                  >
+                    <IconComponent className="h-5 w-5" />
+                    <div className="text-center">
+                      <div className="font-medium">{exercise.title}</div>
+                      <div className="text-xs text-muted-foreground">{exercise.description}</div>
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowExerciseSelection(false)}
+              className="w-full"
+            >
+              Cancel
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {vocabulary && (
         <div className="grid gap-6 md:grid-cols-2">

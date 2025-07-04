@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookOpenText, Target, Loader2 } from "lucide-react";
+import { BookOpenText, Target, Loader2, FileText, Languages, Link, PenTool, Shuffle } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { AnkiExport } from '@/components/AnkiExport';
+import { useNavigate } from 'react-router-dom';
 
 const Exercises = () => {
   const [activeExercise, setActiveExercise] = useState('');
@@ -14,7 +15,9 @@ const Exercises = () => {
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState('');
   const [showAnkiExport, setShowAnkiExport] = useState(false);
+  const [showDirectExerciseSelection, setShowDirectExerciseSelection] = useState(false);
   const { callOpenAI, isLoading, apiKey, saveApiKey } = useOpenAI();
+  const navigate = useNavigate();
 
   const exercises = [
     {
@@ -34,6 +37,58 @@ const Exercises = () => {
       title: 'Multiple Choice',
       description: 'Choose the correct translation from options',
       icon: BookOpenText
+    }
+  ];
+
+  const directExercises = [
+    {
+      id: 'gap-fill',
+      title: 'Gap-Fill',
+      description: 'Fill in the blanks with correct German words',
+      icon: FileText,
+      path: '/exercises/gap-fill'
+    },
+    {
+      id: 'multiple-choice',
+      title: 'Multiple Choice',
+      description: 'Choose the correct answer from multiple options',
+      icon: Target,
+      path: '/exercises/multiple-choice'
+    },
+    {
+      id: 'translation',
+      title: 'Translation',
+      description: 'Translate between German and English',
+      icon: Languages,
+      path: '/exercises/translation'
+    },
+    {
+      id: 'matching',
+      title: 'Matching',
+      description: 'Match German words with their English translations',
+      icon: Link,
+      path: '/exercises/matching'
+    },
+    {
+      id: 'describe-picture',
+      title: 'Describe a Picture',
+      description: 'Practice describing images in German',
+      icon: BookOpenText,
+      path: '/exercises/describe-picture'
+    },
+    {
+      id: 'grammar',
+      title: 'Grammar',
+      description: 'Practice German grammar rules',
+      icon: PenTool,
+      path: '/exercises/grammar'
+    },
+    {
+      id: 'mixed',
+      title: 'Mixed',
+      description: 'Mixed exercises for comprehensive practice',
+      icon: Shuffle,
+      path: '/exercises/mixed'
     }
   ];
 
@@ -77,6 +132,12 @@ const Exercises = () => {
     }
   };
 
+  const sendToExercise = (exercisePath: string) => {
+    // Clear any existing word list for direct navigation
+    sessionStorage.removeItem('wordListForExercise');
+    navigate(exercisePath);
+  };
+
   // Extract vocabulary from exercise content for Anki export
   const getAnkiItems = () => {
     if (!exerciseContent) return [];
@@ -105,6 +166,47 @@ const Exercises = () => {
       <h1 className="text-3xl font-bold mb-6">Vocabulary Exercises</h1>
       
       <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
+
+      {/* Send to Direct Exercise Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Go to Exercise Types</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            Navigate directly to specific exercise types to practice with custom word lists or general exercises.
+          </p>
+          <Button 
+            onClick={() => setShowDirectExerciseSelection(!showDirectExerciseSelection)}
+            variant="outline"
+            className="mb-4"
+          >
+            {showDirectExerciseSelection ? 'Hide' : 'Show'} Exercise Types
+          </Button>
+          
+          {showDirectExerciseSelection && (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {directExercises.map((exercise) => {
+                const IconComponent = exercise.icon;
+                return (
+                  <Button
+                    key={exercise.id}
+                    variant="outline"
+                    className="h-auto p-4 flex flex-col items-center gap-2"
+                    onClick={() => sendToExercise(exercise.path)}
+                  >
+                    <IconComponent className="h-5 w-5" />
+                    <div className="text-center">
+                      <div className="font-medium">{exercise.title}</div>
+                      <div className="text-xs text-muted-foreground">{exercise.description}</div>
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
         {exercises.map((exercise) => {
