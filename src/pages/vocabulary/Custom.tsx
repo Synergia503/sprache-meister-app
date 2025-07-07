@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,12 +7,18 @@ import { Plus, Star, Loader2, BookOpen, X, Edit, Trash } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { useToast } from '@/hooks/use-toast';
+import PhotoWordExtractor from '@/components/PhotoWordExtractor';
 
 interface CustomWord {
   id: string;
   german: string;
   english: string;
   dateAdded: Date;
+}
+
+interface ExtractedWord {
+  german: string;
+  english: string;
 }
 
 const Custom = () => {
@@ -80,6 +85,17 @@ const Custom = () => {
     });
   };
 
+  const handleWordsExtracted = (extractedWords: ExtractedWord[]) => {
+    const newWords: CustomWord[] = extractedWords.map(word => ({
+      id: Date.now().toString() + Math.random(),
+      german: word.german,
+      english: word.english,
+      dateAdded: new Date(),
+    }));
+
+    setCustomWords(prev => [...newWords, ...prev]);
+  };
+
   const recentWords = customWords.slice(0, 3);
   const favoriteWords = customWords.slice(0, 3);
 
@@ -143,6 +159,8 @@ const Custom = () => {
       )}
 
       <div className="grid gap-6">
+        <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
