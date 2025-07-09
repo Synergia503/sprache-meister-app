@@ -7,6 +7,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { VocabularyProvider } from "./contexts/VocabularyContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Vocabulary from "./pages/Vocabulary";
@@ -88,9 +89,11 @@ const App = () => (
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <VocabularyProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </VocabularyProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

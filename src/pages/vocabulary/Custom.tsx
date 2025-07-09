@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Pagination, 
   PaginationContent, 
@@ -13,25 +15,15 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from "@/components/ui/pagination";
-import { Plus, Star, Loader2, BookOpen, X, Edit, Trash, List, ChevronRight } from "lucide-react";
+import { Plus, Star, Loader2, BookOpen, X, Edit, Trash, List, ChevronRight, Filter, Search, ArrowUpDown, Heart, Clock, Target, TrendingUp, Calendar } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { useToast } from '@/hooks/use-toast';
 import PhotoWordExtractor from '@/components/PhotoWordExtractor';
+import { useVocabulary } from '@/contexts/VocabularyContext';
+import { ExtractedWord, CustomWord } from '@/types/vocabulary';
 
-interface CustomWord {
-  id: string;
-  german: string;
-  english: string;
-  categories: string[];
-  dateAdded: Date;
-}
-
-interface ExtractedWord {
-  german: string;
-  english: string;
-  categories?: string[];
-}
+// Remove duplicate interfaces - they're now in types/vocabulary.ts
 
 const Custom = () => {
   const navigate = useNavigate();
@@ -42,24 +34,37 @@ const Custom = () => {
   const [newEnglishWord, setNewEnglishWord] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showAllWords, setShowAllWords] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showLearningHistoryOnly, setShowLearningHistoryOnly] = useState(false);
   const wordsPerPage = 10;
   
-  const [customWords, setCustomWords] = useState<CustomWord[]>([
-    { id: '1', german: 'Fernweh', english: 'Wanderlust', categories: ['emotions', 'travel'], dateAdded: new Date() },
-    { id: '2', german: 'Gemütlichkeit', english: 'Coziness', categories: ['feelings', 'home'], dateAdded: new Date() },
-    { id: '3', german: 'Verschlimmbessern', english: 'To make worse by trying to improve', categories: ['actions', 'irony'], dateAdded: new Date() },
-    { id: '4', german: 'Schadenfreude', english: 'Joy from others\' misfortune', categories: ['emotions'], dateAdded: new Date() },
-    { id: '5', german: 'Zeitgeist', english: 'Spirit of the age', categories: ['culture', 'philosophy'], dateAdded: new Date() },
-    { id: '6', german: 'der Tisch', english: 'table', categories: ['furniture', 'home'], dateAdded: new Date() },
-    { id: '7', german: 'das Buch', english: 'book', categories: ['objects', 'education'], dateAdded: new Date() },
-    { id: '8', german: 'die Lampe', english: 'lamp', categories: ['furniture', 'lighting'], dateAdded: new Date() },
-    { id: '9', german: 'der Stuhl', english: 'chair', categories: ['furniture'], dateAdded: new Date() },
-    { id: '10', german: 'das Fenster', english: 'window', categories: ['architecture', 'home'], dateAdded: new Date() },
-    { id: '11', german: 'die Tür', english: 'door', categories: ['architecture', 'home'], dateAdded: new Date() },
-    { id: '12', german: 'der Computer', english: 'computer', categories: ['technology', 'electronics'], dateAdded: new Date() },
-  ]);
+  const { 
+    getFilteredAndSortedWords, 
+    addWord, 
+    removeWord, 
+    toggleFavorite, 
+    filters,
+    setFilters,
+    sortOption,
+    setSortOption,
+    sortOrder,
+    setSortOrder
+  } = useVocabulary();
+  
   const { callOpenAI, isLoading, apiKey, saveApiKey } = useOpenAI();
   const { toast } = useToast();
+
+  // Apply filters when local state changes
+  React.useEffect(() => {
+    setFilters({
+      searchTerm: searchTerm || undefined,
+      category: selectedCategory || undefined,
+      favorites: showFavoritesOnly || undefined,
+      hasLearningHistory: showLearningHistoryOnly || undefined,
+    });
+  }, [searchTerm, selectedCategory, showFavoritesOnly, showLearningHistoryOnly, setFilters]);
 
   const generateCustomVocabulary = async () => {
     if (!topic.trim()) return;
@@ -88,10 +93,13 @@ const Custom = () => {
       german: newGermanWord.trim(),
       english: newEnglishWord.trim(),
       categories: [],
+      sampleSentence: '',
       dateAdded: new Date(),
+      learningHistory: [],
+      isFavorite: false,
     };
 
-    setCustomWords(prev => [newWord, ...prev]);
+    addWord(newWord);
     setNewGermanWord('');
     setNewEnglishWord('');
     setShowAddForm(false);
@@ -103,7 +111,7 @@ const Custom = () => {
   };
 
   const handleDeleteWord = (id: string) => {
-    setCustomWords(prev => prev.filter(word => word.id !== id));
+    removeWord(id);
     toast({
       title: "Word removed",
       description: "The word has been removed from your custom vocabulary.",
@@ -116,24 +124,34 @@ const Custom = () => {
       german: word.german,
       english: word.english,
       categories: word.categories || [],
+      sampleSentence: '',
       dateAdded: new Date(),
+      learningHistory: [],
+      isFavorite: false,
     }));
 
-    setCustomWords(prev => [...newWords, ...prev]);
+    newWords.forEach(word => addWord(word));
   };
 
   const handleWordClick = (wordId: string) => {
     navigate(`/vocabulary/custom/${wordId}`);
   };
 
-  const totalPages = Math.ceil(customWords.length / wordsPerPage);
-  const paginatedWords = customWords.slice(
+  const calculateSuccessRate = (word: CustomWord) => {
+    if (!word.learningHistory.length) return 0;
+    const successCount = word.learningHistory.filter(h => h.success).length;
+    return Math.round((successCount / word.learningHistory.length) * 100);
+  };
+
+  const filteredWords = getFilteredAndSortedWords();
+  const totalPages = Math.ceil(filteredWords.length / wordsPerPage);
+  const paginatedWords = filteredWords.slice(
     (currentPage - 1) * wordsPerPage,
     currentPage * wordsPerPage
   );
 
-  const recentWords = customWords.slice(0, 3);
-  const favoriteWords = customWords.slice(0, 3);
+  const favoriteWords = filteredWords.filter(word => word.isFavorite).slice(0, 3);
+  const allCategories = [...new Set(filteredWords.flatMap(word => word.categories))].sort();
 
   return (
     <div className="p-6">
@@ -203,7 +221,7 @@ const Custom = () => {
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <List className="h-5 w-5" />
-                All Custom Words ({customWords.length})
+                All Custom Words ({filteredWords.length})
               </div>
               <Button 
                 variant="outline" 
@@ -215,19 +233,121 @@ const Custom = () => {
           </CardHeader>
           {showAllWords && (
             <CardContent>
+              {/* Filters and Sorting Controls */}
+              <div className="mb-6 space-y-4">
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex-1 min-w-60">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search words..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All categories</SelectItem>
+                      {allCategories.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={sortOption} onValueChange={(value) => setSortOption(value as any)}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dateAdded">Date Added</SelectItem>
+                      <SelectItem value="german">German (A-Z)</SelectItem>
+                      <SelectItem value="english">English (A-Z)</SelectItem>
+                      <SelectItem value="learningProgress">Learning Progress</SelectItem>
+                      <SelectItem value="lastLearning">Last Learning</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  >
+                    <ArrowUpDown className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    variant={showFavoritesOnly ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                  >
+                    <Heart className={`mr-2 h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                    Favorites Only
+                  </Button>
+                  <Button 
+                    variant={showLearningHistoryOnly ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowLearningHistoryOnly(!showLearningHistoryOnly)}
+                  >
+                    <Target className="mr-2 h-4 w-4" />
+                    Has Learning History
+                  </Button>
+                </div>
+              </div>
+
               <div className="space-y-3">
                 {paginatedWords.map((word) => (
                   <div 
                     key={word.id} 
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
                     onClick={() => handleWordClick(word.id)}
                   >
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
+                      <div className="flex items-center gap-3 mb-2">
                         <span className="font-medium">{word.german}</span>
                         <span className="text-muted-foreground">—</span>
                         <span>{word.english}</span>
+                        {word.isFavorite && (
+                          <Heart className="h-4 w-4 fill-current text-red-500" />
+                        )}
                       </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                        {/* Learning Progress */}
+                        <div className="flex items-center gap-2">
+                          <Target className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            Progress: {calculateSuccessRate(word)}%
+                          </span>
+                          <Progress value={calculateSuccessRate(word)} className="h-1 w-16" />
+                        </div>
+                        
+                        {/* Last Learning Date */}
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            Last: {word.lastLearningDate 
+                              ? word.lastLearningDate.toLocaleDateString() 
+                              : 'Never'
+                            }
+                          </span>
+                        </div>
+                        
+                        {/* Date Added */}
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">
+                            Added: {word.dateAdded.toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      
                       <div className="flex flex-wrap gap-1">
                         {word.categories.map((category, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
@@ -236,7 +356,32 @@ const Custom = () => {
                         ))}
                       </div>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(word.id);
+                        }}
+                        className="h-8 w-8"
+                      >
+                        <Heart className={`h-4 w-4 ${word.isFavorite ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteWord(word.id);
+                        }}
+                        className="h-8 w-8"
+                      >
+                        <Trash className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                      </Button>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                 ))}
                 

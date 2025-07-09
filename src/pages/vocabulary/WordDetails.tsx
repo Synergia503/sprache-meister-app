@@ -7,30 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Edit, Save, X, Plus, Trash2, Target, Clock } from "lucide-react";
+import { ArrowLeft, Edit, Save, X, Plus, Trash2, Target, Clock, Heart } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
+import { useVocabulary } from '@/contexts/VocabularyContext';
+import { CustomWord } from '@/types/vocabulary';
 
-interface CustomWord {
-  id: string;
-  german: string;
-  english: string;
-  categories: string[];
-  sampleSentence: string;
-  dateAdded: Date;
-  learningHistory: ExerciseResult[];
-}
-
-interface ExerciseResult {
-  exerciseType: 'translation' | 'multiple-choice' | 'matching' | 'gap-fill';
-  success: boolean;
-  date: Date;
-  timeSpent: number; // in seconds
-}
+// Interfaces moved to types/vocabulary.ts
 
 const WordDetails = () => {
   const { wordId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getWordById, updateWord, toggleFavorite } = useVocabulary();
   
   const [word, setWord] = useState<CustomWord | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -42,37 +30,8 @@ const WordDetails = () => {
   });
   const [newCategory, setNewCategory] = useState('');
 
-  // Mock data - in real app this would come from API/storage
   useEffect(() => {
-    const mockWords: CustomWord[] = [
-      {
-        id: '1',
-        german: 'Fernweh',
-        english: 'Wanderlust',
-        categories: ['emotions', 'travel'],
-        sampleSentence: 'Ich habe großes Fernweh nach den Bergen.',
-        dateAdded: new Date(),
-        learningHistory: [
-          { exerciseType: 'translation', success: true, date: new Date(), timeSpent: 45 },
-          { exerciseType: 'multiple-choice', success: false, date: new Date(), timeSpent: 30 },
-          { exerciseType: 'matching', success: true, date: new Date(), timeSpent: 25 },
-        ]
-      },
-      {
-        id: '2',
-        german: 'Gemütlichkeit',
-        english: 'Coziness',
-        categories: ['feelings', 'home'],
-        sampleSentence: 'Die Gemütlichkeit des Cafés lädt zum Verweilen ein.',
-        dateAdded: new Date(),
-        learningHistory: [
-          { exerciseType: 'translation', success: true, date: new Date(), timeSpent: 35 },
-          { exerciseType: 'gap-fill', success: true, date: new Date(), timeSpent: 40 },
-        ]
-      },
-    ];
-
-    const foundWord = mockWords.find(w => w.id === wordId);
+    const foundWord = getWordById(wordId || '');
     if (foundWord) {
       setWord(foundWord);
       setEditForm({
@@ -82,7 +41,7 @@ const WordDetails = () => {
         sampleSentence: foundWord.sampleSentence
       });
     }
-  }, [wordId]);
+  }, [wordId, getWordById]);
 
   const calculateSuccessRate = () => {
     if (!word?.learningHistory.length) return 0;
@@ -103,6 +62,7 @@ const WordDetails = () => {
     };
     
     setWord(updatedWord);
+    updateWord(updatedWord);
     setIsEditing(false);
     
     toast({
@@ -162,22 +122,31 @@ const WordDetails = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Vocabulary
         </Button>
-        <Button
-          onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-          variant={isEditing ? "default" : "outline"}
-        >
-          {isEditing ? (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </>
-          ) : (
-            <>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Word
-            </>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => toggleFavorite(word.id)}
+          >
+            <Heart className={`mr-2 h-4 w-4 ${word.isFavorite ? 'fill-current text-red-500' : ''}`} />
+            {word.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+          </Button>
+          <Button
+            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+            variant={isEditing ? "default" : "outline"}
+          >
+            {isEditing ? (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </>
+            ) : (
+              <>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Word
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6">
