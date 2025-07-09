@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 interface ExtractedWord {
   german: string;
   english: string;
+  categories?: string[];
 }
 
 interface PhotoWordExtractorProps {
@@ -20,25 +21,26 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [extractedWords, setExtractedWords] = useState<ExtractedWord[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [wordCategoryStates, setWordCategoryStates] = useState<{[key: number]: string[]}>({});
   const { toast } = useToast();
 
-  // Simulated German words that could be extracted from photos
+  // Simulated German words that could be extracted from photos with suggested categories
   const sampleGermanWords = [
-    { german: 'der Tisch', english: 'table' },
-    { german: 'das Buch', english: 'book' },
-    { german: 'die Lampe', english: 'lamp' },
-    { german: 'der Stuhl', english: 'chair' },
-    { german: 'das Fenster', english: 'window' },
-    { german: 'die Tür', english: 'door' },
-    { german: 'der Computer', english: 'computer' },
-    { german: 'das Handy', english: 'mobile phone' },
-    { german: 'die Brille', english: 'glasses' },
-    { german: 'der Kaffee', english: 'coffee' },
-    { german: 'das Auto', english: 'car' },
-    { german: 'die Blume', english: 'flower' },
-    { german: 'der Hund', english: 'dog' },
-    { german: 'die Katze', english: 'cat' },
-    { german: 'das Haus', english: 'house' }
+    { german: 'der Tisch', english: 'table', categories: ['furniture', 'home'] },
+    { german: 'das Buch', english: 'book', categories: ['objects', 'education'] },
+    { german: 'die Lampe', english: 'lamp', categories: ['furniture', 'lighting'] },
+    { german: 'der Stuhl', english: 'chair', categories: ['furniture'] },
+    { german: 'das Fenster', english: 'window', categories: ['architecture', 'home'] },
+    { german: 'die Tür', english: 'door', categories: ['architecture', 'home'] },
+    { german: 'der Computer', english: 'computer', categories: ['technology', 'electronics'] },
+    { german: 'das Handy', english: 'mobile phone', categories: ['technology', 'communication'] },
+    { german: 'die Brille', english: 'glasses', categories: ['clothing', 'accessories'] },
+    { german: 'der Kaffee', english: 'coffee', categories: ['food', 'drinks'] },
+    { german: 'das Auto', english: 'car', categories: ['transport', 'vehicles'] },
+    { german: 'die Blume', english: 'flower', categories: ['nature', 'plants'] },
+    { german: 'der Hund', english: 'dog', categories: ['animals', 'pets'] },
+    { german: 'die Katze', english: 'cat', categories: ['animals', 'pets'] },
+    { german: 'das Haus', english: 'house', categories: ['architecture', 'buildings'] }
   ];
 
   const simulateAnalysis = async () => {
@@ -53,11 +55,19 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
     const selectedWords = shuffled.slice(0, numberOfWords);
     
     setExtractedWords(selectedWords);
+    
+    // Initialize category states for each word
+    const initialCategoryStates: {[key: number]: string[]} = {};
+    selectedWords.forEach((word, index) => {
+      initialCategoryStates[index] = [...(word.categories || [])];
+    });
+    setWordCategoryStates(initialCategoryStates);
+    
     setIsAnalyzing(false);
     
     toast({
       title: "Analysis complete!",
-      description: `Extracted ${selectedWords.length} German words from the image.`,
+      description: `Extracted ${selectedWords.length} German words with suggested categories.`,
     });
   };
 
@@ -78,6 +88,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
     };
     reader.readAsDataURL(file);
     setExtractedWords([]);
+    setWordCategoryStates({});
   };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -117,10 +128,30 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
     setSelectedImage(null);
     setImagePreview(null);
     setExtractedWords([]);
+    setWordCategoryStates({});
+  };
+
+  const toggleCategory = (wordIndex: number, category: string) => {
+    setWordCategoryStates(prev => {
+      const currentCategories = prev[wordIndex] || [];
+      const newCategories = currentCategories.includes(category)
+        ? currentCategories.filter(c => c !== category)
+        : [...currentCategories, category];
+      
+      return {
+        ...prev,
+        [wordIndex]: newCategories
+      };
+    });
   };
 
   const addWordsToVocabulary = () => {
-    onWordsExtracted(extractedWords);
+    const wordsWithSelectedCategories = extractedWords.map((word, index) => ({
+      ...word,
+      categories: wordCategoryStates[index] || []
+    }));
+    
+    onWordsExtracted(wordsWithSelectedCategories);
     toast({
       title: "Words added!",
       description: `${extractedWords.length} words have been added to your custom vocabulary.`,
@@ -211,19 +242,43 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
         {extractedWords.length > 0 && (
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium mb-3">Extracted German Words:</h3>
-              <div className="grid gap-2">
+              <h3 className="font-medium mb-3">Extracted German Words with Suggested Categories:</h3>
+              <div className="grid gap-4">
                 {extractedWords.map((word, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
-                    <span className="font-medium">{word.german}</span>
-                    <span className="text-muted-foreground">{word.english}</span>
+                  <div key={index} className="p-3 bg-background rounded border space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{word.german}</span>
+                      <span className="text-muted-foreground">{word.english}</span>
+                    </div>
+                    
+                    {word.categories && word.categories.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">Suggested categories:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {word.categories.map((category, catIndex) => (
+                            <Button
+                              key={catIndex}
+                              variant={wordCategoryStates[index]?.includes(category) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => toggleCategory(index, category)}
+                              className="text-xs h-6"
+                            >
+                              {category}
+                            </Button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Click to select/deselect categories for this word
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
             
             <Button onClick={addWordsToVocabulary} className="w-full">
-              Add All Words to Vocabulary
+              Add Selected Words with Categories to Vocabulary
             </Button>
           </div>
         )}
