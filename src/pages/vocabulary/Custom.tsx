@@ -60,7 +60,7 @@ const Custom = () => {
   React.useEffect(() => {
     setFilters({
       searchTerm: searchTerm || undefined,
-      category: selectedCategory || undefined,
+      category: selectedCategory && selectedCategory !== 'all' ? selectedCategory : undefined,
       favorites: showFavoritesOnly || undefined,
       hasLearningHistory: showLearningHistoryOnly || undefined,
     });
@@ -252,7 +252,7 @@ const Custom = () => {
                       <SelectValue placeholder="Filter by category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All categories</SelectItem>
+                      <SelectItem value="all">All categories</SelectItem>
                       {allCategories.map(category => (
                         <SelectItem key={category} value={category}>
                           {category}
