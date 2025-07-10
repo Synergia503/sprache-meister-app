@@ -30,8 +30,6 @@ const Matching = () => {
   return (
     <ExerciseLayout
       title="Matching Exercise"
-      apiKey={apiKey}
-      onSaveApiKey={saveApiKey}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}

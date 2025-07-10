@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Shuffle, Loader2 } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 
 const Mixed = () => {
   const [exercise, setExercise] = useState('');
@@ -38,8 +37,6 @@ const Mixed = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Mixed Exercises</h1>
-      
-      <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
       
       <div className="grid gap-6">
         <Card>

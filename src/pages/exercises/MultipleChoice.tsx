@@ -24,8 +24,6 @@ const MultipleChoice = () => {
   return (
     <ExerciseLayout
       title="Multiple Choice Exercise"
-      apiKey={apiKey}
-      onSaveApiKey={saveApiKey}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}

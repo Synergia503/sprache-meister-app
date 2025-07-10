@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/pagination";
 import { Plus, Star, Loader2, BookOpen, X, Edit, Trash, List, ChevronRight, Filter, Search, ArrowUpDown, Heart, Clock, Target, TrendingUp, Calendar } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { useToast } from '@/hooks/use-toast';
 import PhotoWordExtractor from '@/components/PhotoWordExtractor';
 import { useVocabulary } from '@/contexts/VocabularyContext';
@@ -162,8 +161,6 @@ const Custom = () => {
           Add Custom Word
         </Button>
       </div>
-
-      <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
 
       {showAddForm && (
         <Card className="mb-6">

@@ -34,8 +34,6 @@ const GapFill = () => {
   return (
     <ExerciseLayout
       title="Gap-Fill Exercise"
-      apiKey={apiKey}
-      onSaveApiKey={saveApiKey}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}

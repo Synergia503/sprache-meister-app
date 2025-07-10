@@ -11,10 +11,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Palette, Volume2, Bell, Globe, Trophy } from "lucide-react";
+import { ChevronDown, Palette, Volume2, Bell, Globe, Trophy, Key } from "lucide-react";
+import { ApiKeyInput } from '@/components/ApiKeyInput';
+import { useOpenAI } from '@/hooks/useOpenAI';
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
+  const { apiKey, saveApiKey } = useOpenAI();
   const [soundEffects, setSoundEffects] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [dailyReminders, setDailyReminders] = useState(false);
@@ -35,6 +38,19 @@ const Settings = () => {
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Settings</h1>
       <div className="max-w-2xl space-y-6">
+        
+        {/* API Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              OpenAI API Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
+          </CardContent>
+        </Card>
         
         {/* Appearance Settings */}
         <Card>

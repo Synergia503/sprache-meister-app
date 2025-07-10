@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BookOpenText, Loader2 } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 
 const DescribePicture = () => {
   const [scenario, setScenario] = useState('');
@@ -40,8 +39,6 @@ const DescribePicture = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Describe a Picture</h1>
-      
-      <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
       
       <Card>
         <CardHeader>

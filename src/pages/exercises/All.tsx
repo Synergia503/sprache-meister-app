@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpenText, Target, PenTool, Shuffle, Loader2, FileText, Languages, Link } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { useNavigate } from 'react-router-dom';
 
 const All = () => {
@@ -70,8 +69,6 @@ const All = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">All Exercises</h1>
-      
-      <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
       
       <div className="mb-6">
         <Card>

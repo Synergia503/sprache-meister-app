@@ -23,8 +23,6 @@ const Translation = () => {
   return (
     <ExerciseLayout
       title="Translation Exercise"
-      apiKey={apiKey}
-      onSaveApiKey={saveApiKey}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}

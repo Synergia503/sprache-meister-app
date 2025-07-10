@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BookOpenText, Target, Loader2, FileText, Languages, Link, PenTool, Shuffle } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { AnkiExport } from '@/components/AnkiExport';
 import { useNavigate } from 'react-router-dom';
 
@@ -165,8 +164,6 @@ const Exercises = () => {
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Vocabulary Exercises</h1>
       
-      <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
-
       {/* Send to Direct Exercise Section */}
       <Card className="mb-6">
         <CardHeader>

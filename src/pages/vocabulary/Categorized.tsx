@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FolderOpen, Loader2, FileText, Target, Languages, Link, BookOpenText, PenTool, Shuffle } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { AnkiExport } from '@/components/AnkiExport';
 import { useNavigate } from 'react-router-dom';
 
@@ -190,8 +189,6 @@ const Categorized = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Categorized Vocabulary</h1>
-      
-      <ApiKeyInput apiKey={apiKey} onSaveApiKey={saveApiKey} />
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
         {categories.map((category) => (
