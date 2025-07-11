@@ -34,7 +34,6 @@ const basicMenuItems = [
 const vocabularySubItems = [
   { title: "Categorized", path: "/vocabulary/categorized" },
   { title: "Custom", path: "/vocabulary/custom" },
-  { title: "Exercises", path: "/vocabulary/exercises" },
 ];
 
 const exercisesSubItems = [

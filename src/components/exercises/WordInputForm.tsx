@@ -24,7 +24,23 @@ export const WordInputForm = ({
   description = "Add up to 20 German words or phrases.",
   placeholder = "Word"
 }: WordInputFormProps) => {
-  const [words, setWords] = useState<string[]>(initialWords);
+  // Check for words from session storage first
+  const getInitialWords = () => {
+    const storedWords = sessionStorage.getItem('wordListForExercise');
+    if (storedWords) {
+      try {
+        const wordList = JSON.parse(storedWords);
+        // Clear session storage after reading
+        sessionStorage.removeItem('wordListForExercise');
+        return wordList.map((word: any) => word.german);
+      } catch (error) {
+        console.error('Error parsing stored words:', error);
+      }
+    }
+    return initialWords;
+  };
+
+  const [words, setWords] = useState<string[]>(getInitialWords);
 
   const addWordField = () => {
     if (words.length < 20) {

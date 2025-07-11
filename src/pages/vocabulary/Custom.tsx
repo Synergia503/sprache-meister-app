@@ -36,6 +36,7 @@ const Custom = () => {
   const [showLearningHistoryOnly, setShowLearningHistoryOnly] = useState(false);
   const [draggedWord, setDraggedWord] = useState<CustomWord | null>(null);
   const [droppedWords, setDroppedWords] = useState<CustomWord[]>([]);
+  const [selectedWords, setSelectedWords] = useState<Set<string>>(new Set());
   const wordsPerPage = 10;
   
   const { 
@@ -134,6 +135,33 @@ const Custom = () => {
     if (!droppedWords.find(w => w.id === word.id)) {
       setDroppedWords(prev => [...prev, word]);
     }
+  };
+
+  const handleWordSelection = (wordId: string, ctrlKey: boolean) => {
+    if (ctrlKey) {
+      setSelectedWords(prev => {
+        const newSelection = new Set(prev);
+        if (newSelection.has(wordId)) {
+          newSelection.delete(wordId);
+        } else {
+          newSelection.add(wordId);
+        }
+        return newSelection;
+      });
+    } else {
+      // Single selection or navigate to word details
+      setSelectedWords(new Set([wordId]));
+      handleWordClick(wordId);
+    }
+  };
+
+  const handleDragSelectedWords = () => {
+    const wordsToAdd = paginatedWords.filter(word => selectedWords.has(word.id));
+    const newWords = wordsToAdd.filter(word => !droppedWords.find(w => w.id === word.id));
+    if (newWords.length > 0) {
+      setDroppedWords(prev => [...prev, ...newWords]);
+    }
+    setSelectedWords(new Set());
   };
 
   const handleRemoveFromDropZone = (wordId: string) => {
@@ -299,11 +327,21 @@ const Custom = () => {
               {paginatedWords.map((word) => (
                 <div 
                   key={word.id} 
-                  className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted cursor-move transition-colors"
-                  draggable
-                  onDragStart={() => handleDragStart(word)}
+                  className={`flex items-center justify-between p-4 rounded-lg transition-colors cursor-pointer ${
+                    selectedWords.has(word.id) 
+                      ? 'bg-primary/20 border border-primary' 
+                      : 'bg-muted/50 hover:bg-muted'
+                  }`}
+                  draggable={selectedWords.has(word.id)}
+                  onDragStart={() => {
+                    if (selectedWords.has(word.id)) {
+                      handleDragSelectedWords();
+                    } else {
+                      handleDragStart(word);
+                    }
+                  }}
                   onDragEnd={handleDragEnd}
-                  onClick={() => handleWordClick(word.id)}
+                  onClick={(e) => handleWordSelection(word.id, e.ctrlKey)}
                 >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -434,10 +472,6 @@ const Custom = () => {
           />
         </div>
 
-        <div className="h-20">
-          <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
-        </div>
-
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
@@ -491,7 +525,12 @@ const Custom = () => {
               </div>
             </CardContent>
           </Card>
+
+          <div className="h-fit">
+            <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
+          </div>
         </div>
+
       </div>
     </div>
   );

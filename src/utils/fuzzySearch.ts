@@ -1,5 +1,5 @@
 // Simple fuzzy search implementation with typo tolerance
-export function fuzzySearch(query: string, text: string, threshold: number = 0.6): boolean {
+export function fuzzySearch(query: string, text: string, threshold: number = 0.4): boolean {
   if (!query || !text) return false;
   
   const normalizedQuery = query.toLowerCase().trim();
@@ -8,7 +8,21 @@ export function fuzzySearch(query: string, text: string, threshold: number = 0.6
   // Exact match
   if (normalizedText.includes(normalizedQuery)) return true;
   
-  // Calculate similarity using Levenshtein distance
+  // Check if text starts with query (for better prefix matching)
+  if (normalizedText.startsWith(normalizedQuery)) return true;
+  
+  // Check each word in the text separately
+  const textWords = normalizedText.split(/\s+/);
+  for (const word of textWords) {
+    if (word.includes(normalizedQuery) || word.startsWith(normalizedQuery)) {
+      return true;
+    }
+    // Calculate similarity for each word
+    const similarity = calculateSimilarity(normalizedQuery, word);
+    if (similarity >= threshold) return true;
+  }
+  
+  // Calculate overall similarity using Levenshtein distance
   const similarity = calculateSimilarity(normalizedQuery, normalizedText);
   return similarity >= threshold;
 }
