@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CustomWord, VocabularyFilters, SortOption, SortOrder } from '@/types/vocabulary';
+import { fuzzySearch } from '@/utils/fuzzySearch';
 
 interface VocabularyContextType {
   words: CustomWord[];
@@ -230,11 +231,11 @@ export const VocabularyProvider: React.FC<{ children: ReactNode }> = ({ children
     }
 
     if (filters.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
+      const searchTerm = filters.searchTerm.toLowerCase();
       filteredWords = filteredWords.filter(word => 
-        word.german.toLowerCase().includes(searchLower) ||
-        word.english.toLowerCase().includes(searchLower) ||
-        word.categories.some(cat => cat.toLowerCase().includes(searchLower))
+        fuzzySearch(searchTerm, word.german) || 
+        fuzzySearch(searchTerm, word.english) ||
+        word.categories.some(cat => fuzzySearch(searchTerm, cat))
       );
     }
 

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "gap-fill",
+    "title": "Gap-Fill",
+    "description": "Fill in the blanks with correct German words",
+    "icon": "FileText",
+    "path": "/exercises/gap-fill"
+  },
+  {
+    "id": "multiple-choice",
+    "title": "Multiple Choice",
+    "description": "Choose the correct answer from multiple options",
+    "icon": "Target",
+    "path": "/exercises/multiple-choice"
+  },
+  {
+    "id": "translation",
+    "title": "Translation",
+    "description": "Translate between German and English",
+    "icon": "Languages",
+    "path": "/exercises/translation"
+  },
+  {
+    "id": "matching",
+    "title": "Matching",
+    "description": "Match German words with their English translations",
+    "icon": "Link",
+    "path": "/exercises/matching"
+  },
+  {
+    "id": "describe-picture",
+    "title": "Describe a Picture",
+    "description": "Practice describing images in German",
+    "icon": "BookOpenText",
+    "path": "/exercises/describe-picture"
+  },
+  {
+    "id": "grammar",
+    "title": "Grammar",
+    "description": "Practice German grammar rules",
+    "icon": "PenTool",
+    "path": "/exercises/grammar"
+  },
+  {
+    "id": "mixed",
+    "title": "Mixed",
+    "description": "Mixed exercises for comprehensive practice",
+    "icon": "Shuffle",
+    "path": "/exercises/mixed"
+  }
+]

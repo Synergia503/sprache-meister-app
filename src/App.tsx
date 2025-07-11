@@ -28,7 +28,7 @@ import Translation from "./pages/exercises/Translation";
 import Matching from "./pages/exercises/Matching";
 import VocabularyCategorized from "./pages/vocabulary/Categorized";
 import VocabularyCustom from "./pages/vocabulary/Custom";
-import VocabularyExercises from "./pages/vocabulary/Exercises";
+
 import WordDetails from "./pages/vocabulary/WordDetails";
 import ExercisesAll from "./pages/exercises/All";
 
@@ -60,7 +60,7 @@ const AppRoutes = () => {
             <Route path="/vocabulary/categorized" element={<VocabularyCategorized />} />
             <Route path="/vocabulary/custom" element={<VocabularyCustom />} />
             <Route path="/vocabulary/custom/:wordId" element={<WordDetails />} />
-            <Route path="/vocabulary/exercises" element={<VocabularyExercises />} />
+            
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/exercises" element={<Exercises />} />
             <Route path="/exercises/all" element={<ExercisesAll />} />

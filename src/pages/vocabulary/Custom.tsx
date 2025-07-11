@@ -16,9 +16,9 @@ import {
   PaginationPrevious 
 } from "@/components/ui/pagination";
 import { Plus, Star, Loader2, BookOpen, X, Edit, Trash, List, ChevronRight, Filter, Search, ArrowUpDown, Heart, Clock, Target, TrendingUp, Calendar } from "lucide-react";
-import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import PhotoWordExtractor from '@/components/PhotoWordExtractor';
+import ExerciseDropZone from '@/components/ExerciseDropZone';
 import { useVocabulary } from '@/contexts/VocabularyContext';
 import { ExtractedWord, CustomWord } from '@/types/vocabulary';
 
@@ -26,17 +26,16 @@ import { ExtractedWord, CustomWord } from '@/types/vocabulary';
 
 const Custom = () => {
   const navigate = useNavigate();
-  const [topic, setTopic] = useState('');
-  const [vocabulary, setVocabulary] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGermanWord, setNewGermanWord] = useState('');
   const [newEnglishWord, setNewEnglishWord] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showAllWords, setShowAllWords] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showLearningHistoryOnly, setShowLearningHistoryOnly] = useState(false);
+  const [draggedWord, setDraggedWord] = useState<CustomWord | null>(null);
+  const [droppedWords, setDroppedWords] = useState<CustomWord[]>([]);
   const wordsPerPage = 10;
   
   const { 
@@ -52,7 +51,6 @@ const Custom = () => {
     setSortOrder
   } = useVocabulary();
   
-  const { callOpenAI, isLoading, apiKey, saveApiKey } = useOpenAI();
   const { toast } = useToast();
 
   // Apply filters when local state changes
@@ -64,18 +62,6 @@ const Custom = () => {
       hasLearningHistory: showLearningHistoryOnly || undefined,
     });
   }, [searchTerm, selectedCategory, showFavoritesOnly, showLearningHistoryOnly, setFilters]);
-
-  const generateCustomVocabulary = async () => {
-    if (!topic.trim()) return;
-    
-    const prompt = `Generate a custom German vocabulary list for the topic "${topic}". Include 10-15 relevant words with their German article (der/die/das), English translation, and pronunciation guide if needed.`;
-    const systemMessage = "You are a German language teacher creating custom vocabulary lists based on student interests.";
-    
-    const result = await callOpenAI(prompt, systemMessage);
-    if (result) {
-      setVocabulary(result);
-    }
-  };
 
   const handleAddCustomWord = () => {
     if (!newGermanWord.trim() || !newEnglishWord.trim()) {
@@ -134,6 +120,28 @@ const Custom = () => {
 
   const handleWordClick = (wordId: string) => {
     navigate(`/vocabulary/custom/${wordId}`);
+  };
+
+  const handleDragStart = (word: CustomWord) => {
+    setDraggedWord(word);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedWord(null);
+  };
+
+  const handleDrop = (word: CustomWord) => {
+    if (!droppedWords.find(w => w.id === word.id)) {
+      setDroppedWords(prev => [...prev, word]);
+    }
+  };
+
+  const handleRemoveFromDropZone = (wordId: string) => {
+    setDroppedWords(prev => prev.filter(w => w.id !== wordId));
+  };
+
+  const handleClearDropZone = () => {
+    setDroppedWords([]);
   };
 
   const calculateSuccessRate = (word: CustomWord) => {
@@ -210,27 +218,16 @@ const Custom = () => {
       )}
 
       <div className="grid gap-6">
-        <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
-
         {/* All Words List */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <List className="h-5 w-5" />
-                All Custom Words ({filteredWords.length})
-              </div>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowAllWords(!showAllWords)}
-              >
-                {showAllWords ? 'Hide List' : 'Show All Words'}
-              </Button>
+            <CardTitle className="flex items-center gap-2">
+              <List className="h-5 w-5" />
+              All Custom Words ({filteredWords.length})
             </CardTitle>
           </CardHeader>
-          {showAllWords && (
-            <CardContent>
-              {/* Filters and Sorting Controls */}
+          <CardContent>
+            {/* Filters and Sorting Controls */}
               <div className="mb-6 space-y-4">
                 <div className="flex flex-wrap gap-3">
                   <div className="flex-1 min-w-60">
@@ -298,13 +295,16 @@ const Custom = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {paginatedWords.map((word) => (
-                  <div 
-                    key={word.id} 
-                    className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
-                    onClick={() => handleWordClick(word.id)}
-                  >
+            <div className="space-y-3">
+              {paginatedWords.map((word) => (
+                <div 
+                  key={word.id} 
+                  className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted cursor-move transition-colors"
+                  draggable
+                  onDragStart={() => handleDragStart(word)}
+                  onDragEnd={handleDragEnd}
+                  onClick={() => handleWordClick(word.id)}
+                >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="font-medium">{word.german}</span>
@@ -379,10 +379,10 @@ const Custom = () => {
                       </Button>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
-                  </div>
-                ))}
-                
-                {totalPages > 1 && (
+                </div>
+              ))}
+              
+              {totalPages > 1 && (
                   <Pagination className="mt-6">
                     <PaginationContent>
                       <PaginationItem>
@@ -412,50 +412,31 @@ const Custom = () => {
                       </PaginationItem>
                     </PaginationContent>
                   </Pagination>
-                )}
-              </div>
-            </CardContent>
-          )}
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
-              Generate Custom Vocabulary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <Input
-                placeholder="Enter a topic (e.g., cooking, sports, technology...)"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                className="flex-1"
-              />
-              <Button 
-                onClick={generateCustomVocabulary}
-                disabled={isLoading || !apiKey || !topic.trim()}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  'Generate'
-                )}
-              </Button>
+              )}
             </div>
-
-            {vocabulary && (
-              <div className="p-4 bg-muted rounded-lg">
-                <h3 className="font-medium mb-2">Custom Vocabulary for "{topic}":</h3>
-                <div className="whitespace-pre-wrap">{vocabulary}</div>
-              </div>
-            )}
           </CardContent>
         </Card>
+
+        <div 
+          className="w-full"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (draggedWord) {
+              handleDrop(draggedWord);
+            }
+          }}
+        >
+          <ExerciseDropZone 
+            droppedWords={droppedWords}
+            onRemoveWord={handleRemoveFromDropZone}
+            onClearAll={handleClearDropZone}
+          />
+        </div>
+
+        <div className="h-20">
+          <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="hover:shadow-lg transition-shadow">
