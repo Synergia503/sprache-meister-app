@@ -246,230 +246,238 @@ const Custom = () => {
       )}
 
       <div className="grid gap-6">
-        {/* All Words List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <List className="h-5 w-5" />
-              All Custom Words ({filteredWords.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Filters and Sorting Controls */}
-              <div className="mb-6 space-y-4">
-                <div className="flex flex-wrap gap-3">
-                  <div className="flex-1 min-w-60">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search words..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All categories</SelectItem>
-                      {allCategories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={sortOption} onValueChange={(value) => setSortOption(value as any)}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="dateAdded">Date Added</SelectItem>
-                      <SelectItem value="german">German (A-Z)</SelectItem>
-                      <SelectItem value="english">English (A-Z)</SelectItem>
-                      <SelectItem value="learningProgress">Learning Progress</SelectItem>
-                      <SelectItem value="lastLearning">Last Learning</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                  >
-                    <ArrowUpDown className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant={showFavoritesOnly ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                  >
-                    <Heart className={`mr-2 h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                    Favorites Only
-                  </Button>
-                  <Button 
-                    variant={showLearningHistoryOnly ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setShowLearningHistoryOnly(!showLearningHistoryOnly)}
-                  >
-                    <Target className="mr-2 h-4 w-4" />
-                    Has Learning History
-                  </Button>
-                </div>
-              </div>
-
-            <div className="space-y-3">
-              {paginatedWords.map((word) => (
-                <div 
-                  key={word.id} 
-                  className={`flex items-center justify-between p-4 rounded-lg transition-colors cursor-pointer ${
-                    selectedWords.has(word.id) 
-                      ? 'bg-primary/20 border border-primary' 
-                      : 'bg-muted/50 hover:bg-muted'
-                  }`}
-                  draggable={selectedWords.has(word.id)}
-                  onDragStart={() => {
-                    if (selectedWords.has(word.id)) {
-                      handleDragSelectedWords();
-                    } else {
-                      handleDragStart(word);
-                    }
-                  }}
-                  onDragEnd={handleDragEnd}
-                  onClick={(e) => handleWordSelection(word.id, e.ctrlKey)}
-                >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="font-medium">{word.german}</span>
-                        <span className="text-muted-foreground">—</span>
-                        <span>{word.english}</span>
-                        {word.isFavorite && (
-                          <Heart className="h-4 w-4 fill-current text-red-500" />
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-                        {/* Learning Progress */}
-                        <div className="flex items-center gap-2">
-                          <Target className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            Progress: {calculateSuccessRate(word)}%
-                          </span>
-                          <Progress value={calculateSuccessRate(word)} className="h-1 w-16" />
-                        </div>
-                        
-                        {/* Last Learning Date */}
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            Last: {word.lastLearningDate 
-                              ? word.lastLearningDate.toLocaleDateString() 
-                              : 'Never'
-                            }
-                          </span>
-                        </div>
-                        
-                        {/* Date Added */}
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            Added: {word.dateAdded.toLocaleDateString()}
-                          </span>
+        {/* Main Content Grid */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* All Words List - Takes 2 columns */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <List className="h-5 w-5" />
+                  All Custom Words ({filteredWords.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Filters and Sorting Controls */}
+                  <div className="mb-6 space-y-4">
+                    <div className="flex flex-wrap gap-3">
+                      <div className="flex-1 min-w-60">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search words..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10"
+                          />
                         </div>
                       </div>
-                      
-                      <div className="flex flex-wrap gap-1">
-                        {word.categories.map((category, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {category}
-                          </Badge>
-                        ))}
-                      </div>
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Filter by category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All categories</SelectItem>
+                          {allCategories.map(category => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={sortOption} onValueChange={(value) => setSortOption(value as any)}>
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Sort by" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="dateAdded">Date Added</SelectItem>
+                          <SelectItem value="german">German (A-Z)</SelectItem>
+                          <SelectItem value="english">English (A-Z)</SelectItem>
+                          <SelectItem value="learningProgress">Learning Progress</SelectItem>
+                          <SelectItem value="lastLearning">Last Learning</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      >
+                        <ArrowUpDown className="h-4 w-4" />
+                      </Button>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(word.id);
-                        }}
-                        className="h-8 w-8"
+                    <div className="flex flex-wrap gap-2">
+                      <Button 
+                        variant={showFavoritesOnly ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                       >
-                        <Heart className={`h-4 w-4 ${word.isFavorite ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
+                        <Heart className={`mr-2 h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                        Favorites Only
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteWord(word.id);
-                        }}
-                        className="h-8 w-8"
+                      <Button 
+                        variant={showLearningHistoryOnly ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowLearningHistoryOnly(!showLearningHistoryOnly)}
                       >
-                        <Trash className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        <Target className="mr-2 h-4 w-4" />
+                        Has Learning History
                       </Button>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
-                </div>
-              ))}
-              
-              {totalPages > 1 && (
-                  <Pagination className="mt-6">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-                      
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                            className="cursor-pointer"
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  </div>
 
-        <div 
-          className="w-full"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (draggedWord) {
-              handleDrop(draggedWord);
-            }
-          }}
-        >
-          <ExerciseDropZone 
-            droppedWords={droppedWords}
-            onRemoveWord={handleRemoveFromDropZone}
-            onClearAll={handleClearDropZone}
-          />
+                <div className="space-y-3">
+                  {paginatedWords.map((word) => (
+                    <div 
+                      key={word.id} 
+                      className={`flex items-center justify-between p-4 rounded-lg transition-colors cursor-pointer ${
+                        selectedWords.has(word.id) 
+                          ? 'bg-primary/20 border border-primary' 
+                          : 'bg-muted/50 hover:bg-muted'
+                      }`}
+                      draggable
+                      onDragStart={() => {
+                        if (selectedWords.has(word.id)) {
+                          handleDragSelectedWords();
+                        } else {
+                          handleDragStart(word);
+                        }
+                      }}
+                      onDragEnd={handleDragEnd}
+                      onClick={(e) => handleWordSelection(word.id, e.ctrlKey)}
+                    >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-medium">{word.german}</span>
+                            <span className="text-muted-foreground">—</span>
+                            <span>{word.english}</span>
+                            {word.isFavorite && (
+                              <Heart className="h-4 w-4 fill-current text-red-500" />
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                            {/* Learning Progress */}
+                            <div className="flex items-center gap-2">
+                              <Target className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                Progress: {calculateSuccessRate(word)}%
+                              </span>
+                              <Progress value={calculateSuccessRate(word)} className="h-1 w-16" />
+                            </div>
+                            
+                            {/* Last Learning Date */}
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                Last: {word.lastLearningDate 
+                                  ? word.lastLearningDate.toLocaleDateString() 
+                                  : 'Never'
+                                }
+                              </span>
+                            </div>
+                            
+                            {/* Date Added */}
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">
+                                Added: {word.dateAdded.toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-1">
+                            {word.categories.map((category, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {category}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(word.id);
+                            }}
+                            className="h-8 w-8"
+                          >
+                            <Heart className={`h-4 w-4 ${word.isFavorite ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteWord(word.id);
+                            }}
+                            className="h-8 w-8"
+                          >
+                            <Trash className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                          </Button>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </div>
+                  ))}
+                  
+                  {totalPages > 1 && (
+                      <Pagination className="mt-6">
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                onClick={() => setCurrentPage(page)}
+                                isActive={currentPage === page}
+                                className="cursor-pointer"
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Exercise Drop Zone - Takes 1 column */}
+          <div className="lg:col-span-1">
+            <div 
+              className="w-full"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedWord) {
+                  handleDrop(draggedWord);
+                }
+              }}
+            >
+              <ExerciseDropZone 
+                droppedWords={droppedWords}
+                onRemoveWord={handleRemoveFromDropZone}
+                onClearAll={handleClearDropZone}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">

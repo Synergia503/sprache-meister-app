@@ -52,7 +52,14 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
     if (!selectedType) return;
 
     // Store words in session storage for the exercise
-    sessionStorage.setItem('wordListForExercise', JSON.stringify(droppedWords));
+    // Convert CustomWord to vocabulary pairs format for matching exercise
+    const vocabularyPairs = droppedWords.map(word => ({
+      german: word.german,
+      english: word.english
+    }));
+    
+    sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
+    sessionStorage.setItem('exerciseCategory', 'Custom Words');
     
     // Navigate to exercise
     navigate(selectedType.path);
