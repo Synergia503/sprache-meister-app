@@ -123,17 +123,35 @@ const Custom = () => {
     navigate(`/vocabulary/custom/${wordId}`);
   };
 
-  const handleDragStart = (word: CustomWord) => {
-    setDraggedWord(word);
+  const handleDragStart = (word: CustomWord, isMultiSelect: boolean = false) => {
+    if (isMultiSelect) {
+      // For multi-select, store all selected words
+      const selectedWordObjects = paginatedWords.filter(w => selectedWords.has(w.id));
+      setDraggedWord({ ...word, isMultiSelect: true, selectedWords: selectedWordObjects } as any);
+    } else {
+      setDraggedWord(word);
+    }
   };
 
   const handleDragEnd = () => {
     setDraggedWord(null);
   };
 
-  const handleDrop = (word: CustomWord) => {
-    if (!droppedWords.find(w => w.id === word.id)) {
-      setDroppedWords(prev => [...prev, word]);
+  const handleDrop = (draggedData: any) => {
+    if (draggedData.isMultiSelect && draggedData.selectedWords) {
+      // Handle multi-select drop
+      const newWords = draggedData.selectedWords.filter((word: CustomWord) => 
+        !droppedWords.find(w => w.id === word.id)
+      );
+      if (newWords.length > 0) {
+        setDroppedWords(prev => [...prev, ...newWords]);
+      }
+      setSelectedWords(new Set()); // Clear selection after drop
+    } else {
+      // Handle single word drop
+      if (!droppedWords.find(w => w.id === draggedData.id)) {
+        setDroppedWords(prev => [...prev, draggedData]);
+      }
     }
   };
 
@@ -155,14 +173,6 @@ const Custom = () => {
     }
   };
 
-  const handleDragSelectedWords = () => {
-    const wordsToAdd = paginatedWords.filter(word => selectedWords.has(word.id));
-    const newWords = wordsToAdd.filter(word => !droppedWords.find(w => w.id === word.id));
-    if (newWords.length > 0) {
-      setDroppedWords(prev => [...prev, ...newWords]);
-    }
-    setSelectedWords(new Set());
-  };
 
   const handleRemoveFromDropZone = (wordId: string) => {
     setDroppedWords(prev => prev.filter(w => w.id !== wordId));
@@ -338,9 +348,9 @@ const Custom = () => {
                       draggable
                       onDragStart={() => {
                         if (selectedWords.has(word.id)) {
-                          handleDragSelectedWords();
+                          handleDragStart(word, true);
                         } else {
-                          handleDragStart(word);
+                          handleDragStart(word, false);
                         }
                       }}
                       onDragEnd={handleDragEnd}
