@@ -25,9 +25,46 @@ export const useTranslationExercise = () => {
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
-  // Load sample exercise on mount
   useEffect(() => {
-    loadSampleExercise();
+    // Check if there's vocabulary data from the category selection
+    const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
+    const exerciseCategory = sessionStorage.getItem('exerciseCategory');
+    
+    if (vocabularyPairsData) {
+      try {
+        const vocabularyPairs = JSON.parse(vocabularyPairsData);
+        const categoryExercise: TranslationExercise = {
+          id: `category-${Date.now()}`,
+          words: vocabularyPairs.map((pair: any) => pair.german),
+          sentences: vocabularyPairs.map((pair: any, index: number) => ({
+            sentenceOrder: index + 1,
+            germanSentence: pair.german,
+            englishSentence: pair.english
+          })),
+          userAnswers: {},
+          isCompleted: false,
+          createdAt: new Date()
+        };
+        
+        setCurrentExercise(categoryExercise);
+        setUserAnswers({});
+        setShowResults(false);
+        
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('vocabularyPairsForExercise');
+        sessionStorage.removeItem('exerciseCategory');
+        
+        toast({
+          title: "Exercise loaded",
+          description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
+        });
+      } catch (error) {
+        console.error('Error parsing vocabulary pairs:', error);
+        loadSampleExercise();
+      }
+    } else {
+      loadSampleExercise();
+    }
   }, []);
 
   const loadSampleExercise = () => {
@@ -113,7 +150,24 @@ Return only a JSON object with this exact format:
   };
 
   const resetExercise = () => {
-    loadSampleExercise();
+    // Store the current exercise data to enable restart functionality
+    const currentVocabulary = currentExercise?.sentences?.map(sentence => ({
+      german: sentence.germanSentence,
+      english: sentence.englishSentence
+    }));
+    
+    if (currentVocabulary && currentVocabulary.length > 0) {
+      // Keep current exercise vocabulary for restart
+      setCurrentExercise(prev => prev ? {
+        ...prev,
+        userAnswers: {},
+        isCompleted: false
+      } : null);
+      setUserAnswers({});
+      setShowResults(false);
+    } else {
+      loadSampleExercise();
+    }
   };
 
   const loadPreviousExercise = (exercise: TranslationExercise) => {

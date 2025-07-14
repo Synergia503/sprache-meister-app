@@ -162,7 +162,10 @@ export const MatchingExerciseDisplay = ({
             </>
           ) : (
             <>
-              <Button onClick={onNewExercise}>
+              <Button onClick={onNewExercise} variant="outline">
+                Restart Same Exercise
+              </Button>
+              <Button onClick={() => window.location.reload()}>
                 New Exercise
               </Button>
               {onDownload && (

@@ -63,9 +63,14 @@ export const TranslationExerciseDisplay = ({
                 Check Translations
               </Button>
             ) : (
-              <Button onClick={onNewExercise}>
-                New Exercise
-              </Button>
+              <>
+                <Button onClick={onNewExercise} variant="outline">
+                  Restart Same Exercise
+                </Button>
+                <Button onClick={() => window.location.reload()}>
+                  New Exercise
+                </Button>
+              </>
             )}
           </div>
         </div>

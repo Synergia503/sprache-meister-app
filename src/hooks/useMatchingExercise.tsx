@@ -222,7 +222,24 @@ Return only a JSON object with this exact format:
   };
 
   const resetExercise = () => {
-    loadSampleExercise();
+    // Store the current exercise data to enable restart functionality
+    const currentVocabulary = currentExercise?.pairs;
+    
+    if (currentVocabulary && currentVocabulary.length > 0) {
+      // Keep current exercise vocabulary for restart
+      setCurrentExercise(prev => prev ? {
+        ...prev,
+        userMatches: {},
+        isCompleted: false
+      } : null);
+      setShuffledEnglish(currentVocabulary ? shuffleArray(currentVocabulary) : []);
+      setUserMatches({});
+      setShowResults(false);
+      setSelectedGerman(null);
+      setSelectedEnglish(null);
+    } else {
+      loadSampleExercise();
+    }
   };
 
   const loadPreviousExercise = (exercise: MatchingExercise) => {

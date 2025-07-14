@@ -37,6 +37,7 @@ const Custom = () => {
   const [draggedWord, setDraggedWord] = useState<CustomWord | null>(null);
   const [droppedWords, setDroppedWords] = useState<CustomWord[]>([]);
   const [selectedWords, setSelectedWords] = useState<Set<string>>(new Set());
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const wordsPerPage = 10;
   
   const { 
@@ -147,6 +148,7 @@ const Custom = () => {
         setDroppedWords(prev => [...prev, ...newWords]);
       }
       setSelectedWords(new Set()); // Clear selection after drop
+      setIsMultiSelectMode(false); // Exit multi-select mode
     } else {
       // Handle single word drop
       if (!droppedWords.find(w => w.id === draggedData.id)) {
@@ -157,6 +159,19 @@ const Custom = () => {
 
   const handleWordSelection = (wordId: string, ctrlKey: boolean) => {
     if (ctrlKey) {
+      // Enter multi-select mode and toggle word selection
+      setIsMultiSelectMode(true);
+      setSelectedWords(prev => {
+        const newSelection = new Set(prev);
+        if (newSelection.has(wordId)) {
+          newSelection.delete(wordId);
+        } else {
+          newSelection.add(wordId);
+        }
+        return newSelection;
+      });
+    } else if (isMultiSelectMode) {
+      // In multi-select mode, toggle word without Ctrl
       setSelectedWords(prev => {
         const newSelection = new Set(prev);
         if (newSelection.has(wordId)) {
@@ -167,8 +182,9 @@ const Custom = () => {
         return newSelection;
       });
     } else {
-      // Single selection or navigate to word details
-      setSelectedWords(new Set([wordId]));
+      // Normal single selection - navigate to word details
+      setSelectedWords(new Set());
+      setIsMultiSelectMode(false);
       handleWordClick(wordId);
     }
   };
@@ -336,7 +352,27 @@ const Custom = () => {
                     </div>
                   </div>
 
-                <div className="space-y-3">
+                 <div className="space-y-3">
+                  {/* Multi-select mode indicator */}
+                  {isMultiSelectMode && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800 font-medium">
+                        Multi-select mode active - Click words to select/deselect them for exercises
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          setIsMultiSelectMode(false);
+                          setSelectedWords(new Set());
+                        }}
+                        className="mt-2"
+                      >
+                        Exit Multi-select
+                      </Button>
+                    </div>
+                  )}
+                  
                   {paginatedWords.map((word) => (
                     <div 
                       key={word.id} 

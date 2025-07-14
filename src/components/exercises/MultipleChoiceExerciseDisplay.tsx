@@ -87,7 +87,10 @@ export const MultipleChoiceExerciseDisplay = ({
                 <Button onClick={onPracticeMistakes} variant="outline">
                   Practice Mistakes
                 </Button>
-                <Button onClick={onNewExercise}>
+                <Button onClick={onNewExercise} variant="outline">
+                  Restart Same Exercise
+                </Button>
+                <Button onClick={() => window.location.reload()}>
                   New Exercise
                 </Button>
               </>

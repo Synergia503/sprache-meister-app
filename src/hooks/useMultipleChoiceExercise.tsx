@@ -40,10 +40,62 @@ export const useMultipleChoiceExercise = () => {
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
-  // Load sample exercise on mount
   useEffect(() => {
-    loadSampleExercise();
+    // Check if there's vocabulary data from the category selection
+    const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
+    const exerciseCategory = sessionStorage.getItem('exerciseCategory');
+    
+    if (vocabularyPairsData) {
+      try {
+        const vocabularyPairs = JSON.parse(vocabularyPairsData);
+        // Generate multiple choice questions from vocabulary pairs
+        const sentences = vocabularyPairs.map((pair: any, index: number) => ({
+          sentenceOrder: index + 1,
+          sentence: `What is the English translation of "${pair.german}"?`,
+          options: generateRandomOptions(pair.english, vocabularyPairs),
+          solution: pair.english
+        }));
+        
+        const categoryExercise: MultipleChoiceExercise = {
+          id: `category-${Date.now()}`,
+          words: vocabularyPairs.map((pair: any) => pair.german),
+          sentences,
+          userAnswers: {},
+          isCompleted: false,
+          createdAt: new Date()
+        };
+        
+        setCurrentExercise(categoryExercise);
+        setUserAnswers({});
+        setShowResults(false);
+        
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('vocabularyPairsForExercise');
+        sessionStorage.removeItem('exerciseCategory');
+        
+        toast({
+          title: "Exercise loaded",
+          description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
+        });
+      } catch (error) {
+        console.error('Error parsing vocabulary pairs:', error);
+        loadSampleExercise();
+      }
+    } else {
+      loadSampleExercise();
+    }
   }, []);
+
+  const generateRandomOptions = (correctAnswer: string, allPairs: any[]) => {
+    const otherAnswers = allPairs
+      .map(pair => pair.english)
+      .filter(answer => answer !== correctAnswer)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+    
+    const options = [correctAnswer, ...otherAnswers].sort(() => Math.random() - 0.5);
+    return options.length === 4 ? options : [correctAnswer, 'Option 2', 'Option 3', 'Option 4'];
+  };
 
   const loadSampleExercise = () => {
     setCurrentExercise(SAMPLE_EXERCISE);
@@ -134,7 +186,21 @@ Return only a JSON object with this exact format:
   };
 
   const resetExercise = () => {
-    loadSampleExercise();
+    // Store the current exercise data to enable restart functionality
+    const currentVocabulary = currentExercise?.sentences;
+    
+    if (currentVocabulary && currentVocabulary.length > 0) {
+      // Keep current exercise vocabulary for restart
+      setCurrentExercise(prev => prev ? {
+        ...prev,
+        userAnswers: {},
+        isCompleted: false
+      } : null);
+      setUserAnswers({});
+      setShowResults(false);
+    } else {
+      loadSampleExercise();
+    }
   };
 
   const loadPreviousExercise = (exercise: MultipleChoiceExercise) => {
