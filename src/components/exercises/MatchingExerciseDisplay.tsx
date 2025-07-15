@@ -95,7 +95,7 @@ export const MatchingExerciseDisplay = ({
             {exercise.pairs.map((pair, index) => (
               <div
                 key={index}
-                className={`p-3 border rounded cursor-pointer transition-colors ${
+                className={`p-3 border rounded cursor-pointer transition-colors min-h-[48px] flex items-center ${
                   showResults 
                     ? getMatchingResult(index) === 'correct' 
                       ? 'bg-green-100 border-green-300' 
@@ -110,9 +110,9 @@ export const MatchingExerciseDisplay = ({
                 }`}
                 onClick={() => handleGermanClick(index)}
               >
-                <span className="font-medium">{index + 1}. {pair.germanWord}</span>
+                <span className="font-medium text-sm">{index + 1}. {pair.germanWord}</span>
                 {userMatches[index] !== undefined && (
-                  <span className="ml-2 text-sm text-muted-foreground">
+                  <span className="ml-2 text-xs text-muted-foreground">
                     → {shuffledEnglish[userMatches[index]]?.englishWord}
                   </span>
                 )}
@@ -123,21 +123,21 @@ export const MatchingExerciseDisplay = ({
           <div className="space-y-2">
             <h3 className="font-medium mb-4">English</h3>
             {shuffledEnglish.map((pair, index) => (
-              <Button
+              <div
                 key={index}
-                variant="outline"
-                className={`w-full justify-start h-auto p-3 ${
+                className={`min-h-[48px] flex items-center p-3 border rounded cursor-pointer transition-colors ${
                   isEnglishWordUsed(index) 
                     ? 'bg-blue-100 border-blue-300' 
                     : selectedEnglish === index
                     ? 'bg-blue-50 border-blue-200'
-                    : ''
+                    : showResults 
+                    ? 'border-gray-200'
+                    : 'hover:bg-gray-50'
                 }`}
                 onClick={() => handleEnglishClick(index)}
-                disabled={showResults}
               >
-                <span className="font-medium">{String.fromCharCode(65 + index)}. {pair.englishWord}</span>
-              </Button>
+                <span className="font-medium text-sm">{String.fromCharCode(65 + index)}. {pair.englishWord}</span>
+              </div>
             ))}
           </div>
         </div>

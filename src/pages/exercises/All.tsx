@@ -2,13 +2,19 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BookOpenText, Target, PenTool, Shuffle, Loader2, FileText, Languages, Link } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useNavigate } from 'react-router-dom';
+import { useVocabulary } from '@/contexts/VocabularyContext';
 
 const All = () => {
   const { isLoading, apiKey, saveApiKey } = useOpenAI();
   const navigate = useNavigate();
+  const { getAllCategories, getWordsByCategory } = useVocabulary();
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  
+  const categories = getAllCategories();
 
   const exercises = [
     {
@@ -63,6 +69,16 @@ const All = () => {
   ];
 
   const sendToExercise = (exercisePath: string) => {
+    if (selectedCategory) {
+      const categoryWords = getWordsByCategory(selectedCategory);
+      const vocabularyPairs = categoryWords.map(word => ({
+        german: word.german,
+        english: word.english
+      }));
+      
+      sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
+      sessionStorage.setItem('exerciseCategory', selectedCategory);
+    }
     navigate(exercisePath);
   };
 
@@ -73,9 +89,33 @@ const All = () => {
       <div className="mb-6">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-muted-foreground">
-              To use exercises with specific vocabulary, go to <strong>Vocabulary → Categorized</strong> or <strong>Vocabulary → Custom</strong> and use the "Send to Exercise" feature to practice with selected words.
-            </p>
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                Select a vocabulary category to practice with specific words, or leave empty to use general exercises.
+              </p>
+              
+              <div className="max-w-md">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select vocabulary category (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No category (general exercise)</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {selectedCategory && (
+                <p className="text-sm text-blue-600">
+                  Selected: <strong>{selectedCategory}</strong> ({getWordsByCategory(selectedCategory).length} words)
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

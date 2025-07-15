@@ -16,6 +16,8 @@ interface VocabularyContextType {
   setSortOrder: (order: SortOrder) => void;
   getFilteredAndSortedWords: () => CustomWord[];
   getWordById: (id: string) => CustomWord | undefined;
+  getAllCategories: () => string[];
+  getWordsByCategory: (category: string) => CustomWord[];
 }
 
 const VocabularyContext = createContext<VocabularyContextType | undefined>(undefined);
@@ -271,6 +273,20 @@ export const VocabularyProvider: React.FC<{ children: ReactNode }> = ({ children
     return filteredWords;
   };
 
+  const getAllCategories = () => {
+    const categories = new Set<string>();
+    words.forEach(word => {
+      word.categories.forEach(category => {
+        categories.add(category);
+      });
+    });
+    return Array.from(categories).sort();
+  };
+
+  const getWordsByCategory = (category: string) => {
+    return words.filter(word => word.categories.includes(category));
+  };
+
   return (
     <VocabularyContext.Provider value={{
       words,
@@ -286,6 +302,8 @@ export const VocabularyProvider: React.FC<{ children: ReactNode }> = ({ children
       setSortOrder,
       getFilteredAndSortedWords,
       getWordById,
+      getAllCategories,
+      getWordsByCategory,
     }}>
       {children}
     </VocabularyContext.Provider>

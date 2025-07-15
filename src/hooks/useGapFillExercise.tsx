@@ -46,9 +46,48 @@ export const useGapFillExercise = () => {
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
-  // Load sample exercise on mount
+  // Load sample exercise on mount or check for vocabulary
   useEffect(() => {
-    loadSampleExercise();
+    // Check if there's vocabulary data from category selection or drag zone
+    const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
+    const wordListData = sessionStorage.getItem('wordListForExercise');
+    const exerciseCategory = sessionStorage.getItem('exerciseCategory');
+    
+    if (vocabularyPairsData) {
+      try {
+        const vocabularyPairs = JSON.parse(vocabularyPairsData);
+        const words = vocabularyPairs.map((pair: any) => pair.german);
+        generateExercise(words);
+        
+        sessionStorage.removeItem('vocabularyPairsForExercise');
+        sessionStorage.removeItem('exerciseCategory');
+        
+        toast({
+          title: "Exercise loaded",
+          description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
+        });
+      } catch (error) {
+        console.error('Error parsing vocabulary pairs:', error);
+        loadSampleExercise();
+      }
+    } else if (wordListData) {
+      try {
+        const words = wordListData.split('\n').filter(word => word.trim());
+        generateExercise(words);
+        
+        sessionStorage.removeItem('wordListForExercise');
+        
+        toast({
+          title: "Exercise loaded",
+          description: "Using vocabulary from drag zone",
+        });
+      } catch (error) {
+        console.error('Error parsing word list:', error);
+        loadSampleExercise();
+      }
+    } else {
+      loadSampleExercise();
+    }
   }, []);
 
   const loadSampleExercise = () => {

@@ -5,6 +5,7 @@ import { useGapFillExercise } from '@/hooks/useGapFillExercise';
 import { WordInputForm } from '@/components/exercises/WordInputForm';
 import { ExerciseDisplay } from '@/components/exercises/ExerciseDisplay';
 import { ExerciseLayout } from '@/components/exercises/ExerciseLayout';
+import { VocabularySelector } from '@/components/VocabularySelector';
 
 const GapFill = () => {
   const [mistakeWords, setMistakeWords] = useState<string[]>([]);
@@ -48,14 +49,22 @@ const GapFill = () => {
         onNewExercise={resetExercise}
       />
       
-      <WordInputForm
-        onGenerateExercise={generateExercise}
-        isLoading={isLoading}
-        apiKey={apiKey}
-        initialWords={mistakeWords.length > 0 ? mistakeWords : ['']}
-        description="Add up to 20 German words or phrases. The exercise will generate 2-4 times as many sentences with gaps."
-        title="Create New Gap-Fill Exercise"
-      />
+      <div className="space-y-6">
+        <VocabularySelector
+          onWordsSelected={generateExercise}
+          title="Use Vocabulary from Category"
+          description="Select a category from your vocabulary to create gap-fill exercises."
+        />
+        
+        <WordInputForm
+          onGenerateExercise={generateExercise}
+          isLoading={isLoading}
+          apiKey={apiKey}
+          initialWords={mistakeWords.length > 0 ? mistakeWords : ['']}
+          description="Add up to 20 German words or phrases. The exercise will generate 2-4 times as many sentences with gaps."
+          title="Create New Gap-Fill Exercise"
+        />
+      </div>
     </ExerciseLayout>
   );
 };
