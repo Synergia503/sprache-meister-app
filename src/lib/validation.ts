@@ -42,8 +42,8 @@ export const registerSchema = z.object({
 // API key validation schema
 export const apiKeySchema = z.string()
   .min(1, 'API key is required')
-  .max(200, 'API key is too long')
-  .regex(/^sk-[a-zA-Z0-9]+$/, 'Invalid OpenAI API key format');
+  .max(200, 'API key is too long');'
+  //.regex(/^sk-[a-zA-Z0-9]+$/, 'Invalid OpenAI API key format');
 
 // Input sanitization function
 export const sanitizeInput = (input: string): string => {
