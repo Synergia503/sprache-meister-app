@@ -69,7 +69,7 @@ const All = () => {
   ];
 
   const sendToExercise = (exercisePath: string) => {
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== 'none') {
       const categoryWords = getWordsByCategory(selectedCategory);
       const vocabularyPairs = categoryWords.map(word => ({
         german: word.german,
@@ -100,7 +100,7 @@ const All = () => {
                     <SelectValue placeholder="Select vocabulary category (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No category (general exercise)</SelectItem>
+                    <SelectItem value="none">No category (general exercise)</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
@@ -110,7 +110,7 @@ const All = () => {
                 </Select>
               </div>
               
-              {selectedCategory && (
+              {selectedCategory && selectedCategory !== 'none' && (
                 <p className="text-sm text-blue-600">
                   Selected: <strong>{selectedCategory}</strong> ({getWordsByCategory(selectedCategory).length} words)
                 </p>

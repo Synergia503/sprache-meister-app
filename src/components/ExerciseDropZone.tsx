@@ -51,14 +51,19 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
     const selectedType = exerciseTypes.find(type => type.id === selectedExercise);
     if (!selectedType) return;
 
-    // Store words in session storage for the exercise
-    // Convert CustomWord to vocabulary pairs format for matching exercise
-    const vocabularyPairs = droppedWords.map(word => ({
-      german: word.german,
-      english: word.english
-    }));
+    // Store words in different formats for different exercise types
+    if (selectedExercise === 'matching' || selectedExercise === 'multiple-choice' || selectedExercise === 'translation') {
+      // These exercises need vocabulary pairs
+      const vocabularyPairs = droppedWords.map(word => ({
+        german: word.german,
+        english: word.english
+      }));
+      sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
+    } else {
+      // Gap-fill and other exercises need word list
+      sessionStorage.setItem('wordListForExercise', JSON.stringify(droppedWords));
+    }
     
-    sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
     sessionStorage.setItem('exerciseCategory', 'Custom Words');
     
     // Navigate to exercise

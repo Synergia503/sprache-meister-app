@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useVocabulary } from '@/contexts/VocabularyContext';
 
 interface VocabularySelectorProps {
-  onWordsSelected: (words: string[]) => void;
+  onWordsSelected: (words: string[] | any[]) => void;
   title?: string;
   description?: string;
 }
@@ -23,8 +23,8 @@ export const VocabularySelector = ({
   const handleUseCategory = () => {
     if (selectedCategory) {
       const categoryWords = getWordsByCategory(selectedCategory);
-      const wordList = categoryWords.map(word => word.german);
-      onWordsSelected(wordList);
+      // Pass the full word objects for exercises that need both german and english
+      onWordsSelected(categoryWords);
     }
   };
 

@@ -103,8 +103,18 @@ export const useMultipleChoiceExercise = () => {
     setShowResults(false);
   };
 
-  const generateExercise = async (topics: string[]) => {
-    const validTopics = topics.filter(topic => topic.trim());
+  const generateExercise = async (input: string[] | any[]) => {
+    // Handle both word objects and string arrays
+    let validTopics: string[] = [];
+    
+    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
+      // Input is word objects from vocabulary
+      validTopics = input.map((word: any) => word.german);
+    } else {
+      // Input is string array
+      validTopics = (input as string[]).filter(topic => topic.trim());
+    }
+    
     if (validTopics.length === 0) {
       toast({
         title: "No topics provided",

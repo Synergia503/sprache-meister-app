@@ -72,23 +72,39 @@ export const useGapFillExercise = () => {
       }
     } else if (wordListData) {
       try {
-        const words = wordListData.split('\n').filter(word => word.trim());
+        const parsedWordList = JSON.parse(wordListData);
+        const words = Array.isArray(parsedWordList) 
+          ? parsedWordList.map((word: any) => word.german || word)
+          : wordListData.split('\n').filter((word: string) => word.trim());
         generateExercise(words);
         
         sessionStorage.removeItem('wordListForExercise');
         
         toast({
           title: "Exercise loaded",
-          description: "Using vocabulary from drag zone",
+          description: "Using vocabulary from selected words",
         });
       } catch (error) {
-        console.error('Error parsing word list:', error);
-        loadSampleExercise();
+        // Fallback to treating as plain text
+        try {
+          const words = wordListData.split('\n').filter((word: string) => word.trim());
+          generateExercise(words);
+          
+          sessionStorage.removeItem('wordListForExercise');
+          
+          toast({
+            title: "Exercise loaded",
+            description: "Using vocabulary from selected words",
+          });
+        } catch (fallbackError) {
+          console.error('Error parsing word list:', fallbackError);
+          loadSampleExercise();
+        }
       }
     } else {
       loadSampleExercise();
     }
-  }, []);
+  }, [toast]);
 
   const loadSampleExercise = () => {
     setCurrentExercise(SAMPLE_EXERCISE);
@@ -96,8 +112,18 @@ export const useGapFillExercise = () => {
     setShowResults(false);
   };
 
-  const generateExercise = async (words: string[]) => {
-    const validWords = words.filter(word => word.trim());
+  const generateExercise = async (input: string[] | any[]) => {
+    // Handle both word objects and string arrays
+    let validWords: string[] = [];
+    
+    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
+      // Input is word objects from vocabulary
+      validWords = input.map((word: any) => word.german);
+    } else {
+      // Input is string array
+      validWords = (input as string[]).filter(word => word.trim());
+    }
+    
     if (validWords.length === 0) {
       toast({
         title: "No words provided",

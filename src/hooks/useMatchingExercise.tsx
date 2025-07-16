@@ -95,8 +95,18 @@ export const useMatchingExercise = () => {
     setSelectedEnglish(null);
   };
 
-  const generateExercise = async (words: string[]) => {
-    const validWords = words.filter(word => word.trim());
+  const generateExercise = async (input: string[] | any[]) => {
+    // Handle both word objects and string arrays
+    let validWords: string[] = [];
+    
+    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
+      // Input is word objects from vocabulary
+      validWords = input.map((word: any) => word.german);
+    } else {
+      // Input is string array
+      validWords = (input as string[]).filter(word => word.trim());
+    }
+    
     if (validWords.length === 0) {
       toast({
         title: "No words provided",

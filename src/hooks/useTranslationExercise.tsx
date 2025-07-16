@@ -73,8 +73,18 @@ export const useTranslationExercise = () => {
     setShowResults(false);
   };
 
-  const generateExercise = async (sentences: string[]) => {
-    const validSentences = sentences.filter(sentence => sentence.trim());
+  const generateExercise = async (input: string[] | any[]) => {
+    // Handle both word objects and string arrays
+    let validSentences: string[] = [];
+    
+    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
+      // Input is word objects from vocabulary
+      validSentences = input.map((word: any) => word.german);
+    } else {
+      // Input is string array
+      validSentences = (input as string[]).filter(sentence => sentence.trim());
+    }
+    
     if (validSentences.length === 0) {
       toast({
         title: "No sentences provided",
