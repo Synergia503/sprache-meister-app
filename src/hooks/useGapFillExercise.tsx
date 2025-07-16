@@ -66,44 +66,42 @@ export const useGapFillExercise = () => {
           title: "Exercise loaded",
           description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
         });
+        return; // Exit early to prevent loading sample exercise
       } catch (error) {
         console.error('Error parsing vocabulary pairs:', error);
-        loadSampleExercise();
       }
     } else if (wordListData) {
       try {
         const parsedWordList = JSON.parse(wordListData);
-        const words = Array.isArray(parsedWordList) 
-          ? parsedWordList.map((word: any) => word.german || word)
-          : wordListData.split('\n').filter((word: string) => word.trim());
+        let words: string[] = [];
+        
+        if (Array.isArray(parsedWordList)) {
+          // Handle array of strings or word objects
+          words = parsedWordList.map((word: any) => 
+            typeof word === 'string' ? word : word.german || word
+          ).filter(word => word && word.trim());
+        } else {
+          // Handle single word or other formats
+          words = [parsedWordList].filter(word => word && word.trim());
+        }
+        
         generateExercise(words);
         
         sessionStorage.removeItem('wordListForExercise');
+        sessionStorage.removeItem('exerciseCategory');
         
         toast({
           title: "Exercise loaded",
-          description: "Using vocabulary from selected words",
+          description: `Using ${words.length} selected words`,
         });
+        return; // Exit early to prevent loading sample exercise
       } catch (error) {
-        // Fallback to treating as plain text
-        try {
-          const words = wordListData.split('\n').filter((word: string) => word.trim());
-          generateExercise(words);
-          
-          sessionStorage.removeItem('wordListForExercise');
-          
-          toast({
-            title: "Exercise loaded",
-            description: "Using vocabulary from selected words",
-          });
-        } catch (fallbackError) {
-          console.error('Error parsing word list:', fallbackError);
-          loadSampleExercise();
-        }
+        console.error('Error parsing word list:', error);
       }
-    } else {
-      loadSampleExercise();
     }
+    
+    // Only load sample exercise if no vocabulary data was found or processed
+    loadSampleExercise();
   }, [toast]);
 
   const loadSampleExercise = () => {
