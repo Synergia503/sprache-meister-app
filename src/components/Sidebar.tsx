@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Book, FileText, Home, LayoutDashboard, Settings, User, CreditCard, Mic, ChevronDown, ChevronRight } from "lucide-react";
+import { Book, FileText, Home, LayoutDashboard, Settings, User, CreditCard, Mic, ChevronDown, ChevronRight, PenTool } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -43,7 +43,6 @@ const exercisesSubItems = [
   { title: "Translation", path: "/exercises/translation" },
   { title: "Matching", path: "/exercises/matching" },
   { title: "Describe a Picture", path: "/exercises/describe-picture" },
-  { title: "Grammar", path: "/exercises/grammar" },
   { title: "Mixed", path: "/exercises/mixed" },
 ];
 
@@ -153,6 +152,15 @@ export function MainSidebar({ children }: MainSidebarProps) {
                       <Link to="/flashcards" className="flex items-center gap-2">
                         <CreditCard className="h-4 w-4" />
                         <span>Flashcards</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/exercises/grammar" className="flex items-center gap-2">
+                        <PenTool className="h-4 w-4" />
+                        <span>Grammar</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

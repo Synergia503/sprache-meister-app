@@ -26,12 +26,12 @@ export const WordInputForm = ({
 }: WordInputFormProps) => {
   // Check for words from session storage first
   const getInitialWords = () => {
-    const storedWords = sessionStorage.getItem('wordListForExercise');
+    const storedWords = sessionStorage.getItem('gapFillWordsForExercise');
     if (storedWords) {
       try {
         const wordList = JSON.parse(storedWords);
         // Clear session storage after reading
-        sessionStorage.removeItem('wordListForExercise');
+        sessionStorage.removeItem('gapFillWordsForExercise');
         return wordList.map((word: any) => word.german);
       } catch (error) {
         console.error('Error parsing stored words:', error);

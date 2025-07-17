@@ -62,7 +62,7 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
     } else if (selectedExercise === 'gap-fill') {
       // Gap-fill needs just the German words as strings
       const germanWords = droppedWords.map(word => word.german);
-      sessionStorage.setItem('wordListForExercise', JSON.stringify(germanWords));
+      sessionStorage.setItem('gapFillWordsForExercise', JSON.stringify(germanWords));
     } else {
       // Other exercises get the full word objects
       sessionStorage.setItem('wordListForExercise', JSON.stringify(droppedWords));

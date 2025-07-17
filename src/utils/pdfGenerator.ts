@@ -1,4 +1,3 @@
-
 import { BaseExercise, TranslationExercise, MultipleChoiceExercise, MatchingExercise } from '@/types/exercises';
 import { GapFillExercise } from '@/types/gapFill';
 import { jsPDF } from 'jspdf';
@@ -39,13 +38,15 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
     let yPosition = 20;
     const lineHeight = 10;
     const pageHeight = doc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    let answers: string[] = [];
 
     const addText = (text: string, fontSize = 12) => {
       doc.setFontSize(fontSize);
       const lines = doc.splitTextToSize(text, 180);
       
       lines.forEach((line: string) => {
-        if (yPosition > pageHeight - 20) {
+        if (yPosition > pageHeight - 30) { // Leave more space for footer
           doc.addPage();
           yPosition = 20;
         }
@@ -71,6 +72,37 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
       doc.setFont(undefined, 'normal');
     };
 
+    const addAnswersToFooter = () => {
+      // Add a new page for answers
+      doc.addPage();
+      
+      // Add answers in footer, upside down
+      doc.save(); // Save current state
+      
+      // Rotate 180 degrees and position at bottom
+      doc.setTransformationMatrix(1, 0, 0, 1, 0, 0);
+      doc.internal.write('q');
+      doc.internal.write(`1 0 0 -1 ${pageWidth} ${pageHeight} cm`);
+      
+      let footerY = 20; // Start from what will be the bottom when rotated
+      doc.setFontSize(8); // Much smaller font for answers
+      doc.setFont(undefined, 'bold');
+      doc.text('Answer Key:', 15, footerY);
+      footerY += 8;
+      doc.setFont(undefined, 'normal');
+      
+      answers.forEach((answer, index) => {
+        if (footerY > pageHeight - 20) {
+          // If we run out of space, we could add another page, but for now just stop
+          return;
+        }
+        doc.text(`${index + 1}. ${answer}`, 15, footerY);
+        footerY += 6;
+      });
+      
+      doc.internal.write('Q');
+    };
+
     if (isMatchingExercise(exercise)) {
       console.log('Generating matching exercise PDF');
       addTitle('Matching Exercise');
@@ -89,9 +121,9 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
         addText(`${String.fromCharCode(65 + i)}. ${pair.englishWord}`);
       });
       
-      addSection('Answer Key:');
+      // Prepare answers
       exercise.pairs.forEach((pair, i) => {
-        addText(`${i + 1}. ${pair.germanWord} - ${pair.englishWord}`);
+        answers.push(`${pair.germanWord} - ${pair.englishWord}`);
       });
       
     } else if (isTranslationExercise(exercise)) {
@@ -107,13 +139,7 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
         addText(`${i + 1}. ${sentence.germanSentence}`);
         addText('   _________________________________');
         yPosition += 5;
-      });
-      
-      addSection('Answer Key:');
-      exercise.sentences.forEach((sentence, i) => {
-        addText(`${i + 1}. ${sentence.germanSentence}`);
-        addText(`   Answer: ${sentence.englishSentence}`);
-        yPosition += 5;
+        answers.push(sentence.englishSentence);
       });
       
     } else if (isMultipleChoiceExercise(exercise)) {
@@ -131,13 +157,7 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
           addText(`   ${String.fromCharCode(65 + idx)}) ${option}`);
         });
         yPosition += 5;
-      });
-      
-      addSection('Answer Key:');
-      exercise.sentences.forEach((sentence, i) => {
-        addText(`${i + 1}. ${sentence.sentence}`);
-        addText(`   Answer: ${sentence.solution}`);
-        yPosition += 5;
+        answers.push(sentence.solution);
       });
       
     } else if (isGapFillExercise(exercise)) {
@@ -153,12 +173,7 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
         addText(`${i + 1}. ${sentence.sentence}`);
         addText('   Answer: _______________');
         yPosition += 5;
-      });
-      
-      addSection('Answer Key:');
-      exercise.sentences.forEach((sentence, i) => {
-        const completeSentence = sentence.sentence.replace('___', sentence.solution);
-        addText(`${i + 1}. ${completeSentence}`);
+        answers.push(sentence.solution);
       });
       
     } else {
@@ -166,6 +181,11 @@ export const generateExercisePDF = (exercise: BaseExercise | GapFillExercise) =>
       addTitle('Exercise');
       addText('Exercise content not available');
       filename = 'exercise.pdf';
+    }
+
+    // Add answers to footer if we have any
+    if (answers.length > 0) {
+      addAnswersToFooter();
     }
 
     console.log('Preparing PDF download with filename:', filename);

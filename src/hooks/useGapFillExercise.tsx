@@ -50,7 +50,7 @@ export const useGapFillExercise = () => {
   useEffect(() => {
     // Check if there's vocabulary data from category selection or drag zone
     const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
-    const wordListData = sessionStorage.getItem('wordListForExercise');
+    const wordListData = sessionStorage.getItem('gapFillWordsForExercise');
     const exerciseCategory = sessionStorage.getItem('exerciseCategory');
     
     if (vocabularyPairsData) {
@@ -72,29 +72,34 @@ export const useGapFillExercise = () => {
       }
     } else if (wordListData) {
       try {
-        const parsedWordList = JSON.parse(wordListData);
+        // Try to parse as JSON first, if it fails, treat as plain text
         let words: string[] = [];
-        
-        if (Array.isArray(parsedWordList)) {
-          // Handle array of strings or word objects
-          words = parsedWordList.map((word: any) => 
-            typeof word === 'string' ? word : word.german || word
-          ).filter(word => word && word.trim());
-        } else {
-          // Handle single word or other formats
-          words = [parsedWordList].filter(word => word && word.trim());
+        try {
+          const parsedWordList = JSON.parse(wordListData);
+          if (Array.isArray(parsedWordList)) {
+            words = parsedWordList.map((word: any) => 
+              typeof word === 'string' ? word : word.german || word
+            ).filter(word => word && word.trim());
+          } else {
+            words = [parsedWordList].filter(word => word && word.trim());
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, treat as plain text with line breaks
+          words = wordListData.split('\n').filter(word => word.trim());
         }
         
-        generateExercise(words);
-        
-        sessionStorage.removeItem('wordListForExercise');
-        sessionStorage.removeItem('exerciseCategory');
-        
-        toast({
-          title: "Exercise loaded",
-          description: `Using ${words.length} selected words`,
-        });
-        return; // Exit early to prevent loading sample exercise
+        if (words.length > 0) {
+          generateExercise(words);
+          
+          sessionStorage.removeItem('gapFillWordsForExercise');
+          sessionStorage.removeItem('exerciseCategory');
+          
+          toast({
+            title: "Exercise loaded",
+            description: `Using ${words.length} selected words`,
+          });
+          return; // Exit early to prevent loading sample exercise
+        }
       } catch (error) {
         console.error('Error parsing word list:', error);
       }
