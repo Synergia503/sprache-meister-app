@@ -48,17 +48,27 @@ export const useGapFillExercise = () => {
 
   // Load sample exercise on mount or check for vocabulary
   useEffect(() => {
+    console.log('Gap-fill exercise useEffect triggered');
+    
     // Check if there's vocabulary data from category selection or drag zone
     const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
     const wordListData = sessionStorage.getItem('gapFillWordsForExercise');
     const exerciseCategory = sessionStorage.getItem('exerciseCategory');
     
+    console.log('Session storage data:', {
+      vocabularyPairsData: vocabularyPairsData ? 'exists' : 'null',
+      wordListData: wordListData ? 'exists' : 'null',
+      exerciseCategory
+    });
+    
     if (vocabularyPairsData) {
+      console.log('Processing vocabulary pairs data');
       try {
         const vocabularyPairs = JSON.parse(vocabularyPairsData);
         const words = vocabularyPairs.map((pair: any) => pair.german);
         generateExercise(words);
         
+        // Clear the sessionStorage after using it
         sessionStorage.removeItem('vocabularyPairsForExercise');
         sessionStorage.removeItem('exerciseCategory');
         
@@ -71,26 +81,25 @@ export const useGapFillExercise = () => {
         console.error('Error parsing vocabulary pairs:', error);
       }
     } else if (wordListData) {
+      console.log('Processing word list data:', wordListData);
       try {
-        // Try to parse as JSON first, if it fails, treat as plain text
+        const parsedWordList = JSON.parse(wordListData);
+        console.log('Parsed word list:', parsedWordList);
+        
         let words: string[] = [];
-        try {
-          const parsedWordList = JSON.parse(wordListData);
-          if (Array.isArray(parsedWordList)) {
-            words = parsedWordList.map((word: any) => 
-              typeof word === 'string' ? word : word.german || word
-            ).filter(word => word && word.trim());
-          } else {
-            words = [parsedWordList].filter(word => word && word.trim());
-          }
-        } catch (parseError) {
-          // If JSON parsing fails, treat as plain text with line breaks
-          words = wordListData.split('\n').filter(word => word.trim());
+        if (Array.isArray(parsedWordList)) {
+          words = parsedWordList.filter(word => word && word.trim());
+        } else {
+          words = [parsedWordList].filter(word => word && word.trim());
         }
         
+        console.log('Processed words for exercise:', words);
+        
         if (words.length > 0) {
+          console.log('Generating exercise with words:', words);
           generateExercise(words);
           
+          // Clear the sessionStorage after using it
           sessionStorage.removeItem('gapFillWordsForExercise');
           sessionStorage.removeItem('exerciseCategory');
           
@@ -99,12 +108,15 @@ export const useGapFillExercise = () => {
             description: `Using ${words.length} selected words`,
           });
           return; // Exit early to prevent loading sample exercise
+        } else {
+          console.log('No valid words found, loading sample exercise');
         }
       } catch (error) {
         console.error('Error parsing word list:', error);
       }
     }
     
+    console.log('Loading sample exercise as fallback');
     // Only load sample exercise if no vocabulary data was found or processed
     loadSampleExercise();
   }, [toast]);
@@ -116,18 +128,23 @@ export const useGapFillExercise = () => {
   };
 
   const generateExercise = async (input: string[] | any[]) => {
+    console.log('generateExercise called with input:', input);
+    
     // Handle both word objects and string arrays
     let validWords: string[] = [];
     
     if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
       // Input is word objects from vocabulary
       validWords = input.map((word: any) => word.german);
+      console.log('Extracted German words from objects:', validWords);
     } else {
       // Input is string array
       validWords = (input as string[]).filter(word => word.trim());
+      console.log('Using string array as words:', validWords);
     }
     
     if (validWords.length === 0) {
+      console.log('No valid words found');
       toast({
         title: "No words provided",
         description: "Please add at least one word to generate an exercise.",
@@ -136,6 +153,7 @@ export const useGapFillExercise = () => {
       return;
     }
 
+    console.log('Calling OpenAI with words:', validWords);
     const prompt = `Create a gap-fill exercise with German words: ${validWords.join(', ')}. Generate ${validWords.length * 3} sentences where each word appears 2-4 times in different grammatical forms. Each sentence should have exactly one gap marked with ___. Randomize the order of words throughout the sentences.
 
 Return only a JSON object with this exact format:

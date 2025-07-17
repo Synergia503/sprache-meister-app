@@ -51,18 +51,25 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
     const selectedType = exerciseTypes.find(type => type.id === selectedExercise);
     if (!selectedType) return;
 
+    // Clear any existing session storage first
+    sessionStorage.removeItem('vocabularyPairsForExercise');
+    sessionStorage.removeItem('gapFillWordsForExercise');
+    sessionStorage.removeItem('wordListForExercise');
+    sessionStorage.removeItem('exerciseCategory');
+    
     // Store words in different formats for different exercise types
-    if (selectedExercise === 'matching' || selectedExercise === 'multiple-choice' || selectedExercise === 'translation') {
+    if (selectedExercise === 'gap-fill') {
+      // Gap-fill needs just the German words as strings
+      const germanWords = droppedWords.map(word => word.german);
+      sessionStorage.setItem('gapFillWordsForExercise', JSON.stringify(germanWords));
+      console.log('Stored gap-fill words:', germanWords);
+    } else if (selectedExercise === 'matching' || selectedExercise === 'multiple-choice' || selectedExercise === 'translation') {
       // These exercises need vocabulary pairs
       const vocabularyPairs = droppedWords.map(word => ({
         german: word.german,
         english: word.english
       }));
       sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
-    } else if (selectedExercise === 'gap-fill') {
-      // Gap-fill needs just the German words as strings
-      const germanWords = droppedWords.map(word => word.german);
-      sessionStorage.setItem('gapFillWordsForExercise', JSON.stringify(germanWords));
     } else {
       // Other exercises get the full word objects
       sessionStorage.setItem('wordListForExercise', JSON.stringify(droppedWords));
