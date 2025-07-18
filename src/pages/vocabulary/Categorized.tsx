@@ -6,6 +6,7 @@ import { FolderOpen, Loader2, FileText, Target, Languages, Link, BookOpenText, P
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { AnkiExport } from '@/components/AnkiExport';
 import { useNavigate } from 'react-router-dom';
+import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
 
 const Categorized = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -160,17 +161,23 @@ const Categorized = () => {
 
   const sendToExercise = (exercisePath: string) => {
     if (selectedCategoryForExercise && selectedCategoryForExercise.samples) {
-      // Store the vocabulary data in different formats for different exercise types
-      const wordList = selectedCategoryForExercise.samples.map((sample: any) => sample.german).join('\n');
-      const vocabularyPairs = selectedCategoryForExercise.samples.map((sample: any) => ({
+      // Convert samples to VocabularyWord format
+      const vocabularyWords: VocabularyWord[] = selectedCategoryForExercise.samples.map((sample: any, index: number) => ({
+        id: `sample-${index}`,
         german: sample.german,
-        english: sample.english
+        english: sample.english,
+        categories: [selectedCategoryForExercise.name.toLowerCase()]
       }));
       
-      // Store both formats for different exercise types
-      sessionStorage.setItem('wordListForExercise', wordList);
-      sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
-      sessionStorage.setItem('exerciseCategory', selectedCategoryForExercise.name);
+      // Determine exercise type from path
+      const exerciseType = exercisePath.split('/').pop() || 'unknown';
+      
+      // Use the service to store exercise data
+      vocabularyExerciseService.setExerciseData(
+        vocabularyWords,
+        selectedCategoryForExercise.name,
+        exerciseType
+      );
     }
     navigate(exercisePath);
   };

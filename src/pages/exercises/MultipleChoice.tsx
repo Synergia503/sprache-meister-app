@@ -41,7 +41,8 @@ const MultipleChoice = () => {
       
       <div className="space-y-6">
         <VocabularySelector
-          onWordsSelected={generateExercise}
+          exerciseType="multiple-choice"
+          exercisePath="/exercises/multiple-choice"
           title="Use Vocabulary from Category"
           description="Select a category from your vocabulary to create multiple choice exercises."
         />

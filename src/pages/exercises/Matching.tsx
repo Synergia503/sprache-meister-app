@@ -55,7 +55,8 @@ const Matching = () => {
       
       <div className="space-y-6">
         <VocabularySelector
-          onWordsSelected={generateExercise}
+          exerciseType="matching"
+          exercisePath="/exercises/matching"
           title="Use Vocabulary from Category"
           description="Select a category from your vocabulary to create matching exercises."
         />

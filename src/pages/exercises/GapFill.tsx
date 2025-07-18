@@ -51,7 +51,8 @@ const GapFill = () => {
       
       <div className="space-y-6">
         <VocabularySelector
-          onWordsSelected={generateExercise}
+          exerciseType="gap-fill"
+          exercisePath="/exercises/gap-fill"
           title="Use Vocabulary from Category"
           description="Select a category from your vocabulary to create gap-fill exercises."
         />

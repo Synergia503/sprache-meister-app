@@ -8,6 +8,7 @@ import { Target, X, Play } from "lucide-react";
 import { CustomWord } from '@/types/vocabulary';
 import { useToast } from '@/hooks/use-toast';
 import { getExerciseTypes, ExerciseType } from '@/services/exerciseService';
+import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
 
 interface ExerciseDropZoneProps {
   droppedWords: CustomWord[];
@@ -51,31 +52,20 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
     const selectedType = exerciseTypes.find(type => type.id === selectedExercise);
     if (!selectedType) return;
 
-    // Clear any existing session storage first
-    sessionStorage.removeItem('vocabularyPairsForExercise');
-    sessionStorage.removeItem('gapFillWordsForExercise');
-    sessionStorage.removeItem('wordListForExercise');
-    sessionStorage.removeItem('exerciseCategory');
-    
-    // Store words in different formats for different exercise types
-    if (selectedExercise === 'gap-fill') {
-      // Gap-fill needs just the German words as strings
-      const germanWords = droppedWords.map(word => word.german);
-      sessionStorage.setItem('gapFillWordsForExercise', JSON.stringify(germanWords));
-      console.log('Stored gap-fill words:', germanWords);
-    } else if (selectedExercise === 'matching' || selectedExercise === 'multiple-choice' || selectedExercise === 'translation') {
-      // These exercises need vocabulary pairs
-      const vocabularyPairs = droppedWords.map(word => ({
-        german: word.german,
-        english: word.english
-      }));
-      sessionStorage.setItem('vocabularyPairsForExercise', JSON.stringify(vocabularyPairs));
-    } else {
-      // Other exercises get the full word objects
-      sessionStorage.setItem('wordListForExercise', JSON.stringify(droppedWords));
-    }
-    
-    sessionStorage.setItem('exerciseCategory', 'Custom Words');
+    // Convert CustomWord to VocabularyWord format
+    const vocabularyWords: VocabularyWord[] = droppedWords.map(word => ({
+      id: word.id,
+      german: word.german,
+      english: word.english,
+      categories: word.categories
+    }));
+
+    // Set exercise data using the service
+    vocabularyExerciseService.setExerciseData(
+      vocabularyWords,
+      'Custom Words',
+      selectedExercise
+    );
     
     // Navigate to exercise
     navigate(selectedType.path);

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { MultipleChoiceExercise } from '@/types/exercises';
+import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
 
 const SAMPLE_EXERCISE: MultipleChoiceExercise = {
   id: 'sample-multiple-choice',
@@ -41,24 +42,23 @@ export const useMultipleChoiceExercise = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if there's vocabulary data from the category selection
-    const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
-    const exerciseCategory = sessionStorage.getItem('exerciseCategory');
-    
-    if (vocabularyPairsData) {
-      try {
-        const vocabularyPairs = JSON.parse(vocabularyPairsData);
-        // Generate multiple choice questions from vocabulary pairs
-        const sentences = vocabularyPairs.map((pair: any, index: number) => ({
+    // Check if there's vocabulary data from the service
+    if (vocabularyExerciseService.hasExerciseData()) {
+      const exerciseData = vocabularyExerciseService.getExerciseData();
+      console.log("Multiple choice exercise: Found exercise data from service:", exerciseData);
+      
+      if (exerciseData && exerciseData.words.length > 0) {
+        // Generate multiple choice questions from vocabulary words
+        const sentences = exerciseData.words.map((word, index) => ({
           sentenceOrder: index + 1,
-          sentence: `What is the English translation of "${pair.german}"?`,
-          options: generateRandomOptions(pair.english, vocabularyPairs),
-          solution: pair.english
+          sentence: `What is the English translation of "${word.german}"?`,
+          options: generateRandomOptions(word.english, exerciseData.words),
+          solution: word.english
         }));
         
         const categoryExercise: MultipleChoiceExercise = {
           id: `category-${Date.now()}`,
-          words: vocabularyPairs.map((pair: any) => pair.german),
+          words: exerciseData.words.map(word => word.german),
           sentences,
           userAnswers: {},
           isCompleted: false,
@@ -69,26 +69,23 @@ export const useMultipleChoiceExercise = () => {
         setUserAnswers({});
         setShowResults(false);
         
-        // Clear the sessionStorage after using it
-        sessionStorage.removeItem('vocabularyPairsForExercise');
-        sessionStorage.removeItem('exerciseCategory');
-        
         toast({
           title: "Exercise loaded",
-          description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
+          description: `Using vocabulary from ${exerciseData.category}`,
         });
-      } catch (error) {
-        console.error('Error parsing vocabulary pairs:', error);
-        loadSampleExercise();
+        
+        // Clear the service data after using it
+        vocabularyExerciseService.clearExerciseData();
+        return;
       }
-    } else {
-      loadSampleExercise();
     }
+    
+    loadSampleExercise();
   }, []);
 
-  const generateRandomOptions = (correctAnswer: string, allPairs: any[]) => {
-    const otherAnswers = allPairs
-      .map(pair => pair.english)
+  const generateRandomOptions = (correctAnswer: string, allWords: any[]) => {
+    const otherAnswers = allWords
+      .map(word => word.english)
       .filter(answer => answer !== correctAnswer)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3);

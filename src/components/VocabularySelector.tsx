@@ -3,19 +3,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useVocabulary } from '@/contexts/VocabularyContext';
+import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
+import { useNavigate } from 'react-router-dom';
 
 interface VocabularySelectorProps {
-  onWordsSelected: (words: string[] | any[]) => void;
+  onWordsSelected?: (words: string[] | any[]) => void;
   title?: string;
   description?: string;
+  exerciseType?: string;
+  exercisePath?: string;
 }
 
 export const VocabularySelector = ({ 
   onWordsSelected, 
   title = "Use Existing Vocabulary",
-  description = "Select a category from your vocabulary to practice with."
+  description = "Select a category from your vocabulary to practice with.",
+  exerciseType,
+  exercisePath
 }: VocabularySelectorProps) => {
   const { getAllCategories, getWordsByCategory } = useVocabulary();
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   
   const categories = getAllCategories();
@@ -23,8 +30,27 @@ export const VocabularySelector = ({
   const handleUseCategory = () => {
     if (selectedCategory) {
       const categoryWords = getWordsByCategory(selectedCategory);
-      // Pass the full word objects for exercises that need both german and english
-      onWordsSelected(categoryWords);
+      
+      if (exerciseType && exercisePath) {
+        // Convert to VocabularyWord format and use service
+        const vocabularyWords: VocabularyWord[] = categoryWords.map(word => ({
+          id: word.id,
+          german: word.german,
+          english: word.english,
+          categories: word.categories
+        }));
+        
+        vocabularyExerciseService.setExerciseData(
+          vocabularyWords,
+          selectedCategory,
+          exerciseType
+        );
+        
+        navigate(exercisePath);
+      } else if (onWordsSelected) {
+        // Fallback to callback for backward compatibility
+        onWordsSelected(categoryWords);
+      }
     }
   };
 

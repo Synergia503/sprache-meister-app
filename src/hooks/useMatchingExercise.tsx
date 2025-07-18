@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { MatchingExercise, MatchingPair } from '@/types/exercises';
+import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
 
 const SAMPLE_EXERCISE: MatchingExercise = {
   id: 'sample-matching',
@@ -32,20 +33,19 @@ export const useMatchingExercise = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if there's vocabulary data from the category selection
-    const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
-    const exerciseCategory = sessionStorage.getItem('exerciseCategory');
-    
-    if (vocabularyPairsData) {
-      try {
-        const vocabularyPairs = JSON.parse(vocabularyPairsData);
+    // Check if there's vocabulary data from the service
+    if (vocabularyExerciseService.hasExerciseData()) {
+      const exerciseData = vocabularyExerciseService.getExerciseData();
+      console.log("Matching exercise: Found exercise data from service:", exerciseData);
+      
+      if (exerciseData && exerciseData.words.length > 0) {
         const categoryExercise: MatchingExercise = {
           id: `category-${Date.now()}`,
-          words: vocabularyPairs.map((pair: any) => pair.german),
-          pairs: vocabularyPairs.map((pair: any, index: number) => ({
+          words: exerciseData.words.map(word => word.german),
+          pairs: exerciseData.words.map((word, index) => ({
             pairOrder: index + 1,
-            germanWord: pair.german,
-            englishWord: pair.english
+            germanWord: word.german,
+            englishWord: word.english
           })),
           userAnswers: {},
           userMatches: {},
@@ -60,21 +60,18 @@ export const useMatchingExercise = () => {
         setSelectedGerman(null);
         setSelectedEnglish(null);
         
-        // Clear the sessionStorage after using it
-        sessionStorage.removeItem('vocabularyPairsForExercise');
-        sessionStorage.removeItem('exerciseCategory');
-        
         toast({
           title: "Exercise loaded",
-          description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
+          description: `Using vocabulary from ${exerciseData.category}`,
         });
-      } catch (error) {
-        console.error('Error parsing vocabulary pairs:', error);
-        loadSampleExercise();
+        
+        // Clear the service data after using it
+        vocabularyExerciseService.clearExerciseData();
+        return;
       }
-    } else {
-      loadSampleExercise();
     }
+    
+    loadSampleExercise();
   }, []);
 
   const shuffleArray = (array: MatchingPair[]) => {

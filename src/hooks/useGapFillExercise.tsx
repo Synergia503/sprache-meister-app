@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useOpenAI } from "@/hooks/useOpenAI";
 import { useToast } from "@/hooks/use-toast";
 import { GapFillExercise } from "@/types/gapFill";
+import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
 
 export const useGapFillExercise = () => {
   const [currentExercise, setCurrentExercise] =
@@ -97,77 +98,46 @@ Return only a JSON object with this exact format:
   useEffect(() => {
     console.log("Gap-fill exercise useEffect triggered");
 
-    // Check if there's vocabulary data from category selection or drag zone
-    const vocabularyPairsData = sessionStorage.getItem(
-      "vocabularyPairsForExercise"
-    );
-    const wordListData = sessionStorage.getItem("gapFillWordsForExercise");
-    const exerciseCategory = sessionStorage.getItem("exerciseCategory");
-
-    console.log("Session storage data:", {
-      vocabularyPairsData: vocabularyPairsData ? "exists" : "null",
-      wordListData: wordListData ? "exists" : "null",
-      exerciseCategory,
-    });
-
-    if (vocabularyPairsData) {
-      console.log("Processing vocabulary pairs data");
-      try {
-        const vocabularyPairs = JSON.parse(vocabularyPairsData);
-        const words = vocabularyPairs.map((pair: any) => pair.german);
-        generateExercise(words);
-
-        // Clear the sessionStorage after using it
-        sessionStorage.removeItem("vocabularyPairsForExercise");
-        sessionStorage.removeItem("exerciseCategory");
-
+    // Check if there's vocabulary data from the service
+    if (vocabularyExerciseService.hasExerciseData()) {
+      const exerciseData = vocabularyExerciseService.getExerciseData();
+      console.log("Found exercise data from service:", exerciseData);
+      
+      if (exerciseData && exerciseData.words.length > 0) {
+        const germanWords = exerciseData.words.map(word => word.german);
+        console.log("Generating exercise with German words:", germanWords);
+        
+        generateExercise(germanWords);
+        
         toast({
           title: "Exercise loaded",
-          description: `Using vocabulary from ${
-            exerciseCategory || "selected category"
-          }`,
+          description: `Using vocabulary from ${exerciseData.category}`,
         });
-        return; // Exit early to prevent loading sample exercise
-      } catch (error) {
-        console.error("Error parsing vocabulary pairs:", error);
-      }
-    } else if (wordListData) {
-      console.log("Processing word list data:", wordListData);
-      try {
-        const parsedWordList = JSON.parse(wordListData);
-        console.log("Parsed word list:", parsedWordList);
-
-        let words: string[] = [];
-        if (Array.isArray(parsedWordList)) {
-          words = parsedWordList.filter((word) => word && word.trim());
-        } else {
-          words = [parsedWordList].filter((word) => word && word.trim());
-        }
-
-        console.log("Processed words for exercise:", words);
-
-        if (words.length > 0) {
-          console.log("Generating exercise with words:", words);
-          generateExercise(words);
-
-          // Clear the sessionStorage after using it
-          sessionStorage.removeItem("gapFillWordsForExercise");
-          sessionStorage.removeItem("exerciseCategory");
-
-          toast({
-            title: "Exercise loaded",
-            description: `Using ${words.length} selected words`,
-          });
-          return; // Exit early to prevent loading sample exercise
-        } else {
-          console.log("No valid words found, loading sample exercise");
-        }
-      } catch (error) {
-        console.error("Error parsing word list:", error);
+        
+        // Clear the service data after using it
+        vocabularyExerciseService.clearExerciseData();
+        return;
       }
     }
 
     console.log("Loading sample exercise as fallback");
+    // Load sample exercise as fallback
+    const sampleExercise: GapFillExercise = {
+      id: 'sample-gap-fill',
+      words: ['haben', 'sein', 'gehen', 'machen', 'kommen'],
+      sentences: [
+        { sentenceOrder: 1, sentence: 'Ich ___ heute müde.', solution: 'bin' },
+        { sentenceOrder: 2, sentence: 'Wir ___ ins Kino gegangen.', solution: 'sind' },
+        { sentenceOrder: 3, sentence: 'Sie ___ ein neues Auto.', solution: 'haben' }
+      ],
+      userAnswers: {},
+      isCompleted: false,
+      createdAt: new Date()
+    };
+    
+    setCurrentExercise(sampleExercise);
+    setUserAnswers({});
+    setShowResults(false);
   }, [toast, generateExercise]);
 
   const handleAnswerChange = (sentenceOrder: number, answer: string) => {

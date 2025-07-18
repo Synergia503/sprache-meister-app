@@ -39,7 +39,8 @@ const Translation = () => {
       
       <div className="space-y-6">
         <VocabularySelector
-          onWordsSelected={generateExercise}
+          exerciseType="translation"
+          exercisePath="/exercises/translation"
           title="Use Vocabulary from Category"
           description="Select a category from your vocabulary to create translation exercises."
         />

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { TranslationExercise } from '@/types/exercises';
+import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
 
 const SAMPLE_EXERCISE: TranslationExercise = {
   id: 'sample-translation',
@@ -26,20 +27,19 @@ export const useTranslationExercise = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if there's vocabulary data from the category selection
-    const vocabularyPairsData = sessionStorage.getItem('vocabularyPairsForExercise');
-    const exerciseCategory = sessionStorage.getItem('exerciseCategory');
-    
-    if (vocabularyPairsData) {
-      try {
-        const vocabularyPairs = JSON.parse(vocabularyPairsData);
+    // Check if there's vocabulary data from the service
+    if (vocabularyExerciseService.hasExerciseData()) {
+      const exerciseData = vocabularyExerciseService.getExerciseData();
+      console.log("Translation exercise: Found exercise data from service:", exerciseData);
+      
+      if (exerciseData && exerciseData.words.length > 0) {
         const categoryExercise: TranslationExercise = {
           id: `category-${Date.now()}`,
-          words: vocabularyPairs.map((pair: any) => pair.german),
-          sentences: vocabularyPairs.map((pair: any, index: number) => ({
+          words: exerciseData.words.map(word => word.german),
+          sentences: exerciseData.words.map((word, index) => ({
             sentenceOrder: index + 1,
-            germanSentence: pair.german,
-            englishSentence: pair.english
+            germanSentence: word.german,
+            englishSentence: word.english
           })),
           userAnswers: {},
           isCompleted: false,
@@ -50,21 +50,18 @@ export const useTranslationExercise = () => {
         setUserAnswers({});
         setShowResults(false);
         
-        // Clear the sessionStorage after using it
-        sessionStorage.removeItem('vocabularyPairsForExercise');
-        sessionStorage.removeItem('exerciseCategory');
-        
         toast({
           title: "Exercise loaded",
-          description: `Using vocabulary from ${exerciseCategory || 'selected category'}`,
+          description: `Using vocabulary from ${exerciseData.category}`,
         });
-      } catch (error) {
-        console.error('Error parsing vocabulary pairs:', error);
-        loadSampleExercise();
+        
+        // Clear the service data after using it
+        vocabularyExerciseService.clearExerciseData();
+        return;
       }
-    } else {
-      loadSampleExercise();
     }
+    
+    loadSampleExercise();
   }, []);
 
   const loadSampleExercise = () => {
