@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useOpenAI } from "@/hooks/useOpenAI";
 import { useToast } from "@/hooks/use-toast";
 import { GapFillExercise } from "@/types/gapFill";
-import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
+import {
+  vocabularyExerciseService,
+  VocabularyWord,
+} from "@/services/vocabularyExerciseService";
 
 export const useGapFillExercise = () => {
   const [currentExercise, setCurrentExercise] =
@@ -16,25 +19,13 @@ export const useGapFillExercise = () => {
   const { toast } = useToast();
 
   const generateExercise = useCallback(
-    async (input: string[] | any[]) => {
-      console.log("generateExercise called with input:", input);
+    async (words: VocabularyWord[]) => {
+      console.log("generateExercise called with input:", words);
 
       // Handle both word objects and string arrays
       let validWords: string[] = [];
-
-      if (
-        input.length > 0 &&
-        typeof input[0] === "object" &&
-        "german" in input[0]
-      ) {
-        // Input is word objects from vocabulary
-        validWords = input.map((word: any) => word.german);
-        console.log("Extracted German words from objects:", validWords);
-      } else {
-        // Input is string array
-        validWords = (input as string[]).filter((word) => word.trim());
-        console.log("Using string array as words:", validWords);
-      }
+      validWords = words.map((word: VocabularyWord) => word.german);
+      console.log("Extracted German words from objects:", validWords);
 
       if (validWords.length === 0) {
         console.log("No valid words found");
@@ -96,24 +87,29 @@ Return only a JSON object with this exact format:
 
   // Check for vocabulary data from service on mount
   useEffect(() => {
-    console.log("Gap-fill exercise useEffect triggered - checking for service data");
+    console.log(
+      "Gap-fill exercise useEffect triggered - checking for service data"
+    );
 
     // Check if there's vocabulary data from the service
     if (vocabularyExerciseService.hasExerciseData()) {
       const exerciseData = vocabularyExerciseService.getExerciseData();
       console.log("Found exercise data from service:", exerciseData);
-      
+
       if (exerciseData && exerciseData.words.length > 0) {
-        console.log("Generating exercise with vocabulary words:", exerciseData.words);
-        
+        console.log(
+          "Generating exercise with vocabulary words:",
+          exerciseData.words
+        );
+
         // Generate exercise with the vocabulary words
         generateExercise(exerciseData.words);
-        
+
         toast({
           title: "Exercise loaded",
           description: `Using vocabulary from ${exerciseData.category}`,
         });
-        
+
         // Clear the service data after using it
         vocabularyExerciseService.clearExerciseData();
         return;
@@ -123,23 +119,6 @@ Return only a JSON object with this exact format:
     }
 
     console.log("Loading sample exercise as fallback");
-    // Load sample exercise as fallback
-    const sampleExercise: GapFillExercise = {
-      id: 'sample-gap-fill',
-      words: ['haben', 'sein', 'gehen', 'machen', 'kommen'],
-      sentences: [
-        { sentenceOrder: 1, sentence: 'Ich ___ heute müde.', solution: 'bin' },
-        { sentenceOrder: 2, sentence: 'Wir ___ ins Kino gegangen.', solution: 'sind' },
-        { sentenceOrder: 3, sentence: 'Sie ___ ein neues Auto.', solution: 'haben' }
-      ],
-      userAnswers: {},
-      isCompleted: false,
-      createdAt: new Date()
-    };
-    
-    setCurrentExercise(sampleExercise);
-    setUserAnswers({});
-    setShowResults(false);
   }, [generateExercise, toast]);
 
   const handleAnswerChange = (sentenceOrder: number, answer: string) => {
