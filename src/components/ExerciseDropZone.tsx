@@ -60,12 +60,16 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
       categories: word.categories
     }));
 
+    console.log('🚀 ExerciseDropZone: Starting exercise with words:', vocabularyWords);
+
     // Set exercise data using the service
     vocabularyExerciseService.setExerciseData(
       vocabularyWords,
       'Custom Words',
       selectedExercise
     );
+    
+    console.log('🚀 ExerciseDropZone: Navigating to:', selectedType.path);
     
     // Navigate to exercise
     navigate(selectedType.path);

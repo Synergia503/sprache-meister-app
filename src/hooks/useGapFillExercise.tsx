@@ -94,9 +94,9 @@ Return only a JSON object with this exact format:
     [callOpenAI, toast]
   );
 
-  // Load sample exercise on mount or check for vocabulary
+  // Check for vocabulary data from service on mount
   useEffect(() => {
-    console.log("Gap-fill exercise useEffect triggered");
+    console.log("Gap-fill exercise useEffect triggered - checking for service data");
 
     // Check if there's vocabulary data from the service
     if (vocabularyExerciseService.hasExerciseData()) {
@@ -104,10 +104,10 @@ Return only a JSON object with this exact format:
       console.log("Found exercise data from service:", exerciseData);
       
       if (exerciseData && exerciseData.words.length > 0) {
-        const germanWords = exerciseData.words.map(word => word.german);
-        console.log("Generating exercise with German words:", germanWords);
+        console.log("Generating exercise with vocabulary words:", exerciseData.words);
         
-        generateExercise(germanWords);
+        // Generate exercise with the vocabulary words
+        generateExercise(exerciseData.words);
         
         toast({
           title: "Exercise loaded",
@@ -118,6 +118,8 @@ Return only a JSON object with this exact format:
         vocabularyExerciseService.clearExerciseData();
         return;
       }
+    } else {
+      console.log("No exercise data found in service");
     }
 
     console.log("Loading sample exercise as fallback");
@@ -138,7 +140,7 @@ Return only a JSON object with this exact format:
     setCurrentExercise(sampleExercise);
     setUserAnswers({});
     setShowResults(false);
-  }, [toast, generateExercise]);
+  }, [generateExercise, toast]);
 
   const handleAnswerChange = (sentenceOrder: number, answer: string) => {
     setUserAnswers((prev) => ({

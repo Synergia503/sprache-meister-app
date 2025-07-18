@@ -30,7 +30,7 @@ class VocabularyExerciseService {
       category,
       exerciseType
     };
-    console.log('VocabularyExerciseService: Set exercise data', {
+    console.log('🔥 VocabularyExerciseService: Set exercise data', {
       wordCount: words.length,
       category,
       exerciseType,
@@ -39,17 +39,19 @@ class VocabularyExerciseService {
   }
 
   getExerciseData(): ExerciseData | null {
-    console.log('VocabularyExerciseService: Get exercise data', this.currentExerciseData);
+    console.log('🔥 VocabularyExerciseService: Get exercise data', this.currentExerciseData);
     return this.currentExerciseData;
   }
 
   clearExerciseData(): void {
-    console.log('VocabularyExerciseService: Clearing exercise data');
+    console.log('🔥 VocabularyExerciseService: Clearing exercise data');
     this.currentExerciseData = null;
   }
 
   hasExerciseData(): boolean {
-    return this.currentExerciseData !== null;
+    const hasData = this.currentExerciseData !== null;
+    console.log('🔥 VocabularyExerciseService: Has exercise data?', hasData);
+    return hasData;
   }
 
   getWordsForExercise(): VocabularyWord[] {
