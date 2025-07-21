@@ -48,7 +48,7 @@ export const generateExercisePDF = (
   exercise: BaseExercise | GapFillExercise
 ) => {
   try {
-    console.log("Starting PDF generation for exercise:", exercise);
+    console.log("🔥 PDF Generation: Starting PDF generation for exercise:", exercise.id);
 
     const doc = new jsPDF();
     let filename = "";
@@ -123,9 +123,10 @@ export const generateExercisePDF = (
     };
 
     if (isMatchingExercise(exercise)) {
-      console.log("Generating matching exercise PDF");
+      console.log("🔥 PDF Generation: Generating matching exercise PDF");
       addTitle("Matching Exercise");
       filename = "matching-exercise.pdf";
+      console.log("🔥 PDF Generation: Set filename to:", filename);
 
       addSection("Instructions:");
       addText("Match the German words with their English translations.");
@@ -145,9 +146,10 @@ export const generateExercisePDF = (
         answers.push(`${pair.germanWord} - ${pair.englishWord}`);
       });
     } else if (isTranslationExercise(exercise)) {
-      console.log("Generating translation exercise PDF");
+      console.log("🔥 PDF Generation: Generating translation exercise PDF");
       addTitle("Translation Exercise");
       filename = "translation-exercise.pdf";
+      console.log("🔥 PDF Generation: Set filename to:", filename);
 
       addSection("Instructions:");
       addText("Translate the following German sentences into English.");
@@ -160,9 +162,10 @@ export const generateExercisePDF = (
         answers.push(sentence.englishSentence);
       });
     } else if (isMultipleChoiceExercise(exercise)) {
-      console.log("Generating multiple choice exercise PDF");
+      console.log("🔥 PDF Generation: Generating multiple choice exercise PDF");
       addTitle("Multiple Choice Exercise");
       filename = "multiple-choice-exercise.pdf";
+      console.log("🔥 PDF Generation: Set filename to:", filename);
 
       addSection("Instructions:");
       addText("Choose the correct answer for each question.");
@@ -177,9 +180,10 @@ export const generateExercisePDF = (
         answers.push(sentence.solution);
       });
     } else if (isGapFillExercise(exercise)) {
-      console.log("Generating gap-fill exercise PDF");
+      console.log("🔥 PDF Generation: Generating gap-fill exercise PDF");
       addTitle("Gap-Fill Exercise");
       filename = "gap-fill-exercise.pdf";
+      console.log("🔥 PDF Generation: Set filename to:", filename);
 
       addSection("Instructions:");
       addText("Fill in the blanks with the correct word.");
@@ -192,10 +196,11 @@ export const generateExercisePDF = (
         answers.push(sentence.solution);
       });
     } else {
-      console.log("Unknown exercise type, generating generic PDF");
+      console.log("🔥 PDF Generation: Unknown exercise type, generating generic PDF");
       addTitle("Exercise");
       addText("Exercise content not available");
       filename = "exercise.pdf";
+      console.log("🔥 PDF Generation: Set filename to:", filename);
     }
 
     // Add answers to footer if we have any
@@ -203,34 +208,36 @@ export const generateExercisePDF = (
       addAnswersToFooter();
     }
 
-    console.log("!!Generated answers:!!", answers);
+    console.log("🔥 PDF Generation: Generated answers:", answers);
 
-    console.log("Preparing PDF download with filename:", filename);
+    console.log("🔥 PDF Generation: Preparing PDF download with filename:", filename);
 
     // Generate PDF as blob and force download
     const pdfBlob = doc.output("blob");
-    console.log("PDF blob created, size:", pdfBlob.size, "bytes");
+    console.log("🔥 PDF Generation: PDF blob created, size:", pdfBlob.size, "bytes");
 
     // Create download link
     const url = URL.createObjectURL(pdfBlob);
     const downloadLink = document.createElement("a");
     downloadLink.href = url;
+    console.log("🔥 PDF Generation: About to set download filename to:", filename);
     downloadLink.download = filename;
+    console.log("🔥 PDF Generation: Download link filename set to:", downloadLink.download);
     downloadLink.style.display = "none";
 
     // Add to DOM, click, and remove
     document.body.appendChild(downloadLink);
-    console.log("Triggering download...");
+    console.log("🔥 PDF Generation: Triggering download for file:", downloadLink.download);
     downloadLink.click();
     document.body.removeChild(downloadLink);
 
     // Clean up the URL
     setTimeout(() => {
       URL.revokeObjectURL(url);
-      console.log("PDF download completed and URL cleaned up");
+      console.log("🔥 PDF Generation: PDF download completed and URL cleaned up");
     }, 100);
   } catch (error) {
-    console.error("Error generating PDF:", error);
+    console.error("🔥 PDF Generation: Error generating PDF:", error);
     alert("Error generating PDF. Please check the console for details.");
   }
 };
