@@ -7,6 +7,24 @@ import {
 import { GapFillExercise } from "@/types/gapFill";
 import { jsPDF, Matrix } from "jspdf";
 
+interface WordFormationExercise {
+  exerciseOrder: number;
+  instruction: string;
+  baseWord: string;
+  solution: string;
+  hint?: string;
+  explanation?: string;
+}
+
+interface WordFormationExerciseData {
+  id: string;
+  words: string[];
+  exercises: WordFormationExercise[];
+  userAnswers: { [key: number]: string };
+  isCompleted: boolean;
+  createdAt: Date;
+}
+
 // Type guards to safely identify exercise types
 const isMatchingExercise = (exercise: any): exercise is MatchingExercise => {
   return "pairs" in exercise && "userMatches" in exercise;
@@ -41,6 +59,15 @@ const isGapFillExercise = (exercise: any): exercise is GapFillExercise => {
     "solution" in exercise.sentences[0] &&
     !("options" in exercise.sentences[0]) &&
     !("germanSentence" in exercise.sentences[0])
+  );
+};
+
+const isWordFormationExercise = (exercise: any): exercise is WordFormationExerciseData => {
+  return (
+    "exercises" in exercise &&
+    exercise.exercises.length > 0 &&
+    "baseWord" in exercise.exercises[0] &&
+    "instruction" in exercise.exercises[0]
   );
 };
 
@@ -194,6 +221,26 @@ export const generateExercisePDF = (
         addText("   Answer: _______________");
         yPosition += 5;
         answers.push(sentence.solution);
+      });
+    } else if (isWordFormationExercise(exercise)) {
+      console.log("🔥 PDF Generation: Generating word formation exercise PDF");
+      addTitle("Word Formation Exercise");
+      filename = "word-formation-exercise.pdf";
+      console.log("🔥 PDF Generation: Set filename to:", filename);
+
+      addSection("Instructions:");
+      addText("Create new words using the given base words and instructions.");
+
+      addSection("Questions:");
+      exercise.exercises.forEach((ex, i) => {
+        addText(`${i + 1}. ${ex.instruction}`);
+        addText(`   Base word: ${ex.baseWord}`);
+        if (ex.hint) {
+          addText(`   Hint: ${ex.hint}`);
+        }
+        addText("   Answer: _______________");
+        yPosition += 5;
+        answers.push(ex.solution);
       });
     } else {
       console.log("🔥 PDF Generation: Unknown exercise type, generating generic PDF");

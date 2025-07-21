@@ -349,6 +349,18 @@ const Custom = () => {
                         <Target className="mr-2 h-4 w-4" />
                         Has Learning History
                       </Button>
+                      <Button 
+                        variant={isMultiSelectMode ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setIsMultiSelectMode(!isMultiSelectMode);
+                          if (!isMultiSelectMode) {
+                            setSelectedWords(new Set());
+                          }
+                        }}
+                      >
+                        Multi-Select Mode
+                      </Button>
                     </div>
                   </div>
 

@@ -47,5 +47,12 @@
     "description": "Mixed exercises for comprehensive practice",
     "icon": "Shuffle",
     "path": "/exercises/mixed"
+  },
+  {
+    "id": "word-formation",
+    "title": "Word Formation",
+    "description": "Practice creating words with prefixes and suffixes",
+    "icon": "Layers",
+    "path": "/exercises/word-formation"
   }
 ]

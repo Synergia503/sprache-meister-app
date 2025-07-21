@@ -1,309 +1,349 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, Loader2, FileText, Target, Languages, Link, BookOpenText, PenTool, Shuffle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FolderOpen, Loader2, Plus, Target } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { AnkiExport } from '@/components/AnkiExport';
+import { useVocabulary } from '@/contexts/VocabularyContext';
 import { useNavigate } from 'react-router-dom';
 import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
+import { useToast } from '@/hooks/use-toast';
+import { getExerciseTypes, ExerciseType } from '@/services/exerciseService';
 
 const Categorized = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [vocabulary, setVocabulary] = useState('');
-  const [showAnkiExport, setShowAnkiExport] = useState(false);
+  const [wordCount, setWordCount] = useState(10);
+  const [generatedWords, setGeneratedWords] = useState<Array<{german: string, english: string}>>([]);
+  const [selectedWords, setSelectedWords] = useState<Set<number>>(new Set());
   const [showExerciseSelection, setShowExerciseSelection] = useState(false);
-  const [selectedCategoryForExercise, setSelectedCategoryForExercise] = useState<any>(null);
-  const { callOpenAI, isLoading, apiKey, saveApiKey } = useOpenAI();
+  const [selectedExercise, setSelectedExercise] = useState('');
+  const [exerciseTypes, setExerciseTypes] = useState<ExerciseType[]>([]);
+  const { callOpenAI, isLoading, apiKey } = useOpenAI();
+  const { getAllCategories, getWordsByCategory, addWord } = useVocabulary();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const exercises = [
-    {
-      id: 'gap-fill',
-      title: 'Gap-Fill',
-      description: 'Fill in the blanks with correct German words',
-      icon: FileText,
-      path: '/exercises/gap-fill'
-    },
-    {
-      id: 'multiple-choice',
-      title: 'Multiple Choice',
-      description: 'Choose the correct answer from multiple options',
-      icon: Target,
-      path: '/exercises/multiple-choice'
-    },
-    {
-      id: 'translation',
-      title: 'Translation',
-      description: 'Translate between German and English',
-      icon: Languages,
-      path: '/exercises/translation'
-    },
-    {
-      id: 'matching',
-      title: 'Matching',
-      description: 'Match German words with their English translations',
-      icon: Link,
-      path: '/exercises/matching'
-    },
-    {
-      id: 'describe-picture',
-      title: 'Describe a Picture',
-      description: 'Practice describing images in German',
-      icon: BookOpenText,
-      path: '/exercises/describe-picture'
-    },
-    {
-      id: 'grammar',
-      title: 'Grammar',
-      description: 'Practice German grammar rules',
-      icon: PenTool,
-      path: '/exercises/grammar'
-    },
-    {
-      id: 'mixed',
-      title: 'Mixed',
-      description: 'Mixed exercises for comprehensive practice',
-      icon: Shuffle,
-      path: '/exercises/mixed'
+  const userCategories = getAllCategories();
+
+  // Load exercise types on component mount
+  React.useEffect(() => {
+    const loadExerciseTypes = async () => {
+      try {
+        const types = await getExerciseTypes();
+        setExerciseTypes(types);
+      } catch (error) {
+        console.error('Failed to load exercise types:', error);
+      }
+    };
+    loadExerciseTypes();
+  }, []);
+
+  const generateVocabulary = async () => {
+    if (!selectedCategory || !apiKey) {
+      toast({
+        title: "Missing requirements",
+        description: "Please select a category and ensure API key is configured.",
+        variant: "destructive",
+      });
+      return;
     }
-  ];
 
-  const categories = [
-    { 
-      name: "Animals", 
-      description: "Learn animal names in German",
-      samples: [
-        { german: "der Hund", english: "dog" },
-        { german: "die Katze", english: "cat" },
-        { german: "das Pferd", english: "horse" },
-        { german: "der Vogel", english: "bird" },
-        { german: "der Fisch", english: "fish" }
-      ]
-    },
-    { 
-      name: "Food & Drinks", 
-      description: "Food and beverage vocabulary",
-      samples: [
-        { german: "das Brot", english: "bread" },
-        { german: "die Milch", english: "milk" },
-        { german: "das Wasser", english: "water" },
-        { german: "der Apfel", english: "apple" },
-        { german: "das Fleisch", english: "meat" }
-      ]
-    },
-    { 
-      name: "Travel", 
-      description: "Travel-related vocabulary",
-      samples: [
-        { german: "der Flughafen", english: "airport" },
-        { german: "das Hotel", english: "hotel" },
-        { german: "der Zug", english: "train" },
-        { german: "die Reise", english: "trip/journey" },
-        { german: "der Koffer", english: "suitcase" }
-      ]
-    },
-    { 
-      name: "Family", 
-      description: "Family members and relationships",
-      samples: [
-        { german: "die Familie", english: "family" },
-        { german: "der Vater", english: "father" },
-        { german: "die Mutter", english: "mother" },
-        { german: "das Kind", english: "child" },
-        { german: "die Schwester", english: "sister" }
-      ]
-    },
-    { 
-      name: "Weather", 
-      description: "Weather conditions and seasons",
-      samples: [
-        { german: "das Wetter", english: "weather" },
-        { german: "die Sonne", english: "sun" },
-        { german: "der Regen", english: "rain" },
-        { german: "der Schnee", english: "snow" },
-        { german: "der Wind", english: "wind" }
-      ]
-    },
-    { 
-      name: "Shopping", 
-      description: "Shopping and retail vocabulary",
-      samples: [
-        { german: "das Geschäft", english: "store/shop" },
-        { german: "der Preis", english: "price" },
-        { german: "das Geld", english: "money" },
-        { german: "kaufen", english: "to buy" },
-        { german: "verkaufen", english: "to sell" }
-      ]
-    }
-  ];
+    const prompt = `Generate exactly ${wordCount} German vocabulary words for the category "${selectedCategory}". 
+    Include the German word with proper article (der/die/das where applicable) and its English translation.
+    
+    Return only a JSON array with this exact format:
+    [
+      {"german": "der Hund", "english": "dog"},
+      {"german": "die Katze", "english": "cat"}
+    ]`;
 
-  const generateVocabulary = async (category: any) => {
-    setSelectedCategory(category.name);
-    const prompt = `Generate a comprehensive vocabulary list for the category "${category.name}" in German. Include 15-20 words with their German article (der/die/das), English translation, and a simple example sentence in German with English translation.`;
-    const systemMessage = "You are a German language teacher creating vocabulary lists for students.";
+    const systemMessage = "You are a German language teacher creating vocabulary lists. Return only valid JSON without any additional text or explanations.";
     
     const result = await callOpenAI(prompt, systemMessage);
     if (result) {
-      setVocabulary(result);
+      try {
+        const words = JSON.parse(result);
+        setGeneratedWords(words);
+        setSelectedWords(new Set()); // Clear previous selections
+        toast({
+          title: "Vocabulary generated!",
+          description: `Generated ${words.length} words for ${selectedCategory}.`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error parsing vocabulary",
+          description: "Failed to parse generated vocabulary. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const showSamples = (category: any) => {
-    setSelectedCategory(category.name);
-    setSelectedCategoryForExercise(category);
-    const samplesText = category.samples.map((sample: any, index: number) => 
-      `${index + 1}. ${sample.german} - ${sample.english}`
-    ).join('\n');
-    setVocabulary(`Sample vocabulary for ${category.name}:\n\n${samplesText}`);
-    setShowAnkiExport(true);
+  const toggleWordSelection = (index: number) => {
+    setSelectedWords(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
   };
 
-  const sendToExercise = (exercisePath: string) => {
-    if (selectedCategoryForExercise && selectedCategoryForExercise.samples) {
-      // Convert samples to VocabularyWord format
-      const vocabularyWords: VocabularyWord[] = selectedCategoryForExercise.samples.map((sample: any, index: number) => ({
-        id: `sample-${index}`,
-        german: sample.german,
-        english: sample.english,
-        categories: [selectedCategoryForExercise.name.toLowerCase()]
-      }));
-      
-      // Determine exercise type from path
-      const exerciseType = exercisePath.split('/').pop() || 'unknown';
-      
-      // Use the service to store exercise data
-      vocabularyExerciseService.setExerciseData(
-        vocabularyWords,
-        selectedCategoryForExercise.name,
-        exerciseType
-      );
-    }
-    navigate(exercisePath);
+  const selectAllWords = () => {
+    setSelectedWords(new Set(generatedWords.map((_, index) => index)));
   };
 
-  const getAnkiItems = () => {
-    const selectedCat = categories.find(cat => cat.name === selectedCategory);
-    if (!selectedCat) return [];
+  const deselectAllWords = () => {
+    setSelectedWords(new Set());
+  };
+
+  const addSelectedWordsToVocabulary = () => {
+    const wordsToAdd = Array.from(selectedWords).map(index => {
+      const word = generatedWords[index];
+      return {
+        id: Date.now().toString() + Math.random(),
+        german: word.german,
+        english: word.english,
+        categories: [selectedCategory],
+        sampleSentence: '',
+        dateAdded: new Date(),
+        learningHistory: [],
+        isFavorite: false,
+      };
+    });
+
+    wordsToAdd.forEach(word => addWord(word));
     
-    return selectedCat.samples.map(sample => ({
-      front: sample.german,
-      back: sample.english,
-      tags: [selectedCategory.toLowerCase().replace(/\s+/g, '-'), 'german-vocabulary']
+    toast({
+      title: "Words added!",
+      description: `Added ${wordsToAdd.length} words to your vocabulary.`,
+    });
+
+    // Clear generated words and selections
+    setGeneratedWords([]);
+    setSelectedWords(new Set());
+  };
+
+  const startExerciseWithCategory = () => {
+    if (!selectedCategory || !selectedExercise) {
+      toast({
+        title: "Missing selection",
+        description: "Please select both a category and exercise type.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const categoryWords = getWordsByCategory(selectedCategory);
+    if (categoryWords.length === 0) {
+      toast({
+        title: "No words found",
+        description: "This category has no words. Please add some words first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Convert to VocabularyWord format
+    const vocabularyWords: VocabularyWord[] = categoryWords.map(word => ({
+      id: word.id,
+      german: word.german,
+      english: word.english,
+      categories: word.categories
     }));
+
+    const selectedType = exerciseTypes.find(type => type.id === selectedExercise);
+    if (!selectedType) return;
+
+    // Use the service to store exercise data
+    vocabularyExerciseService.setExerciseData(
+      vocabularyWords,
+      selectedCategory,
+      selectedExercise
+    );
+
+    // Navigate to exercise
+    navigate(selectedType.path);
+    
+    toast({
+      title: "Exercise started!",
+      description: `Starting ${selectedType.title} with ${categoryWords.length} words from ${selectedCategory}.`,
+    });
   };
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Categorized Vocabulary</h1>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
-        {categories.map((category) => (
-          <Card key={category.name} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="h-5 w-5" />
-                {category.name}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">{category.description}</p>
-              <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => showSamples(category)}
-                >
-                  View Samples
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  className="w-full"
-                  onClick={() => generateVocabulary(category)}
-                  disabled={isLoading || !apiKey}
-                >
-                  {isLoading && selectedCategory === category.name ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Generate More'
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Exercise Selection Modal */}
-      {showExerciseSelection && selectedCategoryForExercise && (
+      {/* User Categories Section */}
+      {userCategories.length > 0 && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Choose Exercise for {selectedCategoryForExercise.name}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <FolderOpen className="h-5 w-5" />
+              Your Categories
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 mb-4">
-              {exercises.map((exercise) => {
-                const IconComponent = exercise.icon;
-                return (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {userCategories.map((category) => (
                   <Button
-                    key={exercise.id}
-                    variant="outline"
-                    className="h-auto p-4 flex flex-col items-center gap-2"
-                    onClick={() => sendToExercise(exercise.path)}
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category)}
+                    className="h-auto p-3 text-left"
                   >
-                    <IconComponent className="h-5 w-5" />
-                    <div className="text-center">
-                      <div className="font-medium">{exercise.title}</div>
-                      <div className="text-xs text-muted-foreground">{exercise.description}</div>
+                    <div>
+                      <div className="font-medium">{category}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {getWordsByCategory(category).length} words
+                      </div>
                     </div>
                   </Button>
-                );
-              })}
+                ))}
+              </div>
+
+              {selectedCategory && (
+                <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium">Generate more words for "{selectedCategory}"</h3>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="word-count">Count:</Label>
+                      <Input
+                        id="word-count"
+                        type="number"
+                        min="5"
+                        max="50"
+                        value={wordCount}
+                        onChange={(e) => setWordCount(parseInt(e.target.value) || 10)}
+                        className="w-20"
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={generateVocabulary}
+                    disabled={isLoading || !apiKey}
+                    className="w-full"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating {wordCount} words...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Generate {wordCount} New Words
+                      </>
+                    )}
+                  </Button>
+
+                  {/* Exercise Selection */}
+                  <div className="space-y-3">
+                    <Label>Start Exercise with Category</Label>
+                    <div className="flex gap-3">
+                      <Select value={selectedExercise} onValueChange={setSelectedExercise}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Choose exercise type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {exerciseTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button 
+                        onClick={startExerciseWithCategory}
+                        disabled={!selectedExercise || getWordsByCategory(selectedCategory).length === 0}
+                        className="flex items-center gap-2"
+                      >
+                        <Target className="h-4 w-4" />
+                        Start Exercise
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <Button 
-              variant="ghost" 
-              onClick={() => setShowExerciseSelection(false)}
-              className="w-full"
-            >
-              Cancel
-            </Button>
           </CardContent>
         </Card>
       )}
 
-      {vocabulary && (
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>{selectedCategory} Vocabulary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="whitespace-pre-wrap mb-4">{vocabulary}</div>
-              
-              {/* Send to Exercise button appears only after viewing samples */}
-              {selectedCategoryForExercise && (
-                <div className="mt-4">
-                  <Button 
-                    onClick={() => setShowExerciseSelection(true)}
-                    className="w-full"
-                  >
-                    Send to Exercise
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      {/* Generated Words Section */}
+      {generatedWords.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Generated Words for "{selectedCategory}"</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={selectAllWords}>
+                  Select All
+                </Button>
+                <Button variant="outline" size="sm" onClick={deselectAllWords}>
+                  Deselect All
+                </Button>
+                <span className="text-sm text-muted-foreground self-center">
+                  {selectedWords.size} of {generatedWords.length} selected
+                </span>
+              </div>
 
-          {showAnkiExport && (
-            <AnkiExport 
-              items={getAnkiItems()}
-              defaultDeckName={`German - ${selectedCategory}`}
-            />
-          )}
-        </div>
+              <div className="grid gap-2">
+                {generatedWords.map((word, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50"
+                  >
+                    <Checkbox
+                      checked={selectedWords.has(index)}
+                      onCheckedChange={() => toggleWordSelection(index)}
+                    />
+                    <div className="flex-1">
+                      <span className="font-medium">{word.german}</span>
+                      <span className="text-muted-foreground mx-2">—</span>
+                      <span>{word.english}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button 
+                onClick={addSelectedWordsToVocabulary}
+                disabled={selectedWords.size === 0}
+                className="w-full"
+              >
+                Add {selectedWords.size} Selected Words to Vocabulary
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {userCategories.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No Categories Yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Add some words to your custom vocabulary first to see categories here.
+            </p>
+            <Button onClick={() => navigate('/vocabulary/custom')}>
+              Go to Custom Vocabulary
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

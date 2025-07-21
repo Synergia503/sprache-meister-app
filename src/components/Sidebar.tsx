@@ -42,6 +42,7 @@ const exercisesSubItems = [
   { title: "Multiple Choice", path: "/exercises/multiple-choice" },
   { title: "Translation", path: "/exercises/translation" },
   { title: "Matching", path: "/exercises/matching" },
+  { title: "Word Formation", path: "/exercises/word-formation" },
   { title: "Describe a Picture", path: "/exercises/describe-picture" },
   { title: "Mixed", path: "/exercises/mixed" },
 ];
