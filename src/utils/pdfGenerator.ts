@@ -5,7 +5,7 @@ import {
   MatchingExercise,
 } from "@/types/exercises";
 import { GapFillExercise } from "@/types/gapFill";
-import { jsPDF, Matrix } from "jspdf";
+import { jsPDF } from "jspdf";
 
 interface WordFormationExercise {
   exerciseOrder: number;
@@ -62,7 +62,9 @@ const isGapFillExercise = (exercise: any): exercise is GapFillExercise => {
   );
 };
 
-const isWordFormationExercise = (exercise: any): exercise is WordFormationExerciseData => {
+const isWordFormationExercise = (
+  exercise: any
+): exercise is WordFormationExerciseData => {
   return (
     "exercises" in exercise &&
     exercise.exercises.length > 0 &&
@@ -75,14 +77,16 @@ export const generateExercisePDF = (
   exercise: BaseExercise | GapFillExercise
 ) => {
   try {
-    console.log("🔥 PDF Generation: Starting PDF generation for exercise:", exercise.id);
+    console.log(
+      "🔥 PDF Generation: Starting PDF generation for exercise:",
+      exercise.id
+    );
 
     const doc = new jsPDF();
     let filename = "";
     let yPosition = 20;
     const lineHeight = 10;
     const pageHeight = doc.internal.pageSize.height;
-    const pageWidth = doc.internal.pageSize.width;
     const answers: string[] = [];
 
     const addText = (text: string, fontSize = 12) => {
@@ -118,35 +122,45 @@ export const generateExercisePDF = (
     };
 
     const addAnswersToFooter = () => {
-      // Add a new page for answers
       doc.addPage();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-      // Add answers in footer, upside down
-      doc.save(); // Save current state
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, "normal");
+      doc.saveGraphicsState?.();
 
-      // Rotate 180 degrees and position at bottom
-      doc.setCurrentTransformationMatrix(doc.Matrix(1, 0, 0, 1, 0, 0));
-      // doc.internal.write("q");
-      // doc.internal.write("q");
-      // doc.internal.write(`1 0 0 -1 ${pageWidth} ${pageHeight} cm`);
-
-      let footerY = 20; // Start from what will be the bottom when rotated
-      doc.setFontSize(8); // Much smaller font for answers
+      let flippedY = 20;
+      doc.setFontSize(8);
       doc.setFont(undefined, "bold");
-      doc.text("Answer Key:", 15, footerY);
-      footerY += 8;
+      doc.text("Answer Key:", 15, flippedY);
+      flippedY += 8;
+
       doc.setFont(undefined, "normal");
 
-      answers.forEach((answer, index) => {
-        if (footerY > pageHeight - 20) {
-          // If we run out of space, we could add another page, but for now just stop
-          return;
-        }
-        doc.text(`${index + 1}. ${answer}`, 15, footerY);
-        footerY += 6;
+      // Handle long answers by splitting into multiple lines if necessary
+      const formattedAnswers = answers.map((answer, index) => {
+        const numberedAnswer = `${index + 1}. ${answer}`;
+        return doc.splitTextToSize(numberedAnswer, 180);
       });
 
-      // doc.internal.write("Q");
+      // Join the answers with a comma, except for the last one
+      const jointAnswers = formattedAnswers
+        .map((lines, idx) => {
+          const answerText = lines.join(" ");
+          return idx < formattedAnswers.length - 1
+            ? `${answerText};`
+            : answerText;
+        })
+        .join(" ");
+
+      doc.text(jointAnswers, 145, flippedY, {
+        align: "left",
+        angle: 180,
+      });
+
+      doc.restoreGraphicsState?.();
     };
 
     if (isMatchingExercise(exercise)) {
@@ -243,7 +257,9 @@ export const generateExercisePDF = (
         answers.push(ex.solution);
       });
     } else {
-      console.log("🔥 PDF Generation: Unknown exercise type, generating generic PDF");
+      console.log(
+        "🔥 PDF Generation: Unknown exercise type, generating generic PDF"
+      );
       addTitle("Exercise");
       addText("Exercise content not available");
       filename = "exercise.pdf";
@@ -257,31 +273,49 @@ export const generateExercisePDF = (
 
     console.log("🔥 PDF Generation: Generated answers:", answers);
 
-    console.log("🔥 PDF Generation: Preparing PDF download with filename:", filename);
+    console.log(
+      "🔥 PDF Generation: Preparing PDF download with filename:",
+      filename
+    );
 
     // Generate PDF as blob and force download
     const pdfBlob = doc.output("blob");
-    console.log("🔥 PDF Generation: PDF blob created, size:", pdfBlob.size, "bytes");
+    console.log(
+      "🔥 PDF Generation: PDF blob created, size:",
+      pdfBlob.size,
+      "bytes"
+    );
 
     // Create download link
     const url = URL.createObjectURL(pdfBlob);
     const downloadLink = document.createElement("a");
     downloadLink.href = url;
-    console.log("🔥 PDF Generation: About to set download filename to:", filename);
+    console.log(
+      "🔥 PDF Generation: About to set download filename to:",
+      filename
+    );
     downloadLink.download = filename;
-    console.log("🔥 PDF Generation: Download link filename set to:", downloadLink.download);
+    console.log(
+      "🔥 PDF Generation: Download link filename set to:",
+      downloadLink.download
+    );
     downloadLink.style.display = "none";
 
     // Add to DOM, click, and remove
     document.body.appendChild(downloadLink);
-    console.log("🔥 PDF Generation: Triggering download for file:", downloadLink.download);
+    console.log(
+      "🔥 PDF Generation: Triggering download for file:",
+      downloadLink.download
+    );
     downloadLink.click();
     document.body.removeChild(downloadLink);
 
     // Clean up the URL
     setTimeout(() => {
       URL.revokeObjectURL(url);
-      console.log("🔥 PDF Generation: PDF download completed and URL cleaned up");
+      console.log(
+        "🔥 PDF Generation: PDF download completed and URL cleaned up"
+      );
     }, 100);
   } catch (error) {
     console.error("🔥 PDF Generation: Error generating PDF:", error);
