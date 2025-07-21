@@ -1,34 +1,36 @@
-
-import { useState, useEffect } from 'react';
-import { useOpenAI } from '@/hooks/useOpenAI';
-import { useToast } from '@/hooks/use-toast';
-import { MatchingExercise, MatchingPair } from '@/types/exercises';
-import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
+import { useState, useEffect } from "react";
+import { useOpenAI } from "@/hooks/useOpenAI";
+import { useToast } from "@/hooks/use-toast";
+import { MatchingExercise, MatchingPair } from "@/types/exercises";
+import { vocabularyExerciseService } from "@/services/vocabularyExerciseService";
 
 const SAMPLE_EXERCISE: MatchingExercise = {
-  id: 'sample-matching',
-  words: ['Hund', 'Katze', 'Haus', 'Auto', 'Wasser'],
+  id: "sample-matching",
+  words: ["Hund", "Katze", "Haus", "Auto", "Wasser"],
   pairs: [
-    { pairOrder: 1, germanWord: 'Hund', englishWord: 'dog' },
-    { pairOrder: 2, germanWord: 'Katze', englishWord: 'cat' },
-    { pairOrder: 3, germanWord: 'Haus', englishWord: 'house' },
-    { pairOrder: 4, germanWord: 'Auto', englishWord: 'car' },
-    { pairOrder: 5, germanWord: 'Wasser', englishWord: 'water' }
+    { pairOrder: 1, germanWord: "Hund", englishWord: "dog" },
+    { pairOrder: 2, germanWord: "Katze", englishWord: "cat" },
+    { pairOrder: 3, germanWord: "Haus", englishWord: "house" },
+    { pairOrder: 4, germanWord: "Auto", englishWord: "car" },
+    { pairOrder: 5, germanWord: "Wasser", englishWord: "water" },
   ],
   userAnswers: {},
   userMatches: {},
   isCompleted: false,
-  createdAt: new Date()
+  createdAt: new Date(),
 };
 
 export const useMatchingExercise = () => {
-  const [currentExercise, setCurrentExercise] = useState<MatchingExercise | null>(null);
+  const [currentExercise, setCurrentExercise] =
+    useState<MatchingExercise | null>(null);
   const [userMatches, setUserMatches] = useState<{ [key: number]: number }>({});
   const [showResults, setShowResults] = useState(false);
   const [shuffledEnglish, setShuffledEnglish] = useState<MatchingPair[]>([]);
   const [selectedGerman, setSelectedGerman] = useState<number | null>(null);
   const [selectedEnglish, setSelectedEnglish] = useState<number | null>(null);
-  const [previousExercises, setPreviousExercises] = useState<MatchingExercise[]>([]);
+  const [previousExercises, setPreviousExercises] = useState<
+    MatchingExercise[]
+  >([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
 
@@ -36,41 +38,44 @@ export const useMatchingExercise = () => {
     // Check if there's vocabulary data from the service
     if (vocabularyExerciseService.hasExerciseData()) {
       const exerciseData = vocabularyExerciseService.getExerciseData();
-      console.log("Matching exercise: Found exercise data from service:", exerciseData);
-      
+      console.log(
+        "Matching exercise: Found exercise data from service:",
+        exerciseData
+      );
+
       if (exerciseData && exerciseData.words.length > 0) {
         const categoryExercise: MatchingExercise = {
           id: `category-${Date.now()}`,
-          words: exerciseData.words.map(word => word.german),
+          words: exerciseData.words.map((word) => word.german),
           pairs: exerciseData.words.map((word, index) => ({
             pairOrder: index + 1,
             germanWord: word.german,
-            englishWord: word.english
+            englishWord: word.english,
           })),
           userAnswers: {},
           userMatches: {},
           isCompleted: false,
-          createdAt: new Date()
+          createdAt: new Date(),
         };
-        
+
         setCurrentExercise(categoryExercise);
         setShuffledEnglish(shuffleArray(categoryExercise.pairs));
         setUserMatches({});
         setShowResults(false);
         setSelectedGerman(null);
         setSelectedEnglish(null);
-        
+
         toast({
           title: "Exercise loaded",
           description: `Using vocabulary from ${exerciseData.category}`,
         });
-        
+
         // Clear the service data after using it
         vocabularyExerciseService.clearExerciseData();
         return;
       }
     }
-    
+
     loadSampleExercise();
   }, []);
 
@@ -95,15 +100,19 @@ export const useMatchingExercise = () => {
   const generateExercise = async (input: string[] | any[]) => {
     // Handle both word objects and string arrays
     let validWords: string[] = [];
-    
-    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
+
+    if (
+      input.length > 0 &&
+      typeof input[0] === "object" &&
+      "german" in input[0]
+    ) {
       // Input is word objects from vocabulary
       validWords = input.map((word: any) => word.german);
     } else {
       // Input is string array
-      validWords = (input as string[]).filter(word => word.trim());
+      validWords = (input as string[]).filter((word) => word.trim());
     }
-    
+
     if (validWords.length === 0) {
       toast({
         title: "No words provided",
@@ -113,7 +122,9 @@ export const useMatchingExercise = () => {
       return;
     }
 
-    const prompt = `Create a German-English matching exercise with these German words: ${validWords.join(', ')}. For each German word, provide its most common English translation.
+    const prompt = `Create a German-English matching exercise with these German words: ${validWords.join(
+      ", "
+    )}. For each German word, provide its most common English translation.
 
 Return only a JSON object with this exact format:
 {
@@ -126,8 +137,9 @@ Return only a JSON object with this exact format:
   ]
 }`;
 
-    const systemMessage = "You are a German language teacher creating matching exercises. Return only valid JSON without any additional text or explanations.";
-    
+    const systemMessage =
+      "You are a German language teacher creating matching exercises. Return only valid JSON without any additional text or explanations.";
+
     const result = await callOpenAI(prompt, systemMessage);
     if (result) {
       try {
@@ -139,7 +151,7 @@ Return only a JSON object with this exact format:
           userAnswers: {},
           userMatches: {},
           isCompleted: false,
-          createdAt: new Date()
+          createdAt: new Date(),
         };
         setCurrentExercise(exercise);
         setShuffledEnglish(shuffleArray(exerciseData.pairs));
@@ -169,22 +181,22 @@ Return only a JSON object with this exact format:
 
   const handleMatch = (germanIndex: number, englishIndex: number) => {
     if (showResults) return;
-    
+
     if (englishIndex === -1) {
       // Clear the match
-      setUserMatches(prev => {
+      setUserMatches((prev) => {
         const newMatches = { ...prev };
         delete newMatches[germanIndex];
         return newMatches;
       });
     } else {
       // Set new match
-      setUserMatches(prev => ({
+      setUserMatches((prev) => ({
         ...prev,
-        [germanIndex]: englishIndex
+        [germanIndex]: englishIndex,
       }));
     }
-    
+
     // Clear selections after matching
     setSelectedGerman(null);
     setSelectedEnglish(null);
@@ -196,12 +208,12 @@ Return only a JSON object with this exact format:
     const updatedExercise = {
       ...currentExercise,
       userMatches,
-      isCompleted: true
+      isCompleted: true,
     };
 
-    setPreviousExercises(prev => [...prev, updatedExercise]);
+    setPreviousExercises((prev) => [...prev, updatedExercise]);
     setShowResults(true);
-    
+
     // Calculate score
     const correctMatches = currentExercise.pairs.filter((pair, index) => {
       const userMatch = userMatches[index];
@@ -217,29 +229,37 @@ Return only a JSON object with this exact format:
   };
 
   const getMatchingResult = (germanIndex: number) => {
-    if (!showResults || !currentExercise) return '';
-    
+    if (!showResults || !currentExercise) return "";
+
     const userMatch = userMatches[germanIndex];
-    if (userMatch === undefined) return '';
-    
+    if (userMatch === undefined) return "";
+
     const correctPair = currentExercise.pairs[germanIndex];
     const selectedPair = shuffledEnglish[userMatch];
-    
-    return correctPair.englishWord === selectedPair.englishWord ? 'correct' : 'incorrect';
+
+    return correctPair.englishWord === selectedPair.englishWord
+      ? "correct"
+      : "incorrect";
   };
 
   const resetExercise = () => {
     // Store the current exercise data to enable restart functionality
     const currentVocabulary = currentExercise?.pairs;
-    
+
     if (currentVocabulary && currentVocabulary.length > 0) {
       // Keep current exercise vocabulary for restart
-      setCurrentExercise(prev => prev ? {
-        ...prev,
-        userMatches: {},
-        isCompleted: false
-      } : null);
-      setShuffledEnglish(currentVocabulary ? shuffleArray(currentVocabulary) : []);
+      setCurrentExercise((prev) =>
+        prev
+          ? {
+              ...prev,
+              userMatches: {},
+              isCompleted: false,
+            }
+          : null
+      );
+      setShuffledEnglish(
+        currentVocabulary ? shuffleArray(currentVocabulary) : []
+      );
       setUserMatches({});
       setShowResults(false);
       setSelectedGerman(null);
@@ -282,6 +302,6 @@ Return only a JSON object with this exact format:
     getMatchingResult,
     resetExercise,
     loadPreviousExercise,
-    shuffleEnglishWords
+    shuffleEnglishWords,
   };
 };

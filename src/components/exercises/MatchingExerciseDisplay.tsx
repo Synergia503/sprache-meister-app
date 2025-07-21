@@ -34,7 +34,7 @@ export const MatchingExerciseDisplay = ({
   onSelectGerman,
   onSelectEnglish,
   getMatchingResult,
-  onDownload
+  onDownload,
 }: MatchingExerciseDisplayProps) => {
   const isEnglishWordUsed = (englishIndex: number) => {
     return Object.values(userMatches).includes(englishIndex);
@@ -42,43 +42,43 @@ export const MatchingExerciseDisplay = ({
 
   const handleGermanClick = (germanIndex: number) => {
     if (showResults) return;
-    
+
     // If this German word is already matched, clear the match
     if (userMatches[germanIndex] !== undefined) {
       onMatch(germanIndex, -1); // -1 indicates clearing the match
       return;
     }
-    
+
     // If there's a selected English word, make the match
     if (selectedEnglish !== null) {
       onMatch(germanIndex, selectedEnglish);
       return;
     }
-    
+
     // Otherwise, just select this German word
     onSelectGerman(germanIndex);
   };
 
   const handleEnglishClick = (englishIndex: number) => {
     if (showResults) return;
-    
+
     // If this English word is already used in a match, clear that match
     if (isEnglishWordUsed(englishIndex)) {
       const germanIndexUsingThis = Object.keys(userMatches).find(
-        key => userMatches[parseInt(key)] === englishIndex
+        (key) => userMatches[parseInt(key)] === englishIndex
       );
       if (germanIndexUsingThis) {
         onMatch(parseInt(germanIndexUsingThis), -1);
       }
       return;
     }
-    
+
     // If there's a selected German word, make the match
     if (selectedGerman !== null) {
       onMatch(selectedGerman, englishIndex);
       return;
     }
-    
+
     // Otherwise, just select this English word
     onSelectEnglish(englishIndex);
   };
@@ -86,7 +86,9 @@ export const MatchingExerciseDisplay = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Match German words with their English translations</CardTitle>
+        <CardTitle>
+          Match German words with their English translations
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid md:grid-cols-2 gap-6">
@@ -96,56 +98,72 @@ export const MatchingExerciseDisplay = ({
               <div
                 key={index}
                 className={`p-3 border rounded cursor-pointer transition-colors min-h-[48px] flex items-center ${
-                  showResults 
-                    ? getMatchingResult(index) === 'correct' 
-                      ? 'bg-green-100 border-green-300' 
-                      : getMatchingResult(index) === 'incorrect'
-                      ? 'bg-red-100 border-red-300'
-                      : 'bg-gray-50'
-                    : userMatches[index] !== undefined 
-                    ? 'bg-blue-100 border-blue-300'
+                  showResults
+                    ? getMatchingResult(index) === "correct"
+                      ? "bg-green-100 border-green-300"
+                      : getMatchingResult(index) === "incorrect"
+                      ? "bg-red-100 border-red-300"
+                      : "bg-gray-50"
+                    : userMatches[index] !== undefined
+                    ? "bg-blue-100 border-blue-300"
                     : selectedGerman === index
-                    ? 'bg-blue-50 border-blue-200'
-                    : 'hover:bg-gray-50'
+                    ? "bg-blue-50 border-blue-200"
+                    : "hover:bg-gray-50"
                 }`}
                 onClick={() => handleGermanClick(index)}
               >
-                <span className="font-medium text-sm">{index + 1}. {pair.germanWord}</span>
+                <span className="font-medium text-sm">
+                  {index + 1}. {pair.germanWord}
+                </span>
+                {/* Show the user's match if available */}
                 {userMatches[index] !== undefined && (
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    → {shuffledEnglish[userMatches[index]]?.englishWord}
+                  <span className="ml-2 text-sm text-gray-600">
+                    → {shuffledEnglish[userMatches[index]].englishWord}
+                  </span>
+                )}
+                {/* Always show correct answer */}
+                {showResults && (
+                  <span className="ml-auto text-sm text-green-600 font-medium">
+                    → {pair.englishWord}
                   </span>
                 )}
               </div>
             ))}
           </div>
-          
+
           <div className="space-y-2">
             <h3 className="font-medium mb-4">English</h3>
             {shuffledEnglish.map((pair, index) => (
               <div
                 key={index}
                 className={`min-h-[48px] flex items-center p-3 border rounded cursor-pointer transition-colors ${
-                  isEnglishWordUsed(index) 
-                    ? 'bg-blue-100 border-blue-300' 
+                  isEnglishWordUsed(index)
+                    ? "bg-blue-100 border-blue-300"
                     : selectedEnglish === index
-                    ? 'bg-blue-50 border-blue-200'
-                    : showResults 
-                    ? 'border-gray-200'
-                    : 'hover:bg-gray-50'
+                    ? "bg-blue-50 border-blue-200"
+                    : showResults
+                    ? "border-gray-200"
+                    : "hover:bg-gray-50"
                 }`}
                 onClick={() => handleEnglishClick(index)}
               >
-                <span className="font-medium text-sm">{String.fromCharCode(65 + index)}. {pair.englishWord}</span>
+                <span className="font-medium text-sm">
+                  {String.fromCharCode(65 + index)}. {pair.englishWord}
+                </span>
               </div>
             ))}
           </div>
         </div>
-        
+
         <div className="flex gap-2 mt-6">
           {!showResults ? (
             <>
-              <Button onClick={onCheckAnswers} disabled={Object.keys(userMatches).length !== exercise.pairs.length}>
+              <Button
+                onClick={onCheckAnswers}
+                disabled={
+                  Object.keys(userMatches).length !== exercise.pairs.length
+                }
+              >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Check Matches
               </Button>

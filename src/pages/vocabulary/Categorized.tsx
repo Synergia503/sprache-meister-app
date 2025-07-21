@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
 import { useToast } from '@/hooks/use-toast';
 import { getExerciseTypes, ExerciseType } from '@/services/exerciseService';
+import React from 'react';
 
 const Categorized = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
