@@ -403,6 +403,7 @@ const Custom = () => {
                       }}
                       onDragEnd={handleDragEnd}
                       onClick={(e) => handleWordSelection(word.id, e.ctrlKey)}
+                      title={isMultiSelectMode ? "Click to select/deselect" : "Ctrl+Click to start multi-select"}
                     >
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
