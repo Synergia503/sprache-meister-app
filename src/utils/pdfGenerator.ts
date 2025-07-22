@@ -1,3 +1,6 @@
+// https://stackoverflow.com/questions/76284643/how-to-rotate-text-around-its-center-in-jspdf
+
+
 import {
   BaseExercise,
   TranslationExercise,
