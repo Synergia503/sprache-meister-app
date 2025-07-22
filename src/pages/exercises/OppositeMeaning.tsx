@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Layers, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeftRight, Loader2, CheckCircle } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { useWordFormationExercise } from '@/hooks/useWordFormationExercise';
+import { useOppositeMeaningExercise } from '@/hooks/useOppositeMeaningExercise';
 import { WordInputForm } from '@/components/exercises/WordInputForm';
 import { ExerciseLayout } from '@/components/exercises/ExerciseLayout';
 import { VocabularySelector } from '@/components/VocabularySelector';
 
-const WordFormation = () => {
+const OppositeMeaning = () => {
   const { apiKey } = useOpenAI();
   const {
     currentExercise,
@@ -22,11 +22,11 @@ const WordFormation = () => {
     checkAnswers,
     resetExercise,
     loadPreviousExercise
-  } = useWordFormationExercise();
+  } = useOppositeMeaningExercise();
 
   return (
     <ExerciseLayout
-      title="Word Formation Exercise"
+      title="Opposite Meaning Exercise"
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}
@@ -34,7 +34,7 @@ const WordFormation = () => {
       {currentExercise && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Create new words using prefixes and suffixes</CardTitle>
+            <CardTitle>Find the opposite meaning (antonym) for each word</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -42,10 +42,10 @@ const WordFormation = () => {
                 <div key={exercise.exerciseOrder} className="space-y-3">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="font-medium mb-2">
-                      {exercise.exerciseOrder}. {exercise.instruction}
+                      {exercise.exerciseOrder}. What is the opposite of "{exercise.word}"?
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Base word: <span className="font-medium">{exercise.baseWord}</span>
+                      English meaning: {exercise.englishMeaning}
                     </p>
                     {exercise.hint && showResults && (
                       <p className="text-sm text-blue-600">
@@ -55,7 +55,7 @@ const WordFormation = () => {
                   </div>
                   
                   <Input
-                    placeholder="Your answer"
+                    placeholder="Enter the opposite word in German"
                     value={userAnswers[exercise.exerciseOrder] || ''}
                     onChange={(e) => handleAnswerChange(exercise.exerciseOrder, e.target.value)}
                     disabled={showResults}
@@ -101,23 +101,23 @@ const WordFormation = () => {
       
       <div className="space-y-6">
         <VocabularySelector
-          exerciseType="word-formation"
-          exercisePath="/exercises/word-formation"
+          exerciseType="opposite-meaning"
+          exercisePath="/exercises/opposite-meaning"
           title="Use Vocabulary from Category"
-          description="Select a category from your vocabulary to create word formation exercises."
+          description="Select a category from your vocabulary to create opposite meaning exercises."
         />
         
         <WordInputForm
           onGenerateExercise={generateExercise}
           isLoading={isLoading}
           apiKey={apiKey}
-          description="Add German base words to practice word formation with prefixes and suffixes."
-          placeholder="Base word (e.g., spielen, Haus)"
-          title="Create New Word Formation Exercise"
+          description="Add German words to find their opposites (antonyms)."
+          placeholder="German word (e.g., groß, schnell)"
+          title="Create New Opposite Meaning Exercise"
         />
       </div>
     </ExerciseLayout>
   );
 };
 
-export default WordFormation;
+export default OppositeMeaning;

@@ -54,5 +54,26 @@
     "description": "Practice creating words with prefixes and suffixes",
     "icon": "Layers",
     "path": "/exercises/word-formation"
+  },
+  {
+    "id": "opposite-meaning",
+    "title": "Opposite Meaning",
+    "description": "Find words with opposite meanings (antonyms)",
+    "icon": "ArrowLeftRight",
+    "path": "/exercises/opposite-meaning"
+  },
+  {
+    "id": "same-meaning",
+    "title": "Same Meaning",
+    "description": "Find words with similar meanings (synonyms)",
+    "icon": "Equal",
+    "path": "/exercises/same-meaning"
+  },
+  {
+    "id": "word-definition",
+    "title": "Word Definition",
+    "description": "Write the word that matches the given definition",
+    "icon": "BookOpen",
+    "path": "/exercises/word-definition"
   }
 ]

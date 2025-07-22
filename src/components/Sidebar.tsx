@@ -43,6 +43,9 @@ const exercisesSubItems = [
   { title: "Translation", path: "/exercises/translation" },
   { title: "Matching", path: "/exercises/matching" },
   { title: "Word Formation", path: "/exercises/word-formation" },
+  { title: "Opposite Meaning", path: "/exercises/opposite-meaning" },
+  { title: "Same Meaning", path: "/exercises/same-meaning" },
+  { title: "Word Definition", path: "/exercises/word-definition" },
   { title: "Describe a Picture", path: "/exercises/describe-picture" },
   { title: "Mixed", path: "/exercises/mixed" },
 ];

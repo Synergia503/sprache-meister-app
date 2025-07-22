@@ -1,24 +1,70 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { BookOpenText, Loader2 } from "lucide-react";
+import { BookOpenText, Loader2, Image } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
 
 const DescribePicture = () => {
   const [scenario, setScenario] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [feedback, setFeedback] = useState('');
-  const { callOpenAI, isLoading, apiKey, saveApiKey } = useOpenAI();
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const { callOpenAI, isLoading, apiKey } = useOpenAI();
 
-  const generateScenario = async () => {
-    const prompt = "Create a detailed description of a scene or picture that a German language student should describe. Include specific details about people, objects, actions, and setting that would help practice German vocabulary and sentence structure.";
-    const systemMessage = "You are a German language teacher creating picture description exercises.";
+  const generateImageAndScenario = async () => {
+    if (!apiKey) {
+      return;
+    }
+
+    setIsGeneratingImage(true);
     
-    const result = await callOpenAI(prompt, systemMessage);
-    if (result) {
-      setScenario(result);
+    try {
+      // First, generate a scenario description
+      const scenarioPrompt = "Create a detailed description of a scene that would be good for German language practice. Include specific objects, people, actions, and settings that would help students practice German vocabulary. Make it vivid and detailed.";
+      const scenarioSystemMessage = "You are a German language teacher creating picture description exercises.";
+      
+      const scenarioResult = await callOpenAI(scenarioPrompt, scenarioSystemMessage);
+      
+      if (scenarioResult) {
+        setScenario(scenarioResult);
+        
+        // Now generate an image based on the scenario
+        const imagePrompt = `Create a realistic image for German language learning: ${scenarioResult}. The image should be clear, educational, and suitable for language practice.`;
+        
+        // Call OpenAI DALL-E API for image generation
+        const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: imagePrompt,
+            n: 1,
+            size: '1024x1024',
+            quality: 'standard'
+          }),
+        });
+
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json();
+          const generatedImageUrl = imageData.data[0].url;
+          setImageUrl(generatedImageUrl);
+        } else {
+          console.error('Image generation failed:', imageResponse.status);
+          // Fallback to a placeholder image
+          setImageUrl('https://images.pexels.com/photos/1181467/pexels-photo-1181467.jpeg?auto=compress&cs=tinysrgb&w=1024&h=1024&fit=crop');
+        }
+      }
+    } catch (error) {
+      console.error('Error generating image:', error);
+      // Fallback to a placeholder image
+      setImageUrl('https://images.pexels.com/photos/1181467/pexels-photo-1181467.jpeg?auto=compress&cs=tinysrgb&w=1024&h=1024&fit=crop');
+    } finally {
+      setIsGeneratingImage(false);
       setDescription('');
       setFeedback('');
     }
@@ -49,26 +95,39 @@ const DescribePicture = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button 
-            onClick={generateScenario} 
-            disabled={isLoading || !apiKey}
+            onClick={generateImageAndScenario} 
+            disabled={isLoading || isGeneratingImage || !apiKey}
             className="w-full"
           >
-            {isLoading ? (
+            {isLoading || isGeneratingImage ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
+                {isGeneratingImage ? 'Generating Image...' : 'Generating...'}
               </>
             ) : (
-              'Generate New Picture Scenario'
+              <>
+                <Image className="mr-2 h-4 w-4" />
+                Generate New Picture Scenario
+              </>
             )}
           </Button>
           
-          {scenario && (
+          {imageUrl && (
             <div className="space-y-4">
-              <div className="p-4 bg-muted rounded-lg">
-                <h3 className="font-medium mb-2">Picture to Describe:</h3>
-                <div className="whitespace-pre-wrap">{scenario}</div>
+              <div className="flex justify-center">
+                <img 
+                  src={imageUrl} 
+                  alt="Generated scene for description" 
+                  className="max-w-full h-auto rounded-lg border shadow-lg max-h-96"
+                />
               </div>
+              
+              {scenario && (
+                <div className="p-4 bg-muted rounded-lg">
+                  <h3 className="font-medium mb-2">Scene Description:</h3>
+                  <div className="whitespace-pre-wrap text-sm">{scenario}</div>
+                </div>
+              )}
               
               <div>
                 <label className="block text-sm font-medium mb-2">Your German Description:</label>

@@ -27,6 +27,9 @@ import MultipleChoice from "./pages/exercises/MultipleChoice";
 import Translation from "./pages/exercises/Translation";
 import Matching from "./pages/exercises/Matching";
 import WordFormation from "./pages/exercises/WordFormation";
+import OppositeMeaning from "./pages/exercises/OppositeMeaning";
+import SameMeaning from "./pages/exercises/SameMeaning";
+import WordDefinition from "./pages/exercises/WordDefinition";
 import VocabularyCategorized from "./pages/vocabulary/Categorized";
 import VocabularyCustom from "./pages/vocabulary/Custom";
 
@@ -70,6 +73,9 @@ const AppRoutes = () => {
             <Route path="/exercises/translation" element={<Translation />} />
             <Route path="/exercises/matching" element={<Matching />} />
             <Route path="/exercises/word-formation" element={<WordFormation />} />
+            <Route path="/exercises/opposite-meaning" element={<OppositeMeaning />} />
+            <Route path="/exercises/same-meaning" element={<SameMeaning />} />
+            <Route path="/exercises/word-definition" element={<WordDefinition />} />
             <Route path="/exercises/describe-picture" element={<DescribePicture />} />
             <Route path="/exercises/grammar" element={<Grammar />} />
             <Route path="/exercises/mixed" element={<Mixed />} />

@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Layers, Loader2, CheckCircle } from "lucide-react";
+import { BookOpen, Loader2, CheckCircle } from "lucide-react";
 import { useOpenAI } from '@/hooks/useOpenAI';
-import { useWordFormationExercise } from '@/hooks/useWordFormationExercise';
+import { useWordDefinitionExercise } from '@/hooks/useWordDefinitionExercise';
 import { WordInputForm } from '@/components/exercises/WordInputForm';
 import { ExerciseLayout } from '@/components/exercises/ExerciseLayout';
 import { VocabularySelector } from '@/components/VocabularySelector';
 
-const WordFormation = () => {
+const WordDefinition = () => {
   const { apiKey } = useOpenAI();
   const {
     currentExercise,
@@ -22,11 +22,11 @@ const WordFormation = () => {
     checkAnswers,
     resetExercise,
     loadPreviousExercise
-  } = useWordFormationExercise();
+  } = useWordDefinitionExercise();
 
   return (
     <ExerciseLayout
-      title="Word Formation Exercise"
+      title="Word Definition Exercise"
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}
@@ -34,7 +34,7 @@ const WordFormation = () => {
       {currentExercise && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Create new words using prefixes and suffixes</CardTitle>
+            <CardTitle>Write the German word that matches each definition</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -42,10 +42,7 @@ const WordFormation = () => {
                 <div key={exercise.exerciseOrder} className="space-y-3">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="font-medium mb-2">
-                      {exercise.exerciseOrder}. {exercise.instruction}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Base word: <span className="font-medium">{exercise.baseWord}</span>
+                      {exercise.exerciseOrder}. {exercise.definition}
                     </p>
                     {exercise.hint && showResults && (
                       <p className="text-sm text-blue-600">
@@ -55,7 +52,7 @@ const WordFormation = () => {
                   </div>
                   
                   <Input
-                    placeholder="Your answer"
+                    placeholder="Enter the German word"
                     value={userAnswers[exercise.exerciseOrder] || ''}
                     onChange={(e) => handleAnswerChange(exercise.exerciseOrder, e.target.value)}
                     disabled={showResults}
@@ -101,23 +98,23 @@ const WordFormation = () => {
       
       <div className="space-y-6">
         <VocabularySelector
-          exerciseType="word-formation"
-          exercisePath="/exercises/word-formation"
+          exerciseType="word-definition"
+          exercisePath="/exercises/word-definition"
           title="Use Vocabulary from Category"
-          description="Select a category from your vocabulary to create word formation exercises."
+          description="Select a category from your vocabulary to create definition exercises."
         />
         
         <WordInputForm
           onGenerateExercise={generateExercise}
           isLoading={isLoading}
           apiKey={apiKey}
-          description="Add German base words to practice word formation with prefixes and suffixes."
-          placeholder="Base word (e.g., spielen, Haus)"
-          title="Create New Word Formation Exercise"
+          description="Add German words to create definition-based exercises."
+          placeholder="German word (e.g., Haus, laufen)"
+          title="Create New Word Definition Exercise"
         />
       </div>
     </ExerciseLayout>
   );
 };
 
-export default WordFormation;
+export default WordDefinition;
