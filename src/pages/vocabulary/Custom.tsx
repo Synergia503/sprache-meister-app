@@ -1,37 +1,61 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Plus, Star, Loader2, BookOpen, X, Edit, Trash, List, ChevronRight, Filter, Search, ArrowUpDown, Heart, Clock, Target, TrendingUp, Calendar } from "lucide-react";
-import { useToast } from '@/hooks/use-toast';
-import PhotoWordExtractor from '@/components/PhotoWordExtractor';
-import ExerciseDropZone from '@/components/ExerciseDropZone';
-import { useVocabulary } from '@/contexts/VocabularyContext';
-import { ExtractedWord, CustomWord } from '@/types/vocabulary';
+import {
+  Plus,
+  Star,
+  Loader2,
+  BookOpen,
+  X,
+  Edit,
+  Trash,
+  List,
+  ChevronRight,
+  Filter,
+  Search,
+  ArrowUpDown,
+  Heart,
+  Clock,
+  Target,
+  TrendingUp,
+  Calendar,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import PhotoWordExtractor from "@/components/PhotoWordExtractor";
+import ExerciseDropZone from "@/components/ExerciseDropZone";
+import { useVocabulary } from "@/contexts/VocabularyContext";
+import { ExtractedWord, CustomWord } from "@/types/vocabulary";
 
 // Remove duplicate interfaces - they're now in types/vocabulary.ts
 
 const Custom = () => {
   const navigate = useNavigate();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newGermanWord, setNewGermanWord] = useState('');
-  const [newEnglishWord, setNewEnglishWord] = useState('');
+  const [newGermanWord, setNewGermanWord] = useState("");
+  const [newEnglishWord, setNewEnglishWord] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showLearningHistoryOnly, setShowLearningHistoryOnly] = useState(false);
   const [draggedWord, setDraggedWord] = useState<CustomWord | null>(null);
@@ -39,31 +63,40 @@ const Custom = () => {
   const [selectedWords, setSelectedWords] = useState<Set<string>>(new Set());
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const wordsPerPage = 10;
-  
-  const { 
-    getFilteredAndSortedWords, 
-    addWord, 
-    removeWord, 
-    toggleFavorite, 
+
+  const {
+    getFilteredAndSortedWords,
+    addWord,
+    removeWord,
+    toggleFavorite,
     filters,
     setFilters,
     sortOption,
     setSortOption,
     sortOrder,
-    setSortOrder
+    setSortOrder,
   } = useVocabulary();
-  
+
   const { toast } = useToast();
 
   // Apply filters when local state changes
   React.useEffect(() => {
     setFilters({
       searchTerm: searchTerm || undefined,
-      category: selectedCategory && selectedCategory !== 'all' ? selectedCategory : undefined,
+      category:
+        selectedCategory && selectedCategory !== "all"
+          ? selectedCategory
+          : undefined,
       favorites: showFavoritesOnly || undefined,
       hasLearningHistory: showLearningHistoryOnly || undefined,
     });
-  }, [searchTerm, selectedCategory, showFavoritesOnly, showLearningHistoryOnly, setFilters]);
+  }, [
+    searchTerm,
+    selectedCategory,
+    showFavoritesOnly,
+    showLearningHistoryOnly,
+    setFilters,
+  ]);
 
   const handleAddCustomWord = () => {
     if (!newGermanWord.trim() || !newEnglishWord.trim()) {
@@ -80,15 +113,15 @@ const Custom = () => {
       german: newGermanWord.trim(),
       english: newEnglishWord.trim(),
       categories: [],
-      sampleSentence: '',
+      sampleSentence: "",
       dateAdded: new Date(),
       learningHistory: [],
       isFavorite: false,
     };
 
     addWord(newWord);
-    setNewGermanWord('');
-    setNewEnglishWord('');
+    setNewGermanWord("");
+    setNewEnglishWord("");
     setShowAddForm(false);
 
     toast({
@@ -106,29 +139,38 @@ const Custom = () => {
   };
 
   const handleWordsExtracted = (extractedWords: ExtractedWord[]) => {
-    const newWords: CustomWord[] = extractedWords.map(word => ({
+    const newWords: CustomWord[] = extractedWords.map((word) => ({
       id: Date.now().toString() + Math.random(),
       german: word.german,
       english: word.english,
       categories: word.categories || [],
-      sampleSentence: '',
+      sampleSentence: "",
       dateAdded: new Date(),
       learningHistory: [],
       isFavorite: false,
     }));
 
-    newWords.forEach(word => addWord(word));
+    newWords.forEach((word) => addWord(word));
   };
 
   const handleWordClick = (wordId: string) => {
     navigate(`/vocabulary/custom/${wordId}`);
   };
 
-  const handleDragStart = (word: CustomWord, isMultiSelect: boolean = false) => {
+  const handleDragStart = (
+    word: CustomWord,
+    isMultiSelect: boolean = false
+  ) => {
     if (isMultiSelect) {
       // For multi-select, store all selected words
-      const selectedWordObjects = paginatedWords.filter(w => selectedWords.has(w.id));
-      setDraggedWord({ ...word, isMultiSelect: true, selectedWords: selectedWordObjects } as any);
+      const selectedWordObjects = paginatedWords.filter((w) =>
+        selectedWords.has(w.id)
+      );
+      setDraggedWord({
+        ...word,
+        isMultiSelect: true,
+        selectedWords: selectedWordObjects,
+      } as any);
     } else {
       setDraggedWord(word);
     }
@@ -141,18 +183,18 @@ const Custom = () => {
   const handleDrop = (draggedData: any) => {
     if (draggedData.isMultiSelect && draggedData.selectedWords) {
       // Handle multi-select drop
-      const newWords = draggedData.selectedWords.filter((word: CustomWord) => 
-        !droppedWords.find(w => w.id === word.id)
+      const newWords = draggedData.selectedWords.filter(
+        (word: CustomWord) => !droppedWords.find((w) => w.id === word.id)
       );
       if (newWords.length > 0) {
-        setDroppedWords(prev => [...prev, ...newWords]);
+        setDroppedWords((prev) => [...prev, ...newWords]);
       }
       setSelectedWords(new Set()); // Clear selection after drop
       setIsMultiSelectMode(false); // Exit multi-select mode
     } else {
       // Handle single word drop
-      if (!droppedWords.find(w => w.id === draggedData.id)) {
-        setDroppedWords(prev => [...prev, draggedData]);
+      if (!droppedWords.find((w) => w.id === draggedData.id)) {
+        setDroppedWords((prev) => [...prev, draggedData]);
       }
     }
   };
@@ -161,7 +203,7 @@ const Custom = () => {
     if (ctrlKey) {
       // Enter multi-select mode and toggle word selection
       setIsMultiSelectMode(true);
-      setSelectedWords(prev => {
+      setSelectedWords((prev) => {
         const newSelection = new Set(prev);
         if (newSelection.has(wordId)) {
           newSelection.delete(wordId);
@@ -172,7 +214,7 @@ const Custom = () => {
       });
     } else if (isMultiSelectMode) {
       // In multi-select mode, toggle word without Ctrl
-      setSelectedWords(prev => {
+      setSelectedWords((prev) => {
         const newSelection = new Set(prev);
         if (newSelection.has(wordId)) {
           newSelection.delete(wordId);
@@ -183,15 +225,14 @@ const Custom = () => {
       });
     } else {
       // Normal single selection - navigate to word details
-      setSelectedWords(new Set());
+      setSelectedWords(new Set()); // Clear any existing selections
       setIsMultiSelectMode(false);
       handleWordClick(wordId);
     }
   };
 
-
   const handleRemoveFromDropZone = (wordId: string) => {
-    setDroppedWords(prev => prev.filter(w => w.id !== wordId));
+    setDroppedWords((prev) => prev.filter((w) => w.id !== wordId));
   };
 
   const handleClearDropZone = () => {
@@ -200,7 +241,7 @@ const Custom = () => {
 
   const calculateSuccessRate = (word: CustomWord) => {
     if (!word.learningHistory.length) return 0;
-    const successCount = word.learningHistory.filter(h => h.success).length;
+    const successCount = word.learningHistory.filter((h) => h.success).length;
     return Math.round((successCount / word.learningHistory.length) * 100);
   };
 
@@ -211,8 +252,12 @@ const Custom = () => {
     currentPage * wordsPerPage
   );
 
-  const favoriteWords = filteredWords.filter(word => word.isFavorite).slice(0, 3);
-  const allCategories = [...new Set(filteredWords.flatMap(word => word.categories))].sort();
+  const favoriteWords = filteredWords
+    .filter((word) => word.isFavorite)
+    .slice(0, 3);
+  const allCategories = [
+    ...new Set(filteredWords.flatMap((word) => word.categories)),
+  ].sort();
 
   return (
     <div className="p-6">
@@ -260,9 +305,7 @@ const Custom = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleAddCustomWord}>
-                Add Word
-              </Button>
+              <Button onClick={handleAddCustomWord}>Add Word</Button>
               <Button variant="outline" onClick={() => setShowAddForm(false)}>
                 Cancel
               </Button>
@@ -285,113 +328,138 @@ const Custom = () => {
               </CardHeader>
               <CardContent>
                 {/* Filters and Sorting Controls */}
-                  <div className="mb-6 space-y-4">
-                    <div className="flex flex-wrap gap-3">
-                      <div className="flex-1 min-w-60">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            placeholder="Search words..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10"
-                          />
-                        </div>
+                <div className="mb-6 space-y-4">
+                  <div className="flex flex-wrap gap-3">
+                    <div className="flex-1 min-w-60">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search words..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
                       </div>
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="w-48">
-                          <SelectValue placeholder="Filter by category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All categories</SelectItem>
-                          {allCategories.map(category => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Select value={sortOption} onValueChange={(value) => setSortOption(value as any)}>
-                        <SelectTrigger className="w-48">
-                          <SelectValue placeholder="Sort by" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="dateAdded">Date Added</SelectItem>
-                          <SelectItem value="german">German (A-Z)</SelectItem>
-                          <SelectItem value="english">English (A-Z)</SelectItem>
-                          <SelectItem value="learningProgress">Learning Progress</SelectItem>
-                          <SelectItem value="lastLearning">Last Learning</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      >
-                        <ArrowUpDown className="h-4 w-4" />
-                      </Button>
                     </div>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      <Button 
-                        variant={showFavoritesOnly ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                      >
-                        <Heart className={`mr-2 h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                        Favorites Only
-                      </Button>
-                      <Button 
-                        variant={showLearningHistoryOnly ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setShowLearningHistoryOnly(!showLearningHistoryOnly)}
-                      >
-                        <Target className="mr-2 h-4 w-4" />
-                        Has Learning History
-                      </Button>
-                      <Button 
-                        variant={isMultiSelectMode ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => {
-                          setIsMultiSelectMode(!isMultiSelectMode);
-                          if (!isMultiSelectMode) {
-                            setSelectedWords(new Set());
-                          }
-                        }}
-                      >
-                        Multi-Select Mode
-                      </Button>
+                    <Select
+                      value={selectedCategory}
+                      onValueChange={setSelectedCategory}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Filter by category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All categories</SelectItem>
+                        {allCategories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select
+                      value={sortOption}
+                      onValueChange={(value) => setSortOption(value as any)}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dateAdded">Date Added</SelectItem>
+                        <SelectItem value="german">German (A-Z)</SelectItem>
+                        <SelectItem value="english">English (A-Z)</SelectItem>
+                        <SelectItem value="learningProgress">
+                          Learning Progress
+                        </SelectItem>
+                        <SelectItem value="lastLearning">
+                          Last Learning
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() =>
+                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                      }
+                    >
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant={showFavoritesOnly ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                    >
+                      <Heart
+                        className={`mr-2 h-4 w-4 ${
+                          showFavoritesOnly ? "fill-current" : ""
+                        }`}
+                      />
+                      Favorites Only
+                    </Button>
+                    <Button
+                      variant={showLearningHistoryOnly ? "default" : "outline"}
+                      size="sm"
+                      onClick={() =>
+                        setShowLearningHistoryOnly(!showLearningHistoryOnly)
+                      }
+                    >
+                      <Target className="mr-2 h-4 w-4" />
+                      Has Learning History
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Always visible multi-select area */}
+                  <div className="p-3 bg-muted/30 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant={isMultiSelectMode ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            const newMultiSelectMode = !isMultiSelectMode;
+                            setIsMultiSelectMode(newMultiSelectMode);
+                            if (!newMultiSelectMode) {
+                              // When leaving multi-select mode, clear all selections
+                              setSelectedWords(new Set());
+                            }
+                          }}
+                        >
+                          Multi-Select Mode
+                        </Button>
+
+                        {isMultiSelectMode && (
+                          <span className="text-sm text-muted-foreground">
+                            Click words to select/deselect •{" "}
+                            {selectedWords.size} selected
+                          </span>
+                        )}
+                      </div>
+
+                      {isMultiSelectMode && selectedWords.size > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedWords(new Set())}
+                        >
+                          Clear Selection
+                        </Button>
+                      )}
                     </div>
                   </div>
 
-                 <div className="space-y-3">
-                  {/* Multi-select mode indicator */}
-                  {isMultiSelectMode && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm text-blue-800 font-medium">
-                        Multi-select mode active - Click words to select/deselect them for exercises
-                      </p>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                          setIsMultiSelectMode(false);
-                          setSelectedWords(new Set());
-                        }}
-                        className="mt-2"
-                      >
-                        Exit Multi-select
-                      </Button>
-                    </div>
-                  )}
-                  
                   {paginatedWords.map((word) => (
-                    <div 
-                      key={word.id} 
+                    <div
+                      key={word.id}
                       className={`flex items-center justify-between p-4 rounded-lg transition-colors cursor-pointer ${
-                        selectedWords.has(word.id) 
-                          ? 'bg-primary/20 border border-primary' 
-                          : 'bg-muted/50 hover:bg-muted'
+                        selectedWords.has(word.id)
+                          ? "bg-primary/20 border border-primary"
+                          : "bg-muted/50 hover:bg-muted"
                       }`}
                       draggable
                       onDragStart={() => {
@@ -403,115 +471,149 @@ const Custom = () => {
                       }}
                       onDragEnd={handleDragEnd}
                       onClick={(e) => handleWordSelection(word.id, e.ctrlKey)}
-                      title={isMultiSelectMode ? "Click to select/deselect" : "Ctrl+Click to start multi-select"}
+                      title={
+                        isMultiSelectMode
+                          ? "Click to select/deselect"
+                          : "Ctrl+Click to start multi-select"
+                      }
                     >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="font-medium">{word.german}</span>
-                            <span className="text-muted-foreground">—</span>
-                            <span>{word.english}</span>
-                            {word.isFavorite && (
-                              <Heart className="h-4 w-4 fill-current text-red-500" />
-                            )}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-medium">{word.german}</span>
+                          <span className="text-muted-foreground">—</span>
+                          <span>{word.english}</span>
+                          {word.isFavorite && (
+                            <Heart className="h-4 w-4 fill-current text-red-500" />
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                          {/* Learning Progress */}
+                          <div className="flex items-center gap-2">
+                            <Target className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              Progress: {calculateSuccessRate(word)}%
+                            </span>
+                            <Progress
+                              value={calculateSuccessRate(word)}
+                              className="h-1 w-16"
+                            />
                           </div>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-                            {/* Learning Progress */}
-                            <div className="flex items-center gap-2">
-                              <Target className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">
-                                Progress: {calculateSuccessRate(word)}%
-                              </span>
-                              <Progress value={calculateSuccessRate(word)} className="h-1 w-16" />
-                            </div>
-                            
-                            {/* Last Learning Date */}
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">
-                                Last: {word.lastLearningDate 
-                                  ? word.lastLearningDate.toLocaleDateString() 
-                                  : 'Never'
-                                }
-                              </span>
-                            </div>
-                            
-                            {/* Date Added */}
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">
-                                Added: {word.dateAdded.toLocaleDateString()}
-                              </span>
-                            </div>
+
+                          {/* Last Learning Date */}
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              Last:{" "}
+                              {word.lastLearningDate
+                                ? word.lastLearningDate.toLocaleDateString()
+                                : "Never"}
+                            </span>
                           </div>
-                          
-                          <div className="flex flex-wrap gap-1">
-                            {word.categories.map((category, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {category}
-                              </Badge>
-                            ))}
+
+                          {/* Date Added */}
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              Added: {word.dateAdded.toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(word.id);
-                            }}
-                            className="h-8 w-8"
-                          >
-                            <Heart className={`h-4 w-4 ${word.isFavorite ? 'fill-current text-red-500' : 'text-muted-foreground'}`} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteWord(word.id);
-                            }}
-                            className="h-8 w-8"
-                          >
-                            <Trash className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                          </Button>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+
+                        <div className="flex flex-wrap gap-1">
+                          {word.categories.map((category, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {category}
+                            </Badge>
+                          ))}
                         </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(word.id);
+                          }}
+                          className="h-8 w-8"
+                        >
+                          <Heart
+                            className={`h-4 w-4 ${
+                              word.isFavorite
+                                ? "fill-current text-red-500"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteWord(word.id);
+                          }}
+                          className="h-8 w-8"
+                        >
+                          <Trash className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        </Button>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
                     </div>
                   ))}
-                  
+
                   {totalPages > 1 && (
-                      <Pagination className="mt-6">
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                            />
+                    <Pagination className="mt-6">
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() =>
+                              setCurrentPage((prev) => Math.max(prev - 1, 1))
+                            }
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                            }
+                          />
+                        </PaginationItem>
+
+                        {Array.from(
+                          { length: totalPages },
+                          (_, i) => i + 1
+                        ).map((page) => (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
                           </PaginationItem>
-                          
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                onClick={() => setCurrentPage(page)}
-                                isActive={currentPage === page}
-                                className="cursor-pointer"
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          
-                          <PaginationItem>
-                            <PaginationNext 
-                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
+                        ))}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(prev + 1, totalPages)
+                              )
+                            }
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
                   )}
                 </div>
               </CardContent>
@@ -520,7 +622,7 @@ const Custom = () => {
 
           {/* Exercise Drop Zone - Takes 1 column */}
           <div className="lg:col-span-1">
-            <div 
+            <div
               className="w-full"
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -530,7 +632,7 @@ const Custom = () => {
                 }
               }}
             >
-              <ExerciseDropZone 
+              <ExerciseDropZone
                 droppedWords={droppedWords}
                 onRemoveWord={handleRemoveFromDropZone}
                 onClearAll={handleClearDropZone}
@@ -548,21 +650,28 @@ const Custom = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">Your starred vocabulary words</p>
+              <p className="text-muted-foreground mb-4">
+                Your starred vocabulary words
+              </p>
               <div className="space-y-2">
                 {favoriteWords.map((word) => (
-                  <div 
-                    key={word.id} 
+                  <div
+                    key={word.id}
                     className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
                     onClick={() => handleWordClick(word.id)}
                   >
                     <div className="flex-1">
                       <div className="mb-1">
-                        <span className="font-medium">{word.german}</span> - {word.english}
+                        <span className="font-medium">{word.german}</span> -{" "}
+                        {word.english}
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {word.categories.slice(0, 3).map((category, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {category}
                           </Badge>
                         ))}
@@ -597,7 +706,6 @@ const Custom = () => {
             <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
           </div>
         </div>
-
       </div>
     </div>
   );
