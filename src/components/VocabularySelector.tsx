@@ -4,7 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useVocabulary } from '@/contexts/VocabularyContext';
 import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface VocabularySelectorProps {
   onWordsSelected?: (words: string[] | any[]) => void;
@@ -23,6 +24,8 @@ export const VocabularySelector = ({
 }: VocabularySelectorProps) => {
   const { getAllCategories, getWordsByCategory } = useVocabulary();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   
   const categories = getAllCategories();
@@ -30,6 +33,15 @@ export const VocabularySelector = ({
   const handleUseCategory = () => {
     if (selectedCategory) {
       const categoryWords = getWordsByCategory(selectedCategory);
+      
+      if (categoryWords.length === 0) {
+        toast({
+          title: "No words found",
+          description: "This category has no words. Please add some words first.",
+          variant: "destructive",
+        });
+        return;
+      }
       
       if (exerciseType && exercisePath) {
         // Convert to VocabularyWord format and use service
@@ -47,8 +59,20 @@ export const VocabularySelector = ({
           exerciseType
         );
         
-        // Force page reload to ensure the exercise picks up the new data
-        window.location.href = exercisePath;
+        // Check if we're already on the target exercise page
+        if (location.pathname === exercisePath) {
+          // We're already on the correct page, just reload the page to pick up new data
+          window.location.reload();
+        } else {
+          // Navigate to the exercise page using React Router
+          navigate(exercisePath);
+        }
+        
+        toast({
+          title: "Exercise started!",
+          description: `Starting ${exerciseType} with ${categoryWords.length} words from ${selectedCategory}.`,
+        });
+        
       } else if (onWordsSelected) {
         // Fallback to callback for backward compatibility
         onWordsSelected(categoryWords);
