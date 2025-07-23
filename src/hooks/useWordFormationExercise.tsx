@@ -64,12 +64,216 @@ export const useWordFormationExercise = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('🔥 WordFormation useEffect: Checking for service data');
     // Check if there's vocabulary data from the service
     if (vocabularyExerciseService.hasExerciseData()) {
       const exerciseData = vocabularyExerciseService.getExerciseData();
       console.log("Word formation exercise: Found exercise data from service:", exerciseData);
       
       if (exerciseData && exerciseData.words.length > 0) {
+        console.log('🔥 WordFormation: Generating exercise with vocabulary words:', exerciseData.words.map(w => w.german));
+        
+        // Generate AI exercises for the vocabulary words
+        generateAIExercises(exerciseData);
+        
+        // Clear the service data after using it
+        vocabularyExerciseService.clearExerciseData();
+        return;
+      }
+    } else {
+      console.log('🔥 WordFormation: No service data found, loading sample');
+    }
+    
+    loadSampleExercise();
+  }, []);
+
+  const generateAIExercises = async (exerciseData: any) => {
+    const words = exerciseData.words.map((word: any) => word.german);
+    const prompt = `Create word formation exercises for these German words: ${words.join(', ')}. 
+    For each word, create an exercise that asks to form a new word using prefixes, suffixes, or other word formation rules.
+    Include clear instructions, hints, and explanations.
+
+Return only a JSON object with this exact format:
+{
+  "exercises": [
+    {
+      "exerciseOrder": 1,
+      "instruction": "Create a noun meaning 'player' from the verb:",
+      "baseWord": "spielen",
+      "solution": "Spieler",
+      "hint": "Add -er suffix",
+      "explanation": "The suffix -er is commonly used to create agent nouns from verbs."
+    }
+  ]
+}`;
+
+    const systemMessage = "You are a German language teacher creating word formation exercises. Return only valid JSON without any additional text or explanations.";
+    
+    const result = await callOpenAI(prompt, systemMessage);
+    if (result) {
+      try {
+        const aiExerciseData = JSON.parse(result);
+        const categoryExercise: WordFormationExerciseData = {
+          id: `category-${Date.now()}`,
+          words: exerciseData.words.map((word: any) => word.german),
+          exercises: aiExerciseData.exercises,
+          userAnswers: {},
+          isCompleted: false,
+          createdAt: new Date()
+        };
+        
+        setCurrentExercise(categoryExercise);
+        setUserAnswers({});
+        setShowResults(false);
+        
+        toast({
+          title: "Exercise loaded",
+          description: `Using vocabulary from ${exerciseData.category}`,
+        });
+      } catch (error) {
+        console.error('Error parsing AI response:', error);
+        loadSampleExercise();
+      }
+    } else {
+      loadSampleExercise();
+    }
+  };
+
+  const loadSampleExercise = () => {
+    setCurrentExercise(SAMPLE_EXERCISE);
+    setUserAnswers({});
+    setShowResults(false);
+  };
+
+  const generateExercise = async (input: string[] | any[]) => {
+    // Handle both word objects and string arrays
+    let validWords: string[] = [];
+    
+    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
+      // Input is word objects from vocabulary
+      validWords = input.map((word: any) => word.german);
+    } else {
+      // Input is string array
+      validWords = (input as string[]).filter(word => word.trim());
+    }
+    
+    if (validWords.length === 0) {
+      toast({
+        title: "No words provided",
+        description: "Please add at least one word to generate an exercise.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const prompt = `Create word formation exercises for these German words: ${validWords.join(', ')}. 
+    For each word, create an exercise that asks to form a new word using prefixes, suffixes, or other word formation rules.
+    Include clear instructions, hints, and explanations.
+
+Return only a JSON object with this exact format:
+{
+  "exercises": [
+    {
+      "exerciseOrder": 1,
+      "instruction": "Create a noun meaning 'player' from the verb:",
+      "baseWord": "spielen",
+      "solution": "Spieler",
+      "hint": "Add -er suffix",
+      "explanation": "The suffix -er is commonly used to create agent nouns from verbs."
+    }
+  ]
+}`;
+
+    const systemMessage = "You are a German language teacher creating word formation exercises. Return only valid JSON without any additional text or explanations.";
+    
+    const result = await callOpenAI(prompt, systemMessage);
+    if (result) {
+      try {
+        const exerciseData = JSON.parse(result);
+        const exercise: WordFormationExerciseData = {
+          id: Date.now().toString(),
+          words: validWords,
+          exercises: exerciseData.exercises,
+          userAnswers: {},
+          isCompleted: false,
+          createdAt: new Date()
+        };
+        setCurrentExercise(exercise);
+        setUserAnswers({});
+        setShowResults(false);
+      } catch (error) {
+        toast({
+          title: "Error parsing exercise",
+          description: "Failed to generate exercise. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleAnswerChange = (exerciseOrder: number, answer: string) => {
+    setUserAnswers(prev => ({
+      ...prev,
+      [exerciseOrder]: answer
+    }));
+  };
+
+  const checkAnswers = () => {
+    if (!currentExercise) return;
+
+    const updatedExercise = {
+      ...currentExercise,
+      userAnswers,
+      isCompleted: true
+    };
+
+    setPreviousExercises(prev => [...prev, updatedExercise]);
+    setShowResults(true);
+    
+    // Calculate score
+    const correctAnswers = currentExercise.exercises.filter(exercise => 
+      userAnswers[exercise.exerciseOrder]?.toLowerCase().trim() === exercise.solution.toLowerCase().trim()
+    ).length;
+
+    toast({
+      title: "Exercise completed!",
+      description: `You got ${correctAnswers} out of ${currentExercise.exercises.length} correct.`,
+    });
+  };
+
+  const resetExercise = () => {
+    if (currentExercise) {
+      setCurrentExercise(prev => prev ? {
+        ...prev,
+        userAnswers: {},
+        isCompleted: false
+      } : null);
+      setUserAnswers({});
+      setShowResults(false);
+    } else {
+      loadSampleExercise();
+    }
+  };
+
+  const loadPreviousExercise = (exercise: WordFormationExerciseData) => {
+    setCurrentExercise(exercise);
+    setUserAnswers(exercise.userAnswers);
+    setShowResults(exercise.isCompleted);
+  };
+
+  return {
+    currentExercise,
+    userAnswers,
+    showResults,
+    previousExercises,
+    isLoading,
+    generateExercise,
+    handleAnswerChange,
+    checkAnswers,
+    resetExercise,
+    loadPreviousExercise
+  };
+};
         // Generate word formation exercises from vocabulary words
         const exercises = exerciseData.words.map((word, index) => ({
           exerciseOrder: index + 1,

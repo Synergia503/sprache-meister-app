@@ -52,6 +52,25 @@ const WordFormation = () => {
                         Hint: {exercise.hint}
                       </p>
                     )}
+                    {!showResults && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          // Toggle hint visibility for this specific exercise
+                          const hintElement = document.getElementById(`hint-${exercise.exerciseOrder}`);
+                          if (hintElement) {
+                            hintElement.style.display = hintElement.style.display === 'none' ? 'block' : 'none';
+                          }
+                        }}
+                        className="text-xs"
+                      >
+                        Show Hint
+                      </Button>
+                    )}
+                    <div id={`hint-${exercise.exerciseOrder}`} style={{ display: 'none' }} className="text-sm text-blue-600">
+                      Hint: {exercise.hint}
+                    </div>
                   </div>
                   
                   <Input
@@ -88,7 +107,7 @@ const WordFormation = () => {
                     <Button onClick={resetExercise} variant="outline">
                       Restart Same Exercise
                     </Button>
-                    <Button onClick={() => window.location.reload()}>
+                    <Button onClick={resetExercise}>
                       New Exercise
                     </Button>
                   </>

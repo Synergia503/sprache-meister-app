@@ -40,13 +40,15 @@ export const VocabularySelector = ({
           categories: word.categories
         }));
         
+        console.log('🔥 VocabularySelector: Setting exercise data for', exerciseType, 'with', vocabularyWords.length, 'words');
         vocabularyExerciseService.setExerciseData(
           vocabularyWords,
           selectedCategory,
           exerciseType
         );
         
-        navigate(exercisePath);
+        // Force page reload to ensure the exercise picks up the new data
+        window.location.href = exercisePath;
       } else if (onWordsSelected) {
         // Fallback to callback for backward compatibility
         onWordsSelected(categoryWords);
