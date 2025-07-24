@@ -42,7 +42,7 @@ import {
   Smartphone,
   ArrowRight,
   Check,
-  Move
+  Move,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PhotoWordExtractor from "@/components/PhotoWordExtractor";
@@ -58,7 +58,7 @@ const Custom = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGermanWord, setNewGermanWord] = useState("");
   const [newEnglishWord, setNewEnglishWord] = useState("");
@@ -210,23 +210,23 @@ const Custom = () => {
   // Mobile touch handlers
   const handleTouchStart = (wordId: string) => {
     if (!isMobile) return;
-    
+
     setTouchStarted(wordId);
     touchTimeoutRef.current = setTimeout(() => {
       // Long press detected - enter multi-select mode
       setIsMultiSelectMode(true);
-      setSelectedWords(prev => {
+      setSelectedWords((prev) => {
         const newSelection = new Set(prev);
         newSelection.add(wordId);
         return newSelection;
       });
       setTouchStarted(null);
-      
+
       // Haptic feedback if available
       if (navigator.vibrate) {
         navigator.vibrate(50);
       }
-      
+
       toast({
         title: "Multi-select mode",
         description: "Word selected. Tap other words to add them.",
@@ -248,7 +248,7 @@ const Custom = () => {
       clearTimeout(touchTimeoutRef.current);
       touchTimeoutRef.current = null;
     }
-    
+
     if (ctrlKey || isMultiSelectMode) {
       // Enter multi-select mode and toggle word selection
       setIsMultiSelectMode(true);
@@ -280,11 +280,13 @@ const Custom = () => {
       return;
     }
 
-    const wordsToAdd = paginatedWords.filter(word => selectedWords.has(word.id));
+    const wordsToAdd = paginatedWords.filter((word) =>
+      selectedWords.has(word.id)
+    );
     const newWords = wordsToAdd.filter(
       (word) => !droppedWords.find((w) => w.id === word.id)
     );
-    
+
     if (newWords.length > 0) {
       setDroppedWords((prev) => [...prev, ...newWords]);
       toast({
@@ -292,7 +294,7 @@ const Custom = () => {
         description: `${newWords.length} words added to exercise preparation.`,
       });
     }
-    
+
     setSelectedWords(new Set());
     setIsMultiSelectMode(false);
   };
@@ -331,20 +333,17 @@ const Custom = () => {
     .filter((word) => word.isFavorite)
     .slice(0, 3);
   const allCategories = [
-    ...new Set(filteredWords.flatMap((word) => word.categories)),
+    ...Array.from(new Set(filteredWords.flatMap((word) => word.categories))),
   ].sort();
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="min-h-screen p-4 sm:p-6">
       {/* Sticky Add to Exercise Button */}
       {selectedWords.size > 0 && (
-        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-4 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3">
-          <Button
-            onClick={handleAddToExercise}
-            className="w-full"
-            size="sm"
-          >
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-4  px-4 sm:px-6 py-3">
+          <Button onClick={handleAddToExercise} className="w-full" size="sm">
             <ArrowRight className="mr-2 h-4 w-4" />
+            {/* with the screen width greater than button the sticky works  */}
             Add {selectedWords.size} to Exercise ({droppedWords.length} total)
           </Button>
         </div>
@@ -352,7 +351,10 @@ const Custom = () => {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold">Custom Vocabulary</h1>
-        <Button onClick={() => setShowAddForm(true)} className="w-full sm:w-auto">
+        <Button
+          onClick={() => setShowAddForm(true)}
+          className="w-full sm:w-auto"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Custom Word
         </Button>
@@ -405,9 +407,9 @@ const Custom = () => {
 
       <div className="grid gap-6">
         {/* Main Content Grid */}
-        <div className={`grid gap-6 ${isMobile ? '' : 'lg:grid-cols-3'}`}>
+        <div className={`grid gap-6 ${isMobile ? "" : "lg:grid-cols-3"}`}>
           {/* All Words List - Full width on mobile, 2 columns on large screens */}
-          <div className={isMobile ? '' : 'lg:col-span-2'}>
+          <div className={isMobile ? "" : "lg:col-span-2"}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -519,13 +521,18 @@ const Custom = () => {
                               }
                             }}
                           >
-                            {isMobile && <Smartphone className="mr-2 h-4 w-4" />}
+                            {isMobile && (
+                              <Smartphone className="mr-2 h-4 w-4" />
+                            )}
                             Multi-Select
                           </Button>
 
                           {isMultiSelectMode && (
                             <span className="text-sm text-muted-foreground">
-                              {isMobile ? "Hold word for 2s or tap to select" : "Click words to select"} • {selectedWords.size} selected
+                              {isMobile
+                                ? "Hold word for 2s or tap to select"
+                                : "Click words to select"}{" "}
+                              • {selectedWords.size} selected
                             </span>
                           )}
                         </div>
@@ -540,7 +547,7 @@ const Custom = () => {
                           </Button>
                         )}
                       </div>
-                      
+
                       {/* Mobile-friendly add to exercise button */}
                       {selectedWords.size > 0 && (
                         <div className="flex gap-2">
@@ -550,7 +557,8 @@ const Custom = () => {
                             size="sm"
                           >
                             <ArrowRight className="mr-2 h-4 w-4" />
-                            Add {selectedWords.size} to Exercise ({droppedWords.length} total)
+                            Add {selectedWords.size} to Exercise (
+                            {droppedWords.length} total)
                           </Button>
                         </div>
                       )}
@@ -734,7 +742,7 @@ const Custom = () => {
           </div>
 
           {/* Exercise Drop Zone - Full width on mobile, 1 column on large screens */}
-          <div className={isMobile ? '' : 'lg:col-span-1'}>
+          <div className={isMobile ? "" : "lg:col-span-1"}>
             <div
               className="w-full"
               onDragOver={(e) => e.preventDefault()}
