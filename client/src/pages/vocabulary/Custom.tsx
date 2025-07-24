@@ -336,6 +336,20 @@ const Custom = () => {
 
   return (
     <div className="p-4 sm:p-6">
+      {/* Sticky Add to Exercise Button */}
+      {selectedWords.size > 0 && (
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-4 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3">
+          <Button
+            onClick={handleAddToExercise}
+            className="w-full"
+            size="sm"
+          >
+            <ArrowRight className="mr-2 h-4 w-4" />
+            Add {selectedWords.size} to Exercise ({droppedWords.length} total)
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold">Custom Vocabulary</h1>
         <Button onClick={() => setShowAddForm(true)} className="w-full sm:w-auto">
