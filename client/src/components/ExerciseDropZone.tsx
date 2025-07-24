@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Target, X, Play } from "lucide-react";
+import { Target, X, Play, Smartphone } from "lucide-react";
 import { CustomWord } from '@/types/vocabulary';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { getExerciseTypes, ExerciseType } from '@/services/exerciseService';
 import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
 
@@ -26,6 +27,7 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   React.useEffect(() => {
     const loadExerciseTypes = async () => {
@@ -87,6 +89,7 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
           <div className="flex items-center gap-2">
             <Target className="h-5 w-5" />
             Exercise Preparation
+            {isMobile && <Smartphone className="h-4 w-4 text-muted-foreground" />}
           </div>
           {droppedWords.length > 0 && (
             <Button variant="ghost" size="sm" onClick={onClearAll}>
@@ -96,18 +99,31 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="min-h-20 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+        <div className={`min-h-20 p-3 sm:p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg ${
+          isMobile ? 'touch-none' : ''
+        }`}>
           {droppedWords.length === 0 ? (
-            <p className="text-muted-foreground text-center">
-              Drag words here to create an exercise
-            </p>
+            <div className="text-center">
+              <p className="text-muted-foreground text-sm sm:text-base">
+                {isMobile 
+                  ? "Use buttons above to add words" 
+                  : "Drag words here to create an exercise"
+                }
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                {isMobile 
+                  ? "Hold words for 2s to select multiple"
+                  : "Select multiple words with Ctrl+Click"
+                }
+              </p>
+            </div>
           ) : (
             <div className="flex flex-wrap gap-2">
               {droppedWords.map((word) => (
                 <Badge
                   key={word.id}
                   variant="secondary"
-                  className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10"
+                  className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10 text-xs sm:text-sm"
                   onClick={() => onRemoveWord(word.id)}
                 >
                   {word.german} - {word.english}
@@ -118,7 +134,7 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
           )}
         </div>
 
-        <div className="flex gap-3">
+        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3`}>
           <Select value={selectedExercise} onValueChange={setSelectedExercise}>
             <SelectTrigger className="flex-1">
               <SelectValue placeholder="Choose exercise type" />
@@ -135,10 +151,10 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
           <Button 
             onClick={handleStartExercise}
             disabled={!selectedExercise || droppedWords.length === 0 || isLoading}
-            className="flex items-center gap-2"
+            className={`flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}
           >
             <Play className="h-4 w-4" />
-            Start Exercise
+            {isMobile ? 'Start Exercise' : 'Start'}
           </Button>
         </div>
       </CardContent>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,17 +39,26 @@ import {
   Target,
   TrendingUp,
   Calendar,
+  Smartphone,
+  ArrowRight,
+  Check,
+  Move
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PhotoWordExtractor from "@/components/PhotoWordExtractor";
 import ExerciseDropZone from "@/components/ExerciseDropZone";
 import { useVocabulary } from "@/contexts/VocabularyContext";
 import { ExtractedWord, CustomWord } from "@/types/vocabulary";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Remove duplicate interfaces - they're now in types/vocabulary.ts
 
 const Custom = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGermanWord, setNewGermanWord] = useState("");
   const [newEnglishWord, setNewEnglishWord] = useState("");
@@ -62,6 +71,7 @@ const Custom = () => {
   const [droppedWords, setDroppedWords] = useState<CustomWord[]>([]);
   const [selectedWords, setSelectedWords] = useState<Set<string>>(new Set());
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [touchStarted, setTouchStarted] = useState<string | null>(null);
   const wordsPerPage = 10;
 
   const {
@@ -76,8 +86,6 @@ const Custom = () => {
     sortOrder,
     setSortOrder,
   } = useVocabulary();
-
-  const { toast } = useToast();
 
   // Apply filters when local state changes
   React.useEffect(() => {
@@ -199,21 +207,51 @@ const Custom = () => {
     }
   };
 
-  const handleWordSelection = (wordId: string, ctrlKey: boolean) => {
-    if (ctrlKey) {
-      // Enter multi-select mode and toggle word selection
+  // Mobile touch handlers
+  const handleTouchStart = (wordId: string) => {
+    if (!isMobile) return;
+    
+    setTouchStarted(wordId);
+    touchTimeoutRef.current = setTimeout(() => {
+      // Long press detected - enter multi-select mode
       setIsMultiSelectMode(true);
-      setSelectedWords((prev) => {
+      setSelectedWords(prev => {
         const newSelection = new Set(prev);
-        if (newSelection.has(wordId)) {
-          newSelection.delete(wordId);
-        } else {
-          newSelection.add(wordId);
-        }
+        newSelection.add(wordId);
         return newSelection;
       });
-    } else if (isMultiSelectMode) {
-      // In multi-select mode, toggle word without Ctrl
+      setTouchStarted(null);
+      
+      // Haptic feedback if available
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
+      toast({
+        title: "Multi-select mode",
+        description: "Word selected. Tap other words to add them.",
+      });
+    }, 2000); // 2 seconds
+  };
+
+  const handleTouchEnd = () => {
+    if (touchTimeoutRef.current) {
+      clearTimeout(touchTimeoutRef.current);
+      touchTimeoutRef.current = null;
+    }
+    setTouchStarted(null);
+  };
+
+  const handleWordSelection = (wordId: string, ctrlKey: boolean) => {
+    // Clear any pending touch timeout
+    if (touchTimeoutRef.current) {
+      clearTimeout(touchTimeoutRef.current);
+      touchTimeoutRef.current = null;
+    }
+    
+    if (ctrlKey || isMultiSelectMode) {
+      // Enter multi-select mode and toggle word selection
+      setIsMultiSelectMode(true);
       setSelectedWords((prev) => {
         const newSelection = new Set(prev);
         if (newSelection.has(wordId)) {
@@ -231,6 +269,34 @@ const Custom = () => {
     }
   };
 
+  // Mobile-friendly add to exercise function
+  const handleAddToExercise = () => {
+    if (selectedWords.size === 0) {
+      toast({
+        title: "No words selected",
+        description: "Please select words first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const wordsToAdd = paginatedWords.filter(word => selectedWords.has(word.id));
+    const newWords = wordsToAdd.filter(
+      (word) => !droppedWords.find((w) => w.id === word.id)
+    );
+    
+    if (newWords.length > 0) {
+      setDroppedWords((prev) => [...prev, ...newWords]);
+      toast({
+        title: "Words added",
+        description: `${newWords.length} words added to exercise preparation.`,
+      });
+    }
+    
+    setSelectedWords(new Set());
+    setIsMultiSelectMode(false);
+  };
+
   const handleRemoveFromDropZone = (wordId: string) => {
     setDroppedWords((prev) => prev.filter((w) => w.id !== wordId));
   };
@@ -244,6 +310,15 @@ const Custom = () => {
     const successCount = word.learningHistory.filter((h) => h.success).length;
     return Math.round((successCount / word.learningHistory.length) * 100);
   };
+
+  // Cleanup touch timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const filteredWords = getFilteredAndSortedWords();
   const totalPages = Math.ceil(filteredWords.length / wordsPerPage);
@@ -316,9 +391,9 @@ const Custom = () => {
 
       <div className="grid gap-6">
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* All Words List - Takes 2 columns */}
-          <div className="lg:col-span-2">
+        <div className={`grid gap-6 ${isMobile ? '' : 'lg:grid-cols-3'}`}>
+          {/* All Words List - Full width on mobile, 2 columns on large screens */}
+          <div className={isMobile ? '' : 'lg:col-span-2'}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -414,41 +489,56 @@ const Custom = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {/* Always visible multi-select area */}
+                  {/* Mobile/Multi-select controls */}
                   <div className="p-3 bg-muted/30 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Button
-                          variant={isMultiSelectMode ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            const newMultiSelectMode = !isMultiSelectMode;
-                            setIsMultiSelectMode(newMultiSelectMode);
-                            if (!newMultiSelectMode) {
-                              // When leaving multi-select mode, clear all selections
-                              setSelectedWords(new Set());
-                            }
-                          }}
-                        >
-                          Multi-Select Mode
-                        </Button>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Button
+                            variant={isMultiSelectMode ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              const newMultiSelectMode = !isMultiSelectMode;
+                              setIsMultiSelectMode(newMultiSelectMode);
+                              if (!newMultiSelectMode) {
+                                setSelectedWords(new Set());
+                              }
+                            }}
+                          >
+                            {isMobile && <Smartphone className="mr-2 h-4 w-4" />}
+                            Multi-Select
+                          </Button>
 
-                        {isMultiSelectMode && (
-                          <span className="text-sm text-muted-foreground">
-                            Click words to select/deselect •{" "}
-                            {selectedWords.size} selected
-                          </span>
+                          {isMultiSelectMode && (
+                            <span className="text-sm text-muted-foreground">
+                              {isMobile ? "Hold word for 2s or tap to select" : "Click words to select"} • {selectedWords.size} selected
+                            </span>
+                          )}
+                        </div>
+
+                        {isMultiSelectMode && selectedWords.size > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedWords(new Set())}
+                          >
+                            Clear
+                          </Button>
                         )}
                       </div>
-
-                      {isMultiSelectMode && selectedWords.size > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedWords(new Set())}
-                        >
-                          Clear Selection
-                        </Button>
+                      
+                      {/* Mobile-friendly add to exercise button */}
+                      {selectedWords.size > 0 && (
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleAddToExercise}
+                            className="flex-1"
+                            size="sm"
+                          >
+                            <ArrowRight className="mr-2 h-4 w-4" />
+                            Add {selectedWords.size} to Exercise ({droppedWords.length} total)
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -456,12 +546,14 @@ const Custom = () => {
                   {paginatedWords.map((word) => (
                     <div
                       key={word.id}
-                      className={`flex items-center justify-between p-4 rounded-lg transition-colors cursor-pointer ${
+                      className={`flex items-center justify-between p-4 rounded-lg transition-all duration-200 cursor-pointer select-none ${
                         selectedWords.has(word.id)
-                          ? "bg-primary/20 border border-primary"
-                          : "bg-muted/50 hover:bg-muted"
+                          ? "bg-primary/20 border border-primary scale-[1.02]"
+                          : touchStarted === word.id
+                          ? "bg-primary/10 scale-[1.01]"
+                          : "bg-muted/50 hover:bg-muted active:bg-muted/70"
                       }`}
-                      draggable
+                      draggable={!isMobile}
                       onDragStart={() => {
                         if (selectedWords.has(word.id)) {
                           handleDragStart(word, true);
@@ -471,8 +563,15 @@ const Custom = () => {
                       }}
                       onDragEnd={handleDragEnd}
                       onClick={(e) => handleWordSelection(word.id, e.ctrlKey)}
+                      onTouchStart={() => handleTouchStart(word.id)}
+                      onTouchEnd={handleTouchEnd}
+                      onTouchCancel={handleTouchEnd}
                       title={
-                        isMultiSelectMode
+                        isMobile
+                          ? isMultiSelectMode
+                            ? "Tap to select/deselect"
+                            : "Hold for 2s to start multi-select"
+                          : isMultiSelectMode
                           ? "Click to select/deselect"
                           : "Ctrl+Click to start multi-select"
                       }
@@ -620,8 +719,8 @@ const Custom = () => {
             </Card>
           </div>
 
-          {/* Exercise Drop Zone - Takes 1 column */}
-          <div className="lg:col-span-1">
+          {/* Exercise Drop Zone - Full width on mobile, 1 column on large screens */}
+          <div className={isMobile ? '' : 'lg:col-span-1'}>
             <div
               className="w-full"
               onDragOver={(e) => e.preventDefault()}
