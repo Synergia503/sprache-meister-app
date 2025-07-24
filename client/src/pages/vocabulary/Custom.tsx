@@ -260,10 +260,10 @@ const Custom = () => {
   ].sort();
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Custom Vocabulary</h1>
-        <Button onClick={() => setShowAddForm(true)}>
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Custom Vocabulary</h1>
+        <Button onClick={() => setShowAddForm(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Add Custom Word
         </Button>

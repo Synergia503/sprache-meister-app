@@ -61,7 +61,8 @@ export function MainSidebar({ children }: MainSidebarProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <Sidebar>
+        <Sidebar className="border-r"
+          collapsible="icon">
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
@@ -201,7 +202,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
           </SidebarContent>
         </Sidebar>
         <div className="flex-1">
-          <SidebarTrigger className="m-2" />
+          <SidebarTrigger className="sidebar-trigger" />
           {children}
         </div>
       </div>

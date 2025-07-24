@@ -161,14 +161,14 @@ const Flashcards = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Flashcards</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowAnkiExport(!showAnkiExport)}>
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Flashcards</h1>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" onClick={() => setShowAnkiExport(!showAnkiExport)} className="w-full sm:w-auto">
             Export to Anki
           </Button>
-          <Button onClick={handleAddNew}>
+          <Button onClick={handleAddNew} className="w-full sm:w-auto">
             <BookPlus className="mr-2 h-4 w-4" />
             Add Flashcard
           </Button>
@@ -194,7 +194,7 @@ const Flashcards = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4 mb-4">
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex-1">
                   <Input
                     placeholder="Search flashcards..."
@@ -202,7 +202,7 @@ const Flashcards = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="w-48">
+                <div className="w-full sm:w-48">
                   <Select value={filterCategory} onValueChange={setFilterCategory}>
                     <SelectTrigger>
                       <SelectValue placeholder="Filter by category" />

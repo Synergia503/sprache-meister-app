@@ -67,17 +67,19 @@ export const WordInputForm = ({
           </p>
           
           {words.map((word, index) => (
-            <div key={index} className="flex gap-2">
+            <div key={index} className="flex flex-col sm:flex-row gap-2">
               <Input
                 placeholder={`${placeholder} ${index + 1}`}
                 value={word}
                 onChange={(e) => updateWord(index, e.target.value)}
+                className="flex-1"
               />
               {words.length > 1 && (
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => removeWordField(index)}
+                  className="w-full sm:w-auto"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -85,9 +87,9 @@ export const WordInputForm = ({
             </div>
           ))}
           
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {words.length < 20 && (
-              <Button variant="outline" onClick={addWordField}>
+              <Button variant="outline" onClick={addWordField} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Word
               </Button>
@@ -95,6 +97,7 @@ export const WordInputForm = ({
             <Button 
               onClick={handleGenerate} 
               disabled={isLoading || !apiKey}
+              className="w-full sm:w-auto"
             >
               Generate Exercise
             </Button>

@@ -98,4 +98,37 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Mobile-first responsive improvements */
+  .mobile-card {
+    @apply w-full max-w-md mx-auto;
+  }
+  
+  .mobile-form-group {
+    @apply flex flex-col sm:flex-row gap-2;
+  }
+  
+  .mobile-button {
+    @apply w-full sm:w-auto;
+  }
+  
+  .mobile-grid {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  /* Touch-friendly button sizing for mobile */
+  @media (max-width: 767px) {
+    .btn {
+      @apply min-h-[44px] px-4 py-2;
+    }
+    
+    input {
+      @apply min-h-[44px];
+    }
+    
+    /* Ensure sidebar trigger is visible and touchable on mobile */
+    .sidebar-trigger {
+      @apply p-3 m-2 bg-background border rounded-md;
+    }
+  }
 }

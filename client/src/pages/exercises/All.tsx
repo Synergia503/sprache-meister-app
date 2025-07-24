@@ -83,8 +83,8 @@ const All = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">All Exercises</h1>
+    <div className="p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">All Exercises</h1>
       
       <div className="mb-6">
         <Card>
@@ -120,7 +120,7 @@ const All = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {exercises.map((exercise) => {
           const IconComponent = exercise.icon;
           return (
