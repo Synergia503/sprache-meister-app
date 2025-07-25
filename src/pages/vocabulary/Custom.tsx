@@ -506,7 +506,6 @@ const Custom = () => {
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between">
                         {" "}
-                        asdf
                         <div className="flex items-center gap-3">
                           <Button
                             variant={isMultiSelectMode ? "default" : "outline"}
@@ -544,21 +543,6 @@ const Custom = () => {
                           </Button>
                         )}
                       </div>
-
-                      {/* Mobile-friendly add to exercise button */}
-                      {selectedWords.size > 0 && (
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={handleAddToExercise}
-                            className="flex-1 min-w-0"
-                            size="sm"
-                          >
-                            <ArrowRight className="mr-2 h-4 w-4" />
-                            Add {selectedWords.size} to Exercise (
-                            {droppedWords.length} total)
-                          </Button>
-                        </div>
-                      )}
                     </div>
                   </div>
 
