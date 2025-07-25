@@ -195,7 +195,7 @@ const Flashcards = () => {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Input
                     placeholder="Search flashcards..."
                     value={searchTerm}

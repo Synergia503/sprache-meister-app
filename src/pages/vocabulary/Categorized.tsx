@@ -251,7 +251,7 @@ const Categorized = () => {
                     <Label>Start Exercise with Category</Label>
                     <div className="flex gap-3">
                       <Select value={selectedExercise} onValueChange={setSelectedExercise}>
-                        <SelectTrigger className="flex-1">
+                        <SelectTrigger className="flex-1 min-w-0">
                           <SelectValue placeholder="Choose exercise type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -310,7 +310,7 @@ const Categorized = () => {
                       checked={selectedWords.has(index)}
                       onCheckedChange={() => toggleWordSelection(index)}
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <span className="font-medium">{word.german}</span>
                       <span className="text-muted-foreground mx-2">—</span>
                       <span>{word.english}</span>

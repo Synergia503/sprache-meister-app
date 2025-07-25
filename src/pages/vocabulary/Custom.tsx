@@ -24,25 +24,18 @@ import {
 import {
   Plus,
   Star,
-  Loader2,
-  BookOpen,
   X,
-  Edit,
   Trash,
   List,
   ChevronRight,
-  Filter,
   Search,
   ArrowUpDown,
   Heart,
   Clock,
   Target,
-  TrendingUp,
   Calendar,
   Smartphone,
   ArrowRight,
-  Check,
-  Move,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PhotoWordExtractor from "@/components/PhotoWordExtractor";
@@ -79,7 +72,6 @@ const Custom = () => {
     addWord,
     removeWord,
     toggleFavorite,
-    filters,
     setFilters,
     sortOption,
     setSortOption,
@@ -337,11 +329,15 @@ const Custom = () => {
   ].sort();
 
   return (
-    <div className="min-h-screen p-4 sm:p-6">
+    <div className="p-4 sm:p-6">
       {/* Sticky Add to Exercise Button */}
       {selectedWords.size > 0 && (
-        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-4  px-4 sm:px-6 py-3">
-          <Button onClick={handleAddToExercise} className="w-full" size="sm">
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-4 px-4 sm:px-6 py-3">
+          <Button
+            onClick={handleAddToExercise}
+            className="w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+            size="sm"
+          >
             <ArrowRight className="mr-2 h-4 w-4" />
             {/* with the screen width greater than button the sticky works  */}
             Add {selectedWords.size} to Exercise ({droppedWords.length} total)
@@ -421,7 +417,7 @@ const Custom = () => {
                 {/* Filters and Sorting Controls */}
                 <div className="mb-6 space-y-4">
                   <div className="flex flex-wrap gap-3">
-                    <div className="flex-1 min-w-60">
+                    <div className="flex-1 min-w-0">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -436,7 +432,7 @@ const Custom = () => {
                       value={selectedCategory}
                       onValueChange={setSelectedCategory}
                     >
-                      <SelectTrigger className="w-48">
+                      <SelectTrigger className="min-w-0 w-full sm:w-48">
                         <SelectValue placeholder="Filter by category" />
                       </SelectTrigger>
                       <SelectContent>
@@ -452,7 +448,7 @@ const Custom = () => {
                       value={sortOption}
                       onValueChange={(value) => setSortOption(value as any)}
                     >
-                      <SelectTrigger className="w-48">
+                      <SelectTrigger className="min-w-0 w-full sm:w-48">
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>
                       <SelectContent>
@@ -509,6 +505,8 @@ const Custom = () => {
                   <div className="p-3 bg-muted/30 border rounded-lg">
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between">
+                        {" "}
+                        asdf
                         <div className="flex items-center gap-3">
                           <Button
                             variant={isMultiSelectMode ? "default" : "outline"}
@@ -536,7 +534,6 @@ const Custom = () => {
                             </span>
                           )}
                         </div>
-
                         {isMultiSelectMode && selectedWords.size > 0 && (
                           <Button
                             variant="outline"
@@ -553,7 +550,7 @@ const Custom = () => {
                         <div className="flex gap-2">
                           <Button
                             onClick={handleAddToExercise}
-                            className="flex-1"
+                            className="flex-1 min-w-0"
                             size="sm"
                           >
                             <ArrowRight className="mr-2 h-4 w-4" />
@@ -598,7 +595,7 @@ const Custom = () => {
                           : "Ctrl+Click to start multi-select"
                       }
                     >
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                           <span className="font-medium">{word.german}</span>
                           <span className="text-muted-foreground">—</span>
@@ -781,7 +778,7 @@ const Custom = () => {
                     className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
                     onClick={() => handleWordClick(word.id)}
                   >
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="mb-1">
                         <span className="font-medium">{word.german}</span> -{" "}
                         {word.english}

@@ -136,7 +136,7 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
 
         <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3`}>
           <Select value={selectedExercise} onValueChange={setSelectedExercise}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="flex-1 min-w-0">
               <SelectValue placeholder="Choose exercise type" />
             </SelectTrigger>
             <SelectContent>

@@ -162,7 +162,7 @@ export const AnkiExport = ({ items, defaultDeckName = 'German Learning' }: AnkiE
               <Label htmlFor="deck-select">Select Deck</Label>
               <div className="flex gap-2 mt-1">
                 <Select value={selectedDeck} onValueChange={setSelectedDeck}>
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="flex-1 min-w-0">
                     <SelectValue placeholder="Select a deck" />
                   </SelectTrigger>
                   <SelectContent>

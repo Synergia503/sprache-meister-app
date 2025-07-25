@@ -72,7 +72,7 @@ export const WordInputForm = ({
                 placeholder={`${placeholder} ${index + 1}`}
                 value={word}
                 onChange={(e) => updateWord(index, e.target.value)}
-                className="flex-1"
+                className="flex-1 min-w-0"
               />
               {words.length > 1 && (
                 <Button

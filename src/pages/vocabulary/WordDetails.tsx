@@ -210,7 +210,7 @@ const WordDetails = () => {
                         value={newCategory}
                         onChange={(e) => setNewCategory(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-                        className="flex-1"
+                        className="flex-1 min-w-0"
                       />
                       <Button onClick={handleAddCategory} size="sm">
                         <Plus className="h-4 w-4" />

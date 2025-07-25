@@ -224,7 +224,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
               <Button
                 onClick={simulateAnalysis}
                 disabled={isAnalyzing}
-                className="flex-1"
+                className="flex-1 min-w-0"
               >
                 {isAnalyzing ? (
                   <>

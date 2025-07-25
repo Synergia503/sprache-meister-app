@@ -201,7 +201,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <SidebarTrigger className="sidebar-trigger" />
           {children}
         </div>

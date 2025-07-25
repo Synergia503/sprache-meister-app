@@ -1039,7 +1039,7 @@ const Profile = () => {
                     and remove all your data from our servers.
                   </p>
                   <div className="flex gap-3">
-                    <Button variant="destructive" onClick={handleDeleteAccount} className="flex-1">
+                    <Button variant="destructive" onClick={handleDeleteAccount} className="flex-1 min-w-0">
                       Yes, delete my account
                     </Button>
                   </div>
