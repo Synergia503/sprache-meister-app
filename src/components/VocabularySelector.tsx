@@ -6,9 +6,11 @@ import { useVocabulary } from '@/contexts/VocabularyContext';
 import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { CustomWord } from '@/types/vocabulary';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface VocabularySelectorProps {
-  onWordsSelected?: (words: string[] | any[]) => void;
+  onWordsSelected?: (words: string[] | CustomWord[]) => void;
   title?: string;
   description?: string;
   exerciseType?: string;
@@ -23,6 +25,7 @@ export const VocabularySelector = ({
   exercisePath
 }: VocabularySelectorProps) => {
   const { getAllCategories, getWordsByCategory } = useVocabulary();
+  const { languageSettings } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -42,7 +45,7 @@ export const VocabularySelector = ({
         });
         return;
       }
-      
+
       if (exerciseType && exercisePath) {
         // Convert to VocabularyWord format and use service
         const vocabularyWords: VocabularyWord[] = categoryWords.map(word => ({
@@ -56,8 +59,8 @@ export const VocabularySelector = ({
         // Convert VocabularyWord back to CustomWord format for the service
         const customWords: CustomWord[] = vocabularyWords.map(word => ({
           id: word.id,
-          targetLanguage: { code: 'de', name: 'German', nativeName: 'Deutsch' }, // Default values
-          nativeLanguage: { code: 'en', name: 'English', nativeName: 'English' }, // Default values
+          targetLanguage: languageSettings.targetLanguage,
+          nativeLanguage: languageSettings.nativeLanguage,
           targetWord: word.targetWord,
           nativeWord: word.nativeWord,
           categories: word.categories,

@@ -31,9 +31,9 @@ export const useMatchingExercise = () => {
   const [currentExercise, setCurrentExercise] = useState<MatchingExercise | null>(null);
   const [userMatches, setUserMatches] = useState<{ [key: number]: number }>({});
   const [showResults, setShowResults] = useState(false);
-  const [shuffledEnglish, setShuffledEnglish] = useState<MatchingPair[]>([]);
-  const [selectedGerman, setSelectedGerman] = useState<number | null>(null);
-  const [selectedEnglish, setSelectedEnglish] = useState<number | null>(null);
+  const [shuffledNative, setShuffledNative] = useState<MatchingPair[]>([]);
+  const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
+  const [selectedNative, setSelectedNative] = useState<number | null>(null);
   const [previousExercises, setPreviousExercises] = useState<MatchingExercise[]>([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
@@ -65,13 +65,13 @@ export const useMatchingExercise = () => {
         setCurrentExercise(categoryExercise);
         setUserMatches({});
         setShowResults(false);
-        setShuffledEnglish(shuffleArray([...categoryExercise.pairs]));
+        setShuffledNative(shuffleArray([...categoryExercise.pairs]));
         
         toast({
           title: "Exercise loaded",
           description: `Using vocabulary from ${exerciseData.category}`,
         });
-        
+
         // Clear the service data after using it
         vocabularyExerciseService.clearExerciseData();
         return;
@@ -94,7 +94,7 @@ export const useMatchingExercise = () => {
     setCurrentExercise(SAMPLE_EXERCISE);
     setUserMatches({});
     setShowResults(false);
-    setShuffledEnglish(shuffleArray([...SAMPLE_EXERCISE.pairs]));
+    setShuffledNative(shuffleArray([...SAMPLE_EXERCISE.pairs]));
   };
 
   const generateExercise = async (input: string[] | WordPair[]) => {
@@ -108,8 +108,8 @@ export const useMatchingExercise = () => {
     }
 
     const words = Array.isArray(input) ? input : [];
-    
-    const prompt = `Create a matching exercise with ${words.length} ${languageSettings.targetLanguage.nativeName}-${languageSettings.nativeLanguage.nativeName} word pairs. 
+
+    const prompt = `Create a matching exercise with ${words.length} ${languageSettings.targetLanguage.nativeName}-${languageSettings.nativeLanguage.nativeName} word pairs.
     Use these words: ${words.join(', ')}
     
     Return only a JSON array with this exact format:
@@ -143,7 +143,7 @@ export const useMatchingExercise = () => {
         setCurrentExercise(exercise);
         setUserMatches({});
         setShowResults(false);
-        setShuffledEnglish(shuffleArray([...exercise.pairs]));
+        setShuffledNative(shuffleArray([...exercise.pairs]));
         
         toast({
           title: "Exercise generated!",
@@ -159,34 +159,34 @@ export const useMatchingExercise = () => {
     }
   };
 
-  const handleSelectGerman = (index: number) => {
-    setSelectedGerman(index);
+  const handleSelectTarget = (index: number) => {
+    setSelectedTarget(index);
   };
 
-  const handleSelectEnglish = (index: number) => {
-    setSelectedEnglish(index);
+  const handleSelectNative = (index: number) => {
+    setSelectedNative(index);
   };
 
-  const handleMatch = (germanIndex: number, englishIndex: number) => {
-    if (englishIndex === -1) {
+  const handleMatch = (targetIndex: number, nativeIndex: number) => {
+    if (nativeIndex === -1) {
       // Clear the match
       setUserMatches(prev => {
         const newMatches = { ...prev };
-        delete newMatches[germanIndex];
+        delete newMatches[targetIndex];
         return newMatches;
       });
-      setSelectedGerman(null);
-      setSelectedEnglish(null);
+      setSelectedTarget(null);
+      setSelectedNative(null);
       return;
     }
 
     setUserMatches(prev => ({
       ...prev,
-      [germanIndex]: englishIndex
+      [targetIndex]: nativeIndex
     }));
     
-    setSelectedGerman(null);
-    setSelectedEnglish(null);
+    setSelectedTarget(null);
+    setSelectedNative(null);
   };
 
   const checkAnswers = () => {
@@ -194,7 +194,7 @@ export const useMatchingExercise = () => {
     
     const correctMatches = currentExercise.pairs.filter((pair, index) => {
       const userMatch = userMatches[index];
-      return userMatch !== undefined && shuffledEnglish[userMatch].nativeWord === pair.nativeWord;
+      return userMatch !== undefined && shuffledNative[userMatch].nativeWord === pair.nativeWord;
     }).length;
     
     const totalPairs = currentExercise.pairs.length;
@@ -208,14 +208,14 @@ export const useMatchingExercise = () => {
     });
   };
 
-  const getMatchingResult = (germanIndex: number) => {
+  const getMatchingResult = (targetIndex: number) => {
     if (!currentExercise || !showResults) return '';
     
-    const userMatch = userMatches[germanIndex];
+    const userMatch = userMatches[targetIndex];
     if (userMatch === undefined) return 'Not answered';
     
-    const userSelected = shuffledEnglish[userMatch];
-    const correct = currentExercise.pairs[germanIndex];
+    const userSelected = shuffledNative[userMatch];
+    const correct = currentExercise.pairs[targetIndex];
     
     if (userSelected.nativeWord === correct.nativeWord) {
       return 'Correct';
@@ -228,25 +228,25 @@ export const useMatchingExercise = () => {
     setCurrentExercise(null);
     setUserMatches({});
     setShowResults(false);
-    setSelectedGerman(null);
-    setSelectedEnglish(null);
-    setShuffledEnglish([]);
+    setSelectedTarget(null);
+    setSelectedNative(null);
+    setShuffledNative([]);
   };
 
   const loadPreviousExercise = (exercise: MatchingExercise) => {
     setCurrentExercise(exercise);
     setUserMatches(exercise.userMatches);
     setShowResults(exercise.isCompleted);
-    setShuffledEnglish(shuffleArray([...exercise.pairs]));
+    setShuffledNative(shuffleArray([...exercise.pairs]));
   };
 
-  const shuffleEnglishWords = () => {
+  const shuffleNativeWords = () => {
     if (currentExercise) {
-      setShuffledEnglish(shuffleArray([...currentExercise.pairs]));
+      setShuffledNative(shuffleArray([...currentExercise.pairs]));
       setUserMatches({});
       setShowResults(false);
-      setSelectedGerman(null);
-      setSelectedEnglish(null);
+      setSelectedTarget(null);
+      setSelectedNative(null);
     }
   };
 
@@ -254,19 +254,19 @@ export const useMatchingExercise = () => {
     currentExercise,
     userMatches,
     showResults,
-    shuffledEnglish,
-    selectedGerman,
-    selectedEnglish,
+    shuffledNative,
+    selectedTarget,
+    selectedNative,
     onMatch: handleMatch,
     onCheckAnswers: checkAnswers,
-    onShuffle: shuffleEnglishWords,
+    onShuffle: shuffleNativeWords,
     onNewExercise: resetExercise,
-    onSelectGerman: handleSelectGerman,
-    onSelectEnglish: handleSelectEnglish,
+    onSelectTarget: handleSelectTarget,
+    onSelectNative: handleSelectNative,
     getMatchingResult,
     generateExercise,
     loadSampleExercise,
     loadPreviousExercise,
-    shuffleEnglishWords,
+    shuffleNativeWords,
   };
 };

@@ -6,8 +6,8 @@ import { Camera, Upload, Image, Loader2, X } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 
 interface ExtractedWord {
-  german: string;
-  english: string;
+  targetWord: string;
+  nativeWord: string;
   categories?: string[];
 }
 
@@ -24,23 +24,23 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
   const [wordCategoryStates, setWordCategoryStates] = useState<{[key: number]: string[]}>({});
   const { toast } = useToast();
 
-  // Simulated German words that could be extracted from photos with suggested categories
-  const sampleGermanWords = [
-    { german: 'der Tisch', english: 'table', categories: ['furniture', 'home'] },
-    { german: 'das Buch', english: 'book', categories: ['objects', 'education'] },
-    { german: 'die Lampe', english: 'lamp', categories: ['furniture', 'lighting'] },
-    { german: 'der Stuhl', english: 'chair', categories: ['furniture'] },
-    { german: 'das Fenster', english: 'window', categories: ['architecture', 'home'] },
-    { german: 'die Tür', english: 'door', categories: ['architecture', 'home'] },
-    { german: 'der Computer', english: 'computer', categories: ['technology', 'electronics'] },
-    { german: 'das Handy', english: 'mobile phone', categories: ['technology', 'communication'] },
-    { german: 'die Brille', english: 'glasses', categories: ['clothing', 'accessories'] },
-    { german: 'der Kaffee', english: 'coffee', categories: ['food', 'drinks'] },
-    { german: 'das Auto', english: 'car', categories: ['transport', 'vehicles'] },
-    { german: 'die Blume', english: 'flower', categories: ['nature', 'plants'] },
-    { german: 'der Hund', english: 'dog', categories: ['animals', 'pets'] },
-    { german: 'die Katze', english: 'cat', categories: ['animals', 'pets'] },
-    { german: 'das Haus', english: 'house', categories: ['architecture', 'buildings'] }
+  // Simulated target language words that could be extracted from photos with suggested categories
+  const sampleTargetLanguageWords = [
+    { targetWord: 'der Tisch', nativeWord: 'table', categories: ['furniture', 'home'] },
+    { targetWord: 'das Buch', nativeWord: 'book', categories: ['objects', 'education'] },
+    { targetWord: 'die Lampe', nativeWord: 'lamp', categories: ['furniture', 'lighting'] },
+    { targetWord: 'der Stuhl', nativeWord: 'chair', categories: ['furniture'] },
+    { targetWord: 'das Fenster', nativeWord: 'window', categories: ['architecture', 'home'] },
+    { targetWord: 'die Tür', nativeWord: 'door', categories: ['architecture', 'home'] },
+    { targetWord: 'der Computer', nativeWord: 'computer', categories: ['technology', 'electronics'] },
+    { targetWord: 'das Handy', nativeWord: 'mobile phone', categories: ['technology', 'communication'] },
+    { targetWord: 'die Brille', nativeWord: 'glasses', categories: ['clothing', 'accessories'] },
+    { targetWord: 'der Kaffee', nativeWord: 'coffee', categories: ['food', 'drinks'] },
+    { targetWord: 'das Auto', nativeWord: 'car', categories: ['transport', 'vehicles'] },
+    { targetWord: 'die Blume', nativeWord: 'flower', categories: ['nature', 'plants'] },
+    { targetWord: 'der Hund', nativeWord: 'dog', categories: ['animals', 'pets'] },
+    { targetWord: 'die Katze', nativeWord: 'cat', categories: ['animals', 'pets'] },
+    { targetWord: 'das Haus', nativeWord: 'house', categories: ['architecture', 'buildings'] }
   ];
 
   const simulateAnalysis = async () => {
@@ -51,7 +51,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
     
     // Generate 5-8 random words
     const numberOfWords = Math.floor(Math.random() * 4) + 5; // 5-8 words
-    const shuffled = [...sampleGermanWords].sort(() => 0.5 - Math.random());
+    const shuffled = [...sampleTargetLanguageWords].sort(() => 0.5 - Math.random());
     const selectedWords = shuffled.slice(0, numberOfWords);
     
     setExtractedWords(selectedWords);
@@ -67,7 +67,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
     
     toast({
       title: "Analysis complete!",
-      description: `Extracted ${selectedWords.length} German words with suggested categories.`,
+      description: `Extracted ${selectedWords.length} target language words with suggested categories.`,
     });
   };
 
@@ -242,13 +242,13 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
         {extractedWords.length > 0 && (
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium mb-3">Extracted German Words with Suggested Categories:</h3>
+              <h3 className="font-medium mb-3">Extracted target language Words with Suggested Categories:</h3>
               <div className="grid gap-4">
                 {extractedWords.map((word, index) => (
                   <div key={index} className="p-3 bg-background rounded border space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{word.german}</span>
-                      <span className="text-muted-foreground">{word.english}</span>
+                      <span className="font-medium">{word.targetWord}</span>
+                      <span className="text-muted-foreground">{word.nativeWord}</span>
                     </div>
                     
                     {word.categories && word.categories.length > 0 && (

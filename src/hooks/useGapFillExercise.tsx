@@ -6,6 +6,7 @@ import {
   vocabularyExerciseService,
   VocabularyWord,
 } from "@/services/vocabularyExerciseService";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const useGapFillExercise = () => {
   const [currentExercise, setCurrentExercise] =
@@ -17,6 +18,7 @@ export const useGapFillExercise = () => {
   );
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
+  const { languageSettings } = useLanguage();
 
   const generateExercise = useCallback(
     async (words: VocabularyWord[]) => {
@@ -24,8 +26,8 @@ export const useGapFillExercise = () => {
 
       // Handle both word objects and string arrays
       let validWords: string[] = [];
-      validWords = words.map((word: VocabularyWord) => word.german);
-      console.log("Extracted German words from objects:", validWords);
+      validWords = words.map((word: VocabularyWord) => word.targetWord);
+      console.log("Extracted target words from objects:", validWords);
 
       if (validWords.length === 0) {
         console.log("No valid words found");
@@ -38,7 +40,7 @@ export const useGapFillExercise = () => {
       }
 
       console.log("Calling OpenAI with words:", validWords);
-      const prompt = `Create a gap-fill exercise with German words: ${validWords.join(
+        const prompt = `Create a gap-fill exercise with target language words: ${validWords.join(
         ", "
       )}. Generate ${
         validWords.length * 3
@@ -56,7 +58,7 @@ Return only a JSON object with this exact format:
 }`;
 
       const systemMessage =
-        "You are a German language teacher creating gap-fill exercises. Return only valid JSON without any additional text or explanations.";
+        `You are a ${languageSettings.targetLanguage.nativeName} language teacher creating gap-fill exercises. Return only valid JSON without any additional text or explanations.`;
 
       const result = await callOpenAI(prompt, systemMessage);
       if (result) {
@@ -82,7 +84,7 @@ Return only a JSON object with this exact format:
         }
       }
     },
-    [callOpenAI, toast]
+    [callOpenAI, toast, languageSettings.targetLanguage.nativeName]
   );
 
   // Check for vocabulary data from service on mount

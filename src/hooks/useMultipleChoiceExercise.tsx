@@ -1,109 +1,123 @@
-
-import { useState, useEffect } from 'react';
-import { useOpenAI } from '@/hooks/useOpenAI';
-import { useToast } from '@/hooks/use-toast';
-import { MultipleChoiceExercise } from '@/types/exercises';
-import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
-
-const SAMPLE_EXERCISE: MultipleChoiceExercise = {
-  id: 'sample-multiple-choice',
-  words: ['der/die/das', 'haben/sein', 'Adjektivendungen'],
-  sentences: [
-    {
-      sentenceOrder: 1,
-      sentence: '____ Haus ist groß.',
-      options: ['Der', 'Die', 'Das', 'Den'],
-      solution: 'Das'
-    },
-    {
-      sentenceOrder: 2,
-      sentence: 'Ich ____ heute müde.',
-      options: ['habe', 'bin', 'ist', 'sind'],
-      solution: 'bin'
-    },
-    {
-      sentenceOrder: 3,
-      sentence: 'Er trägt ein____ schwarz____ Jacke.',
-      options: ['e, e', 'en, en', 'e, en', 'er, e'],
-      solution: 'e, e'
-    },
-    {
-      sentenceOrder: 4,
-      sentence: 'Die Sonne scheint ____.',
-      options: ['heute', 'morgen', 'gestern', 'nächste Woche'],
-      solution: 'heute'
-    },
-    {
-      sentenceOrder: 5,
-      sentence: 'Die Kinder ____ eine neue Schule.',
-      options: ['gehen', 'geht', 'gingen', 'ging'],
-      solution: 'gehen'
-    }
-  ],
-  userAnswers: {},
-  isCompleted: false,
-  createdAt: new Date()
-};
+import { useState, useEffect } from "react";
+import { useOpenAI } from "@/hooks/useOpenAI";
+import { useToast } from "@/hooks/use-toast";
+import { MultipleChoiceExercise } from "@/types/exercises";
+import { vocabularyExerciseService } from "@/services/vocabularyExerciseService";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const useMultipleChoiceExercise = () => {
-  const [currentExercise, setCurrentExercise] = useState<MultipleChoiceExercise | null>(null);
+  const [currentExercise, setCurrentExercise] =
+    useState<MultipleChoiceExercise | null>(null);
   const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({});
   const [showResults, setShowResults] = useState(false);
-  const [previousExercises, setPreviousExercises] = useState<MultipleChoiceExercise[]>([]);
+  const [previousExercises, setPreviousExercises] = useState<
+    MultipleChoiceExercise[]
+  >([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
+  const { languageSettings } = useLanguage();
+  const SAMPLE_EXERCISE: MultipleChoiceExercise = {
+    id: "sample-multiple-choice",
+    words: ["der/die/das", "haben/sein", "Adjektivendungen"],
+    sentences: [
+      {
+        sentenceOrder: 1,
+        sentence: "____ Haus ist groß.",
+        options: ["Der", "Die", "Das", "Den"],
+        solution: "Das",
+      },
+      {
+        sentenceOrder: 2,
+        sentence: "Ich ____ heute müde.",
+        options: ["habe", "bin", "ist", "sind"],
+        solution: "bin",
+      },
+      {
+        sentenceOrder: 3,
+        sentence: "Er trägt ein____ schwarz____ Jacke.",
+        options: ["e, e", "en, en", "e, en", "er, e"],
+        solution: "e, e",
+      },
+      {
+        sentenceOrder: 4,
+        sentence: "Die Sonne scheint ____.",
+        options: ["heute", "morgen", "gestern", "nächste Woche"],
+        solution: "heute",
+      },
+      {
+        sentenceOrder: 5,
+        sentence: "Die Kinder ____ eine neue Schule.",
+        options: ["gehen", "geht", "gingen", "ging"],
+        solution: "gehen",
+      },
+    ],
+    userAnswers: {},
+    isCompleted: false,
+    createdAt: new Date(),
+    targetLanguage: languageSettings.targetLanguage.nativeName,
+    nativeLanguage: languageSettings.nativeLanguage.nativeName,
+  };
 
   useEffect(() => {
     // Check if there's vocabulary data from the service
     if (vocabularyExerciseService.hasExerciseData()) {
       const exerciseData = vocabularyExerciseService.getExerciseData();
-      console.log("Multiple choice exercise: Found exercise data from service:", exerciseData);
-      
+      console.log(
+        "Multiple choice exercise: Found exercise data from service:",
+        exerciseData
+      );
+
       if (exerciseData && exerciseData.words.length > 0) {
         // Generate multiple choice questions from vocabulary words
         const sentences = exerciseData.words.map((word, index) => ({
           sentenceOrder: index + 1,
-          sentence: `What is the English translation of "${word.german}"?`,
-          options: generateRandomOptions(word.english, exerciseData.words),
-          solution: word.english
+          sentence: `What is the native language translation of "${word.targetWord}"?`,
+          options: generateRandomOptions(word.nativeWord, exerciseData.words),
+          solution: word.nativeWord,
         }));
-        
+
         const categoryExercise: MultipleChoiceExercise = {
           id: `category-${Date.now()}`,
-          words: exerciseData.words.map(word => word.german),
+          words: exerciseData.words.map((word) => word.targetWord),
           sentences,
           userAnswers: {},
           isCompleted: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          targetLanguage: languageSettings.targetLanguage.nativeName,
+          nativeLanguage: languageSettings.nativeLanguage.nativeName,
         };
-        
+
         setCurrentExercise(categoryExercise);
         setUserAnswers({});
         setShowResults(false);
-        
+
         toast({
           title: "Exercise loaded",
           description: `Using vocabulary from ${exerciseData.category}`,
         });
-        
+
         // Clear the service data after using it
         vocabularyExerciseService.clearExerciseData();
         return;
       }
     }
-    
+
     loadSampleExercise();
   }, []);
 
   const generateRandomOptions = (correctAnswer: string, allWords: any[]) => {
     const otherAnswers = allWords
-      .map(word => word.english)
-      .filter(answer => answer !== correctAnswer)
+      .map((word) => word.nativeWord)
+      .filter((answer) => answer !== correctAnswer)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3);
-    
-    const options = [correctAnswer, ...otherAnswers].sort(() => Math.random() - 0.5);
-    return options.length === 4 ? options : [correctAnswer, 'Option 2', 'Option 3', 'Option 4'];
+
+    const options = [correctAnswer, ...otherAnswers].sort(
+      () => Math.random() - 0.5
+    );
+    return options.length === 4
+      ? options
+      : [correctAnswer, "Option 2", "Option 3", "Option 4"];
   };
 
   const loadSampleExercise = () => {
@@ -115,15 +129,19 @@ export const useMultipleChoiceExercise = () => {
   const generateExercise = async (input: string[] | any[]) => {
     // Handle both word objects and string arrays
     let validTopics: string[] = [];
-    
-    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
+
+    if (
+      input.length > 0 &&
+      typeof input[0] === "object" &&
+      "targetWord" in input[0]
+    ) {
       // Input is word objects from vocabulary
-      validTopics = input.map((word: any) => word.german);
+      validTopics = input.map((word: any) => word.targetWord);
     } else {
       // Input is string array
-      validTopics = (input as string[]).filter(topic => topic.trim());
+      validTopics = (input as string[]).filter((topic) => topic.trim());
     }
-    
+
     if (validTopics.length === 0) {
       toast({
         title: "No topics provided",
@@ -133,7 +151,11 @@ export const useMultipleChoiceExercise = () => {
       return;
     }
 
-    const prompt = `Create a German multiple choice exercise focusing on these topics: ${validTopics.join(', ')}. Create sentences with blanks and provide 4 options for each, with one correct answer.
+    const prompt = `Create a ${
+      languageSettings.targetLanguage.nativeName
+    } multiple choice exercise focusing on these topics: ${validTopics.join(
+      ", "
+    )}. Create sentences with blanks and provide 4 options for each, with one correct answer.
 
 Return only a JSON object with this exact format:
 {
@@ -147,8 +169,8 @@ Return only a JSON object with this exact format:
   ]
 }`;
 
-    const systemMessage = "You are a German language teacher creating multiple choice exercises. Return only valid JSON without any additional text or explanations.";
-    
+    const systemMessage = `You are a ${languageSettings.targetLanguage.nativeName} language teacher creating multiple choice exercises. Return only valid JSON without any additional text or explanations.`;
+
     const result = await callOpenAI(prompt, systemMessage);
     if (result) {
       try {
@@ -159,7 +181,9 @@ Return only a JSON object with this exact format:
           sentences: exerciseData.sentences,
           userAnswers: {},
           isCompleted: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          targetLanguage: languageSettings.targetLanguage.nativeName,
+          nativeLanguage: languageSettings.nativeLanguage.nativeName,
         };
         setCurrentExercise(exercise);
         setUserAnswers({});
@@ -175,9 +199,9 @@ Return only a JSON object with this exact format:
   };
 
   const handleAnswerChange = (sentenceOrder: number, answer: string) => {
-    setUserAnswers(prev => ({
+    setUserAnswers((prev) => ({
       ...prev,
-      [sentenceOrder]: answer
+      [sentenceOrder]: answer,
     }));
   };
 
@@ -187,15 +211,15 @@ Return only a JSON object with this exact format:
     const updatedExercise = {
       ...currentExercise,
       userAnswers,
-      isCompleted: true
+      isCompleted: true,
     };
 
-    setPreviousExercises(prev => [...prev, updatedExercise]);
+    setPreviousExercises((prev) => [...prev, updatedExercise]);
     setShowResults(true);
-    
+
     // Calculate score
-    const correctAnswers = currentExercise.sentences.filter(sentence => 
-      userAnswers[sentence.sentenceOrder] === sentence.solution
+    const correctAnswers = currentExercise.sentences.filter(
+      (sentence) => userAnswers[sentence.sentenceOrder] === sentence.solution
     ).length;
 
     toast({
@@ -207,14 +231,18 @@ Return only a JSON object with this exact format:
   const resetExercise = () => {
     // Store the current exercise data to enable restart functionality
     const currentVocabulary = currentExercise?.sentences;
-    
+
     if (currentVocabulary && currentVocabulary.length > 0) {
       // Keep current exercise vocabulary for restart
-      setCurrentExercise(prev => prev ? {
-        ...prev,
-        userAnswers: {},
-        isCompleted: false
-      } : null);
+      setCurrentExercise((prev) =>
+        prev
+          ? {
+              ...prev,
+              userAnswers: {},
+              isCompleted: false,
+            }
+          : null
+      );
       setUserAnswers({});
       setShowResults(false);
     } else {
@@ -231,8 +259,8 @@ Return only a JSON object with this exact format:
   const practiceMistakes = () => {
     if (!currentExercise || !showResults) return;
 
-    const incorrectSentences = currentExercise.sentences.filter(sentence => 
-      userAnswers[sentence.sentenceOrder] !== sentence.solution
+    const incorrectSentences = currentExercise.sentences.filter(
+      (sentence) => userAnswers[sentence.sentenceOrder] !== sentence.solution
     );
 
     if (incorrectSentences.length === 0) {
@@ -249,7 +277,7 @@ Return only a JSON object with this exact format:
       sentences: incorrectSentences,
       userAnswers: {},
       isCompleted: false,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     setCurrentExercise(mistakeExercise);
@@ -268,6 +296,6 @@ Return only a JSON object with this exact format:
     checkAnswers,
     resetExercise,
     loadPreviousExercise,
-    practiceMistakes
+    practiceMistakes,
   };
 };

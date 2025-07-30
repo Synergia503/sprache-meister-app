@@ -38,7 +38,7 @@ export const TranslationExerciseDisplay = ({
           {exercise.sentences.map((sentence) => (
             <div key={sentence.sentenceOrder} className="space-y-2">
               <p className="font-medium">
-                {sentence.sentenceOrder}. {sentence.germanSentence}
+                {sentence.sentenceOrder}. {sentence.targetSentence}
               </p>
               <Textarea
                 placeholder="Enter your English translation"
@@ -50,7 +50,7 @@ export const TranslationExerciseDisplay = ({
               {showResults && (
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm font-medium text-blue-800">Correct translation:</p>
-                  <p className="text-blue-700">{sentence.englishSentence}</p>
+                  <p className="text-blue-700">{sentence.nativeSentence}</p>
                 </div>
               )}
             </div>
