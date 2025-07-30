@@ -8,9 +8,25 @@ import { useSameMeaningExercise } from '@/hooks/useSameMeaningExercise';
 import { WordInputForm } from '@/components/exercises/WordInputForm';
 import { ExerciseLayout } from '@/components/exercises/ExerciseLayout';
 import { VocabularySelector } from '@/components/VocabularySelector';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { BaseExercise } from '@/types/exercises';
+
+interface SameMeaningExercise {
+  exerciseOrder: number;
+  word: string;
+  nativeMeaning: string;
+  solution: string;
+  hint?: string;
+  explanation?: string;
+}
+
+interface SameMeaningExerciseData extends BaseExercise {
+  exercises: SameMeaningExercise[];
+}
 
 const SameMeaning = () => {
   const { apiKey } = useOpenAI();
+  const { languageSettings } = useLanguage();
   const {
     currentExercise,
     userAnswers,
@@ -26,7 +42,7 @@ const SameMeaning = () => {
 
   return (
     <ExerciseLayout
-      title="Same Meaning Exercise"
+      title={`${languageSettings.targetLanguage.nativeName} Same Meaning Exercise`}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}
@@ -34,7 +50,7 @@ const SameMeaning = () => {
       {currentExercise && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Find a word with the same meaning (synonym) for each word</CardTitle>
+            <CardTitle>Find words with the same meaning (synonym) for each word</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -42,10 +58,10 @@ const SameMeaning = () => {
                 <div key={exercise.exerciseOrder} className="space-y-3">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="font-medium mb-2">
-                      {exercise.exerciseOrder}. Find a synonym for "{exercise.word}"
+                      {exercise.exerciseOrder}. What is a synonym for "{exercise.word}"?
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      English meaning: {exercise.englishMeaning}
+                      {languageSettings.nativeLanguage.nativeName} meaning: {exercise.englishMeaning}
                     </p>
                     {exercise.hint && showResults && (
                       <p className="text-sm text-blue-600">
@@ -55,7 +71,7 @@ const SameMeaning = () => {
                   </div>
                   
                   <Input
-                    placeholder="Enter a word with similar meaning in German"
+                    placeholder={`Enter a synonym in ${languageSettings.targetLanguage.nativeName}`}
                     value={userAnswers[exercise.exerciseOrder] || ''}
                     onChange={(e) => handleAnswerChange(exercise.exerciseOrder, e.target.value)}
                     disabled={showResults}
@@ -104,16 +120,16 @@ const SameMeaning = () => {
           exerciseType="same-meaning"
           exercisePath="/exercises/same-meaning"
           title="Use Vocabulary from Category"
-          description="Select a category from your vocabulary to create synonym exercises."
+          description={`Select a category from your ${languageSettings.targetLanguage.nativeName} vocabulary to create same meaning exercises.`}
         />
         
         <WordInputForm
           onGenerateExercise={generateExercise}
           isLoading={isLoading}
           apiKey={apiKey}
-          description="Add German words to find their synonyms (words with similar meanings)."
-          placeholder="German word (e.g., schön, schnell)"
-          title="Create New Same Meaning Exercise"
+          description={`Add ${languageSettings.targetLanguage.nativeName} words to find their synonyms.`}
+          placeholder={`${languageSettings.targetLanguage.nativeName} word (e.g., ${languageSettings.targetLanguage.code === 'de' ? 'groß, schnell' : 'big, fast'})`}
+          title={`Create New ${languageSettings.targetLanguage.nativeName} Same Meaning Exercise`}
         />
       </div>
     </ExerciseLayout>

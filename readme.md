@@ -1,8 +1,8 @@
-# German Learning Application
+# YALLA (Yet Another Language Learning App)
 
 ## Overview
 
-This is a full-stack German learning application built with Express.js, React, and TypeScript. The application provides a comprehensive platform for learning German through flashcards, vocabulary management, interactive exercises, and voice conversations. It features a modern UI built with shadcn/ui components and Tailwind CSS
+This is a full-stack foreign language learning application built with React, and TypeScript. The application provides a comprehensive platform for learning foreign languages through flashcards, vocabulary management, interactive exercises, and voice conversations. It features a modern UI built with shadcn/ui components and Tailwind CSS
 
 ## User Preferences
 
@@ -23,17 +23,17 @@ Preferred communication style: Simple, everyday language.
 
 ### Backend Architecture
 
-- **Framework**: Express.js with TypeScript
-- **Build System**: ESBuild for production builds
-- **Development**: tsx for TypeScript execution in development
+- **Framework**: TBA
+- **Build System**: TBA
+- **Development**: TBA
 
 ### Data Storage Solutions
 
-- **Primary Database**:
-- **Schema Management**:
-- **Local Storage**:
-- **Session Management**:
-- **In-Memory Storage**:
+- **Primary Database**: TBA
+- **Schema Management**: TBA
+- **Local Storage**: TBA
+- **Session Management**: TBA
+- **In-Memory Storage**: TBA
 
 ## Key Components
 

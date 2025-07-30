@@ -8,9 +8,11 @@ import { useOppositeMeaningExercise } from '@/hooks/useOppositeMeaningExercise';
 import { WordInputForm } from '@/components/exercises/WordInputForm';
 import { ExerciseLayout } from '@/components/exercises/ExerciseLayout';
 import { VocabularySelector } from '@/components/VocabularySelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const OppositeMeaning = () => {
   const { apiKey } = useOpenAI();
+  const { languageSettings } = useLanguage();
   const {
     currentExercise,
     userAnswers,
@@ -26,7 +28,7 @@ const OppositeMeaning = () => {
 
   return (
     <ExerciseLayout
-      title="Opposite Meaning Exercise"
+      title={`${languageSettings.targetLanguage.nativeName} Opposite Meaning Exercise`}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}
@@ -45,7 +47,7 @@ const OppositeMeaning = () => {
                       {exercise.exerciseOrder}. What is the opposite of "{exercise.word}"?
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      English meaning: {exercise.englishMeaning}
+                      {languageSettings.nativeLanguage.nativeName} meaning: {exercise.englishMeaning}
                     </p>
                     {exercise.hint && showResults && (
                       <p className="text-sm text-blue-600">
@@ -55,7 +57,7 @@ const OppositeMeaning = () => {
                   </div>
                   
                   <Input
-                    placeholder="Enter the opposite word in German"
+                    placeholder={`Enter the opposite word in ${languageSettings.targetLanguage.nativeName}`}
                     value={userAnswers[exercise.exerciseOrder] || ''}
                     onChange={(e) => handleAnswerChange(exercise.exerciseOrder, e.target.value)}
                     disabled={showResults}
@@ -104,16 +106,16 @@ const OppositeMeaning = () => {
           exerciseType="opposite-meaning"
           exercisePath="/exercises/opposite-meaning"
           title="Use Vocabulary from Category"
-          description="Select a category from your vocabulary to create opposite meaning exercises."
+          description={`Select a category from your ${languageSettings.targetLanguage.nativeName} vocabulary to create opposite meaning exercises.`}
         />
         
         <WordInputForm
           onGenerateExercise={generateExercise}
           isLoading={isLoading}
           apiKey={apiKey}
-          description="Add German words to find their opposites (antonyms)."
-          placeholder="German word (e.g., groß, schnell)"
-          title="Create New Opposite Meaning Exercise"
+          description={`Add ${languageSettings.targetLanguage.nativeName} words to find their opposites (antonyms).`}
+          placeholder={`${languageSettings.targetLanguage.nativeName} word (e.g., ${languageSettings.targetLanguage.code === 'de' ? 'groß, schnell' : 'big, fast'})`}
+          title={`Create New ${languageSettings.targetLanguage.nativeName} Opposite Meaning Exercise`}
         />
       </div>
     </ExerciseLayout>

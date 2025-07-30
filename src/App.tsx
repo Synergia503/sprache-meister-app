@@ -1,4 +1,3 @@
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainSidebar } from "./components/Sidebar";
@@ -7,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import { VocabularyProvider } from "./contexts/VocabularyContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -55,37 +55,64 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/register" element={<Navigate to="/" replace />} />
-      <Route path="*" element={
-        <MainSidebar>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/vocabulary" element={<Vocabulary />} />
-            <Route path="/vocabulary/categorized" element={<VocabularyCategorized />} />
-            <Route path="/vocabulary/custom" element={<VocabularyCustom />} />
-            <Route path="/vocabulary/custom/:wordId" element={<WordDetails />} />
-            
-            <Route path="/flashcards" element={<Flashcards />} />
-            <Route path="/exercises" element={<Exercises />} />
-            <Route path="/exercises/all" element={<ExercisesAll />} />
-            <Route path="/exercises/gap-fill" element={<GapFill />} />
-            <Route path="/exercises/multiple-choice" element={<MultipleChoice />} />
-            <Route path="/exercises/translation" element={<Translation />} />
-            <Route path="/exercises/matching" element={<Matching />} />
-            <Route path="/exercises/word-formation" element={<WordFormation />} />
-            <Route path="/exercises/opposite-meaning" element={<OppositeMeaning />} />
-            <Route path="/exercises/same-meaning" element={<SameMeaning />} />
-            <Route path="/exercises/word-definition" element={<WordDefinition />} />
-            <Route path="/exercises/describe-picture" element={<DescribePicture />} />
-            <Route path="/exercises/grammar" element={<Grammar />} />
-            <Route path="/exercises/mixed" element={<Mixed />} />
-            <Route path="/voice-conversation" element={<VoiceConversation />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </MainSidebar>
-      } />
+      <Route
+        path="*"
+        element={
+          <MainSidebar>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/vocabulary" element={<Vocabulary />} />
+              <Route
+                path="/vocabulary/categorized"
+                element={<VocabularyCategorized />}
+              />
+              <Route path="/vocabulary/custom" element={<VocabularyCustom />} />
+              <Route
+                path="/vocabulary/custom/:wordId"
+                element={<WordDetails />}
+              />
+
+              <Route path="/flashcards" element={<Flashcards />} />
+              <Route path="/exercises" element={<Exercises />} />
+              <Route path="/exercises/all" element={<ExercisesAll />} />
+              <Route path="/exercises/gap-fill" element={<GapFill />} />
+              <Route
+                path="/exercises/multiple-choice"
+                element={<MultipleChoice />}
+              />
+              <Route path="/exercises/translation" element={<Translation />} />
+              <Route path="/exercises/matching" element={<Matching />} />
+              <Route
+                path="/exercises/word-formation"
+                element={<WordFormation />}
+              />
+              <Route
+                path="/exercises/opposite-meaning"
+                element={<OppositeMeaning />}
+              />
+              <Route path="/exercises/same-meaning" element={<SameMeaning />} />
+              <Route
+                path="/exercises/word-definition"
+                element={<WordDefinition />}
+              />
+              <Route
+                path="/exercises/describe-picture"
+                element={<DescribePicture />}
+              />
+              <Route path="/exercises/grammar" element={<Grammar />} />
+              <Route path="/exercises/mixed" element={<Mixed />} />
+              <Route
+                path="/voice-conversation"
+                element={<VoiceConversation />}
+              />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </MainSidebar>
+        }
+      />
     </Routes>
   );
 };
@@ -97,11 +124,13 @@ const App = () => (
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <VocabularyProvider>
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-          </VocabularyProvider>
+          <LanguageProvider>
+            <VocabularyProvider>
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </VocabularyProvider>
+          </LanguageProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

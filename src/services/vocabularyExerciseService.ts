@@ -1,7 +1,9 @@
+import { CustomWord } from '@/types/vocabulary';
+
 interface VocabularyWord {
   id: string;
-  german: string;
-  english: string;
+  targetWord: string;
+  nativeWord: string;
   categories: string[];
 }
 
@@ -24,9 +26,14 @@ class VocabularyExerciseService {
     return VocabularyExerciseService.instance;
   }
 
-  setExerciseData(words: VocabularyWord[], category: string, exerciseType: string): void {
+  setExerciseData(words: CustomWord[], category: string, exerciseType: string): void {
     this.currentExerciseData = {
-      words,
+      words: words.map(word => ({
+        id: word.id,
+        targetWord: word.targetWord,
+        nativeWord: word.nativeWord,
+        categories: word.categories
+      })),
       category,
       exerciseType
     };
@@ -34,7 +41,7 @@ class VocabularyExerciseService {
       wordCount: words.length,
       category,
       exerciseType,
-      words: words.map(w => w.german)
+      words: words.map(w => w.targetWord)
     });
   }
 
@@ -58,14 +65,14 @@ class VocabularyExerciseService {
     return this.currentExerciseData?.words || [];
   }
 
-  getGermanWords(): string[] {
-    return this.currentExerciseData?.words.map(word => word.german) || [];
+  getTargetWords(): string[] {
+    return this.currentExerciseData?.words.map(word => word.targetWord) || [];
   }
 
-  getVocabularyPairs(): Array<{ german: string; english: string }> {
+  getVocabularyPairs(): Array<{ targetWord: string; nativeWord: string }> {
     return this.currentExerciseData?.words.map(word => ({
-      german: word.german,
-      english: word.english
+      targetWord: word.targetWord,
+      nativeWord: word.nativeWord
     })) || [];
   }
 

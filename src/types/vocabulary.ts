@@ -1,3 +1,5 @@
+import { Language } from './languages';
+
 export interface ExerciseResult {
   exerciseType: 'translation' | 'multiple-choice' | 'matching' | 'gap-fill';
   success: boolean;
@@ -7,8 +9,10 @@ export interface ExerciseResult {
 
 export interface CustomWord {
   id: string;
-  german: string;
-  english: string;
+  targetLanguage: Language; // The language being learned
+  nativeLanguage: Language; // The user's native language
+  targetWord: string; // Word in the target language
+  nativeWord: string; // Translation in native language
   categories: string[];
   sampleSentence: string;
   dateAdded: Date;
@@ -18,12 +22,12 @@ export interface CustomWord {
 }
 
 export interface ExtractedWord {
-  german: string;
-  english: string;
+  targetWord: string;
+  nativeWord: string;
   categories?: string[];
 }
 
-export type SortOption = 'dateAdded' | 'german' | 'english' | 'learningProgress' | 'lastLearning';
+export type SortOption = 'dateAdded' | 'targetWord' | 'nativeWord' | 'learningProgress' | 'lastLearning';
 export type SortOrder = 'asc' | 'desc';
 
 export interface VocabularyFilters {
@@ -31,4 +35,11 @@ export interface VocabularyFilters {
   favorites?: boolean;
   hasLearningHistory?: boolean;
   searchTerm?: string;
+  targetLanguage?: string;
+  nativeLanguage?: string;
+}
+
+export interface LanguageSettings {
+  targetLanguage: Language;
+  nativeLanguage: Language;
 }

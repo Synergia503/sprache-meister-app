@@ -1,70 +1,69 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Edit, Save, X, Plus, Trash2, Target, Clock, Heart } from "lucide-react";
-import { useToast } from '@/hooks/use-toast';
-import { useVocabulary } from '@/contexts/VocabularyContext';
-import { CustomWord } from '@/types/vocabulary';
-
-// Interfaces moved to types/vocabulary.ts
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Edit, Save, X, Star, Heart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useVocabulary } from "@/contexts/VocabularyContext";
+import { CustomWord } from "@/types/vocabulary";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const WordDetails = () => {
   const { wordId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { languageSettings } = useLanguage();
   const { getWordById, updateWord, toggleFavorite } = useVocabulary();
-  
+
   const [word, setWord] = useState<CustomWord | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    german: '',
-    english: '',
+    targetWord: "",
+    nativeWord: "",
     categories: [] as string[],
-    sampleSentence: ''
+    sampleSentence: "",
   });
-  const [newCategory, setNewCategory] = useState('');
+  const [newCategory, setNewCategory] = useState("");
 
   useEffect(() => {
-    const foundWord = getWordById(wordId || '');
+    const foundWord = getWordById(wordId || "");
     if (foundWord) {
       setWord(foundWord);
       setEditForm({
-        german: foundWord.german,
-        english: foundWord.english,
+        targetWord: foundWord.targetWord,
+        nativeWord: foundWord.nativeWord,
         categories: [...foundWord.categories],
-        sampleSentence: foundWord.sampleSentence
+        sampleSentence: foundWord.sampleSentence,
       });
     }
   }, [wordId, getWordById]);
 
   const calculateSuccessRate = () => {
     if (!word?.learningHistory.length) return 0;
-    const successCount = word.learningHistory.filter(h => h.success).length;
+    const successCount = word.learningHistory.filter((h) => h.success).length;
     return Math.round((successCount / word.learningHistory.length) * 100);
   };
 
   const handleSave = () => {
     if (!word) return;
-    
+
     // Update word with edit form data
     const updatedWord = {
       ...word,
-      german: editForm.german,
-      english: editForm.english,
+      targetWord: editForm.targetWord,
+      nativeWord: editForm.nativeWord,
       categories: editForm.categories,
-      sampleSentence: editForm.sampleSentence
+      sampleSentence: editForm.sampleSentence,
     };
-    
+
     setWord(updatedWord);
     updateWord(updatedWord);
     setIsEditing(false);
-    
+
     toast({
       title: "Word updated!",
       description: "Your changes have been saved successfully.",
@@ -73,42 +72,38 @@ const WordDetails = () => {
 
   const handleAddCategory = () => {
     if (!newCategory.trim() || editForm.categories.length >= 5) return;
-    
+
     if (!editForm.categories.includes(newCategory.trim())) {
-      setEditForm(prev => ({
+      setEditForm((prev) => ({
         ...prev,
-        categories: [...prev.categories, newCategory.trim()]
+        categories: [...prev.categories, newCategory.trim()],
       }));
     }
-    setNewCategory('');
+    setNewCategory("");
   };
 
   const handleRemoveCategory = (categoryToRemove: string) => {
-    setEditForm(prev => ({
+    setEditForm((prev) => ({
       ...prev,
-      categories: prev.categories.filter(cat => cat !== categoryToRemove)
+      categories: prev.categories.filter((cat) => cat !== categoryToRemove),
     }));
-  };
-
-  const exerciseTypeLabels = {
-    'translation': 'Translation',
-    'multiple-choice': 'Multiple Choice',
-    'matching': 'Matching',
-    'gap-fill': 'Gap Fill'
   };
 
   if (!word) {
     return (
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => navigate('/vocabulary/custom')}>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/vocabulary/custom")}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Vocabulary
           </Button>
         </div>
         <Card>
-          <CardContent className="p-6">
-            <p className="text-muted-foreground">Word not found.</p>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">Word not found</p>
           </CardContent>
         </Card>
       </div>
@@ -116,37 +111,36 @@ const WordDetails = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="outline" onClick={() => navigate('/vocabulary/custom')}>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          onClick={() => navigate("/vocabulary/custom")}
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Vocabulary
         </Button>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => toggleFavorite(word.id)}
-          >
-            <Heart className={`mr-2 h-4 w-4 ${word.isFavorite ? 'fill-current text-red-500' : ''}`} />
-            {word.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-          </Button>
-          <Button
-            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-            variant={isEditing ? "default" : "outline"}
-          >
-            {isEditing ? (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
-              </>
-            ) : (
-              <>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Word
-              </>
-            )}
-          </Button>
-        </div>
+        <div className="flex-1" />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => toggleFavorite(word.id)}
+        >
+          <Heart
+            className={`h-5 w-5 ${
+              word.isFavorite
+                ? "text-red-500 fill-current"
+                : "text-muted-foreground"
+            }`}
+          />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsEditing(!isEditing)}
+        >
+          {isEditing ? <X className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
+        </Button>
       </div>
 
       <div className="grid gap-6">
@@ -157,27 +151,43 @@ const WordDetails = () => {
               {isEditing ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="german">German Word</Label>
+                    <Label htmlFor="target-word">
+                      {languageSettings.targetLanguage.nativeName} Word
+                    </Label>
                     <Input
-                      id="german"
-                      value={editForm.german}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, german: e.target.value }))}
+                      id="target-word"
+                      value={editForm.targetWord}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          targetWord: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                   <div>
-                    <Label htmlFor="english">English Translation</Label>
+                    <Label htmlFor="native-word">
+                      {languageSettings.nativeLanguage.nativeName} Translation
+                    </Label>
                     <Input
-                      id="english"
-                      value={editForm.english}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, english: e.target.value }))}
+                      id="native-word"
+                      value={editForm.nativeWord}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          nativeWord: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  <span className="font-bold text-primary">{word.german}</span>
+                  <span className="font-bold text-primary">
+                    {word.targetWord}
+                  </span>
                   <span className="text-muted-foreground">—</span>
-                  <span>{word.english}</span>
+                  <span>{word.nativeWord}</span>
                 </div>
               )}
             </CardTitle>
@@ -185,17 +195,37 @@ const WordDetails = () => {
           <CardContent className="space-y-4">
             {/* Categories */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">Categories</Label>
+              <Label>Categories</Label>
               {isEditing ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add category"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleAddCategory()
+                      }
+                    />
+                    <Button
+                      onClick={handleAddCategory}
+                      disabled={!newCategory.trim()}
+                    >
+                      Add
+                    </Button>
+                  </div>
                   <div className="flex flex-wrap gap-2">
-                    {editForm.categories.map((category, index) => (
-                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    {editForm.categories.map((category) => (
+                      <Badge
+                        key={category}
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         {category}
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                          size="icon"
+                          className="h-4 w-4 p-0"
                           onClick={() => handleRemoveCategory(category)}
                         >
                           <X className="h-3 w-3" />
@@ -203,25 +233,13 @@ const WordDetails = () => {
                       </Badge>
                     ))}
                   </div>
-                  {editForm.categories.length < 5 && (
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add new category"
-                        value={newCategory}
-                        onChange={(e) => setNewCategory(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-                        className="flex-1 min-w-0"
-                      />
-                      <Button onClick={handleAddCategory} size="sm">
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  {word.categories.map((category, index) => (
-                    <Badge key={index} variant="secondary">{category}</Badge>
+                  {word.categories.map((category) => (
+                    <Badge key={category} variant="secondary">
+                      {category}
+                    </Badge>
                   ))}
                 </div>
               )}
@@ -229,90 +247,122 @@ const WordDetails = () => {
 
             {/* Sample Sentence */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">Sample Sentence</Label>
+              <Label htmlFor="sample-sentence">Sample Sentence</Label>
               {isEditing ? (
                 <Textarea
+                  id="sample-sentence"
+                  placeholder={`Enter a sample sentence in ${languageSettings.targetLanguage.nativeName}`}
                   value={editForm.sampleSentence}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, sampleSentence: e.target.value }))}
-                  placeholder="Enter a sample sentence in German"
-                  className="min-h-20"
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      sampleSentence: e.target.value,
+                    }))
+                  }
+                  rows={3}
                 />
               ) : (
-                <p className="text-muted-foreground italic">
-                  {word.sampleSentence || "No sample sentence available."}
+                <p className="text-muted-foreground">
+                  {word.sampleSentence || "No sample sentence provided"}
                 </p>
               )}
             </div>
 
-            <div className="text-sm text-muted-foreground">
-              Added on {word.dateAdded.toLocaleDateString()}
-            </div>
+            {isEditing && (
+              <div className="flex gap-2">
+                <Button onClick={handleSave}>Save Changes</Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Learning Progress */}
+        {/* Learning Statistics */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Learning Progress
-            </CardTitle>
+            <CardTitle>Learning Statistics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Success Rate</span>
-                  <span className="text-sm text-muted-foreground">
-                    {calculateSuccessRate()}% ({word.learningHistory.filter(h => h.success).length}/{word.learningHistory.length})
-                  </span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">
+                  {calculateSuccessRate()}%
                 </div>
-                <Progress value={calculateSuccessRate()} className="h-2" />
+                <div className="text-sm text-muted-foreground">
+                  Success Rate
+                </div>
               </div>
-
-              <div>
-                <h4 className="font-medium mb-3 flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Exercise History
-                </h4>
-                <div className="space-y-2">
-                  {word.learningHistory.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">No exercises completed yet.</p>
-                  ) : (
-                    word.learningHistory.map((history, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 rounded border">
-                        <div className="flex items-center gap-3">
-                          <Badge variant={history.success ? "default" : "destructive"}>
-                            {history.success ? "✓" : "✗"}
-                          </Badge>
-                          <span className="text-sm">{exerciseTypeLabels[history.exerciseType]}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{history.timeSpent}s</span>
-                          <span>{history.date.toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {word.learningHistory.length}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Exercises Completed
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {word.learningHistory.filter((h) => h.success).length}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Correct Answers
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {word.lastLearningDate ? "Yes" : "No"}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Recently Practiced
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {isEditing && (
-        <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setIsEditing(false)}>
-            <X className="mr-2 h-4 w-4" />
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
-          </Button>
-        </div>
-      )}
+        {/* Learning History */}
+        {word.learningHistory.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Learning History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {word.learningHistory
+                  .slice(-5)
+                  .reverse()
+                  .map((result, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-2 border rounded"
+                    >
+                      <div>
+                        <div className="font-medium capitalize">
+                          {result.exerciseType.replace("-", " ")}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {result.date.toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant={result.success ? "default" : "destructive"}
+                        >
+                          {result.success ? "Correct" : "Incorrect"}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {result.timeSpent}s
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

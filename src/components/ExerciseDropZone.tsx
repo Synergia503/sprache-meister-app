@@ -54,19 +54,11 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
     const selectedType = exerciseTypes.find(type => type.id === selectedExercise);
     if (!selectedType) return;
 
-    // Convert CustomWord to VocabularyWord format
-    const vocabularyWords: VocabularyWord[] = droppedWords.map(word => ({
-      id: word.id,
-      german: word.german,
-      english: word.english,
-      categories: word.categories
-    }));
-
-    console.log('🚀 ExerciseDropZone: Starting exercise with words:', vocabularyWords);
+    console.log('🚀 ExerciseDropZone: Starting exercise with words:', droppedWords);
 
     // Set exercise data using the service
     vocabularyExerciseService.setExerciseData(
-      vocabularyWords,
+      droppedWords,
       'Custom Words',
       selectedExercise
     );
@@ -126,7 +118,7 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
                   className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10 text-xs sm:text-sm"
                   onClick={() => onRemoveWord(word.id)}
                 >
-                  {word.german} - {word.english}
+                  {word.targetWord} - {word.nativeWord}
                   <X className="h-3 w-3" />
                 </Badge>
               ))}

@@ -1,60 +1,36 @@
-import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  Plus,
-  Star,
-  X,
-  Trash,
-  List,
-  ChevronRight,
-  Search,
-  ArrowUpDown,
-  Heart,
-  Clock,
-  Target,
-  Calendar,
-  Smartphone,
-  ArrowRight,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import PhotoWordExtractor from "@/components/PhotoWordExtractor";
-import ExerciseDropZone from "@/components/ExerciseDropZone";
-import { useVocabulary } from "@/contexts/VocabularyContext";
-import { ExtractedWord, CustomWord } from "@/types/vocabulary";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Heart, Search, Plus, Trash2, Edit, Star, Filter, SortAsc, SortDesc } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useVocabulary } from '@/contexts/VocabularyContext';
+import { CustomWord, ExtractedWord, SortOption } from '@/types/vocabulary';
+import ExerciseDropZone from '@/components/ExerciseDropZone';
+import PhotoWordExtractor from '@/components/PhotoWordExtractor';
+import { AnkiExport } from '@/components/AnkiExport';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-// Remove duplicate interfaces - they're now in types/vocabulary.ts
+interface DraggedData {
+  type: 'word';
+  word: CustomWord;
+}
 
 const Custom = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const { languageSettings } = useLanguage();
   const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newGermanWord, setNewGermanWord] = useState("");
-  const [newEnglishWord, setNewEnglishWord] = useState("");
+  const [newTargetWord, setNewTargetWord] = useState("");
+  const [newNativeWord, setNewNativeWord] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -99,10 +75,10 @@ const Custom = () => {
   ]);
 
   const handleAddCustomWord = () => {
-    if (!newGermanWord.trim() || !newEnglishWord.trim()) {
+    if (!newTargetWord.trim() || !newNativeWord.trim()) {
       toast({
         title: "Missing information",
-        description: "Please fill in both German and English words.",
+        description: `Please fill in both ${languageSettings.targetLanguage.nativeName} and ${languageSettings.nativeLanguage.nativeName} words.`,
         variant: "destructive",
       });
       return;
@@ -110,8 +86,10 @@ const Custom = () => {
 
     const newWord: CustomWord = {
       id: Date.now().toString(),
-      german: newGermanWord.trim(),
-      english: newEnglishWord.trim(),
+      targetLanguage: languageSettings.targetLanguage.code,
+      nativeLanguage: languageSettings.nativeLanguage.code,
+      targetWord: newTargetWord.trim(),
+      nativeWord: newNativeWord.trim(),
       categories: [],
       sampleSentence: "",
       dateAdded: new Date(),
@@ -120,37 +98,45 @@ const Custom = () => {
     };
 
     addWord(newWord);
-    setNewGermanWord("");
-    setNewEnglishWord("");
+    setNewTargetWord("");
+    setNewNativeWord("");
     setShowAddForm(false);
 
     toast({
       title: "Word added!",
-      description: `"${newWord.german}" has been added to your custom vocabulary.`,
+      description: `"${newWord.targetWord}" has been added to your custom vocabulary.`,
     });
   };
 
   const handleDeleteWord = (id: string) => {
     removeWord(id);
     toast({
-      title: "Word removed",
-      description: "The word has been removed from your custom vocabulary.",
+      title: "Word deleted",
+      description: "The word has been removed from your vocabulary.",
     });
   };
 
   const handleWordsExtracted = (extractedWords: ExtractedWord[]) => {
-    const newWords: CustomWord[] = extractedWords.map((word) => ({
-      id: Date.now().toString() + Math.random(),
-      german: word.german,
-      english: word.english,
-      categories: word.categories || [],
-      sampleSentence: "",
-      dateAdded: new Date(),
-      learningHistory: [],
-      isFavorite: false,
-    }));
+    extractedWords.forEach((extractedWord) => {
+      const newWord: CustomWord = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        targetLanguage: languageSettings.targetLanguage.code,
+        nativeLanguage: languageSettings.nativeLanguage.code,
+        targetWord: extractedWord.targetWord,
+        nativeWord: extractedWord.nativeWord,
+        categories: extractedWord.categories || [],
+        sampleSentence: "",
+        dateAdded: new Date(),
+        learningHistory: [],
+        isFavorite: false,
+      };
+      addWord(newWord);
+    });
 
-    newWords.forEach((word) => addWord(word));
+    toast({
+      title: "Words extracted!",
+      description: `${extractedWords.length} words have been added to your vocabulary.`,
+    });
   };
 
   const handleWordClick = (wordId: string) => {
@@ -162,15 +148,7 @@ const Custom = () => {
     isMultiSelect: boolean = false
   ) => {
     if (isMultiSelect) {
-      // For multi-select, store all selected words
-      const selectedWordObjects = paginatedWords.filter((w) =>
-        selectedWords.has(w.id)
-      );
-      setDraggedWord({
-        ...word,
-        isMultiSelect: true,
-        selectedWords: selectedWordObjects,
-      } as any);
+      setDraggedWord(word);
     } else {
       setDraggedWord(word);
     }
@@ -180,119 +158,76 @@ const Custom = () => {
     setDraggedWord(null);
   };
 
-  const handleDrop = (draggedData: any) => {
-    if (draggedData.isMultiSelect && draggedData.selectedWords) {
-      // Handle multi-select drop
-      const newWords = draggedData.selectedWords.filter(
-        (word: CustomWord) => !droppedWords.find((w) => w.id === word.id)
-      );
-      if (newWords.length > 0) {
-        setDroppedWords((prev) => [...prev, ...newWords]);
-      }
-      setSelectedWords(new Set()); // Clear selection after drop
-      setIsMultiSelectMode(false); // Exit multi-select mode
-    } else {
-      // Handle single word drop
-      if (!droppedWords.find((w) => w.id === draggedData.id)) {
-        setDroppedWords((prev) => [...prev, draggedData]);
+  const handleDrop = (draggedData: DraggedData) => {
+    if (draggedData && draggedData.type === 'word') {
+      const word = draggedData.word as CustomWord;
+      if (!droppedWords.find(w => w.id === word.id)) {
+        setDroppedWords(prev => [...prev, word]);
+        toast({
+          title: "Word added to exercise",
+          description: `${word.targetWord} has been added to the exercise.`,
+        });
       }
     }
   };
 
-  // Mobile touch handlers
   const handleTouchStart = (wordId: string) => {
-    if (!isMobile) return;
-
     setTouchStarted(wordId);
     touchTimeoutRef.current = setTimeout(() => {
-      // Long press detected - enter multi-select mode
       setIsMultiSelectMode(true);
-      setSelectedWords((prev) => {
-        const newSelection = new Set(prev);
-        newSelection.add(wordId);
-        return newSelection;
-      });
-      setTouchStarted(null);
-
-      // Haptic feedback if available
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-
-      toast({
-        title: "Multi-select mode",
-        description: "Word selected. Tap other words to add them.",
-      });
-    }, 2000); // 2 seconds
+      setSelectedWords(prev => new Set([...prev, wordId]));
+    }, 500);
   };
 
   const handleTouchEnd = () => {
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current);
-      touchTimeoutRef.current = null;
     }
     setTouchStarted(null);
   };
 
   const handleWordSelection = (wordId: string, ctrlKey: boolean) => {
-    // Clear any pending touch timeout
-    if (touchTimeoutRef.current) {
-      clearTimeout(touchTimeoutRef.current);
-      touchTimeoutRef.current = null;
-    }
-
-    if (ctrlKey || isMultiSelectMode) {
-      // Enter multi-select mode and toggle word selection
-      setIsMultiSelectMode(true);
-      setSelectedWords((prev) => {
-        const newSelection = new Set(prev);
-        if (newSelection.has(wordId)) {
-          newSelection.delete(wordId);
+    if (isMultiSelectMode || ctrlKey) {
+      setSelectedWords(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(wordId)) {
+          newSet.delete(wordId);
         } else {
-          newSelection.add(wordId);
+          newSet.add(wordId);
         }
-        return newSelection;
+        return newSet;
       });
     } else {
-      // Normal single selection - navigate to word details
-      setSelectedWords(new Set()); // Clear any existing selections
-      setIsMultiSelectMode(false);
       handleWordClick(wordId);
     }
   };
 
-  // Mobile-friendly add to exercise function
   const handleAddToExercise = () => {
-    if (selectedWords.size === 0) {
+    const selectedWordsList = getFilteredAndSortedWords().filter(word =>
+      selectedWords.has(word.id)
+    );
+
+    if (selectedWordsList.length === 0) {
       toast({
         title: "No words selected",
-        description: "Please select words first.",
+        description: "Please select at least one word to add to the exercise.",
         variant: "destructive",
       });
       return;
     }
 
-    const wordsToAdd = paginatedWords.filter((word) =>
-      selectedWords.has(word.id)
-    );
-    const newWords = wordsToAdd.filter(
-      (word) => !droppedWords.find((w) => w.id === word.id)
-    );
-
-    if (newWords.length > 0) {
-      setDroppedWords((prev) => [...prev, ...newWords]);
-      toast({
-        title: "Words added",
-        description: `${newWords.length} words added to exercise preparation.`,
-      });
-    }
-
+    setDroppedWords(prev => [...prev, ...selectedWordsList]);
     setSelectedWords(new Set());
     setIsMultiSelectMode(false);
+
+    toast({
+      title: "Words added to exercise",
+      description: `${selectedWordsList.length} words have been added to the exercise.`,
+    });
   };
 
   const handleRemoveFromDropZone = (wordId: string) => {
-    setDroppedWords((prev) => prev.filter((w) => w.id !== wordId));
+    setDroppedWords(prev => prev.filter(word => word.id !== wordId));
   };
 
   const handleClearDropZone = () => {
@@ -301,93 +236,63 @@ const Custom = () => {
 
   const calculateSuccessRate = (word: CustomWord) => {
     if (!word.learningHistory.length) return 0;
-    const successCount = word.learningHistory.filter((h) => h.success).length;
+    const successCount = word.learningHistory.filter(h => h.success).length;
     return Math.round((successCount / word.learningHistory.length) * 100);
   };
 
-  // Cleanup touch timeout on unmount
-  React.useEffect(() => {
-    return () => {
-      if (touchTimeoutRef.current) {
-        clearTimeout(touchTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const filteredWords = getFilteredAndSortedWords();
   const totalPages = Math.ceil(filteredWords.length / wordsPerPage);
-  const paginatedWords = filteredWords.slice(
-    (currentPage - 1) * wordsPerPage,
-    currentPage * wordsPerPage
-  );
+  const startIndex = (currentPage - 1) * wordsPerPage;
+  const endIndex = startIndex + wordsPerPage;
+  const currentWords = filteredWords.slice(startIndex, endIndex);
 
-  const favoriteWords = filteredWords
-    .filter((word) => word.isFavorite)
-    .slice(0, 3);
-  const allCategories = [
-    ...Array.from(new Set(filteredWords.flatMap((word) => word.categories))),
-  ].sort();
+  const getAnkiItems = () => {
+    return droppedWords.map(word => ({
+      front: word.targetWord,
+      back: `${word.nativeWord}${word.sampleSentence ? `\n\n${word.sampleSentence}` : ''}`,
+      tags: ['custom-vocabulary', ...word.categories]
+    }));
+  };
 
   return (
-    <div className="p-4 sm:p-6">
-      {/* Sticky Add to Exercise Button */}
-      {selectedWords.size > 0 && (
-        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-4 px-4 sm:px-6 py-3">
-          <Button
-            onClick={handleAddToExercise}
-            className="w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
-            size="sm"
-          >
-            <ArrowRight className="mr-2 h-4 w-4" />
-            {/* with the screen width greater than button the sticky works  */}
-            Add {selectedWords.size} to Exercise ({droppedWords.length} total)
-          </Button>
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Custom Vocabulary</h1>
+          <p className="text-muted-foreground">
+            Manage your personal vocabulary collection
+          </p>
         </div>
-      )}
-
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">Custom Vocabulary</h1>
-        <Button
-          onClick={() => setShowAddForm(true)}
-          className="w-full sm:w-auto"
-        >
+        <Button onClick={() => setShowAddForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Custom Word
+          Add Word
         </Button>
       </div>
 
+      {/* Add Word Form */}
       {showAddForm && (
-        <Card className="mb-6">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Add Custom Word
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowAddForm(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </CardTitle>
+            <CardTitle>Add New Word</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="german-word">German Word</Label>
+              <div>
+                <Label htmlFor="target-word">{languageSettings.targetLanguage.nativeName} Word</Label>
                 <Input
-                  id="german-word"
-                  placeholder="Enter German word"
-                  value={newGermanWord}
-                  onChange={(e) => setNewGermanWord(e.target.value)}
+                  id="target-word"
+                  placeholder={`Enter ${languageSettings.targetLanguage.nativeName} word`}
+                  value={newTargetWord}
+                  onChange={(e) => setNewTargetWord(e.target.value)}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="english-word">English Translation</Label>
+              <div>
+                <Label htmlFor="native-word">{languageSettings.nativeLanguage.nativeName} Translation</Label>
                 <Input
-                  id="english-word"
-                  placeholder="Enter English translation"
-                  value={newEnglishWord}
-                  onChange={(e) => setNewEnglishWord(e.target.value)}
+                  id="native-word"
+                  placeholder={`Enter ${languageSettings.nativeLanguage.nativeName} translation`}
+                  value={newNativeWord}
+                  onChange={(e) => setNewNativeWord(e.target.value)}
                 />
               </div>
             </div>
@@ -401,414 +306,177 @@ const Custom = () => {
         </Card>
       )}
 
-      <div className="grid gap-6">
-        {/* Main Content Grid */}
-        <div className={`grid gap-6 ${isMobile ? "" : "lg:grid-cols-3"}`}>
-          {/* All Words List - Full width on mobile, 2 columns on large screens */}
-          <div className={isMobile ? "" : "lg:col-span-2"}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <List className="h-5 w-5" />
-                  All Custom Words ({filteredWords.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Filters and Sorting Controls */}
-                <div className="mb-6 space-y-4">
-                  <div className="flex flex-wrap gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search words..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                    </div>
-                    <Select
-                      value={selectedCategory}
-                      onValueChange={setSelectedCategory}
-                    >
-                      <SelectTrigger className="min-w-0 w-full sm:w-48">
-                        <SelectValue placeholder="Filter by category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All categories</SelectItem>
-                        {allCategories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={sortOption}
-                      onValueChange={(value) => setSortOption(value as any)}
-                    >
-                      <SelectTrigger className="min-w-0 w-full sm:w-48">
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="dateAdded">Date Added</SelectItem>
-                        <SelectItem value="german">German (A-Z)</SelectItem>
-                        <SelectItem value="english">English (A-Z)</SelectItem>
-                        <SelectItem value="learningProgress">
-                          Learning Progress
-                        </SelectItem>
-                        <SelectItem value="lastLearning">
-                          Last Learning
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-                      }
-                    >
-                      <ArrowUpDown className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant={showFavoritesOnly ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                    >
-                      <Heart
-                        className={`mr-2 h-4 w-4 ${
-                          showFavoritesOnly ? "fill-current" : ""
-                        }`}
-                      />
-                      Favorites Only
-                    </Button>
-                    <Button
-                      variant={showLearningHistoryOnly ? "default" : "outline"}
-                      size="sm"
-                      onClick={() =>
-                        setShowLearningHistoryOnly(!showLearningHistoryOnly)
-                      }
-                    >
-                      <Target className="mr-2 h-4 w-4" />
-                      Has Learning History
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {/* Mobile/Multi-select controls */}
-                  <div className="p-3 bg-muted/30 border rounded-lg">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between">
-                        {" "}
-                        <div className="flex items-center gap-3">
-                          <Button
-                            variant={isMultiSelectMode ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => {
-                              const newMultiSelectMode = !isMultiSelectMode;
-                              setIsMultiSelectMode(newMultiSelectMode);
-                              if (!newMultiSelectMode) {
-                                setSelectedWords(new Set());
-                              }
-                            }}
-                          >
-                            {isMobile && (
-                              <Smartphone className="mr-2 h-4 w-4" />
-                            )}
-                            Multi-Select
-                          </Button>
-
-                          {isMultiSelectMode && (
-                            <span className="text-sm text-muted-foreground">
-                              {isMobile
-                                ? "Hold word for 2s or tap to select"
-                                : "Click words to select"}{" "}
-                              • {selectedWords.size} selected
-                            </span>
-                          )}
-                        </div>
-                        {isMultiSelectMode && selectedWords.size > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedWords(new Set())}
-                          >
-                            Clear
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {paginatedWords.map((word) => (
-                    <div
-                      key={word.id}
-                      className={`flex items-center justify-between p-4 rounded-lg transition-all duration-200 cursor-pointer select-none ${
-                        selectedWords.has(word.id)
-                          ? "bg-primary/20 border border-primary scale-[1.02]"
-                          : touchStarted === word.id
-                          ? "bg-primary/10 scale-[1.01]"
-                          : "bg-muted/50 hover:bg-muted active:bg-muted/70"
-                      }`}
-                      draggable={!isMobile}
-                      onDragStart={() => {
-                        if (selectedWords.has(word.id)) {
-                          handleDragStart(word, true);
-                        } else {
-                          handleDragStart(word, false);
-                        }
-                      }}
-                      onDragEnd={handleDragEnd}
-                      onClick={(e) => handleWordSelection(word.id, e.ctrlKey)}
-                      onTouchStart={() => handleTouchStart(word.id)}
-                      onTouchEnd={handleTouchEnd}
-                      onTouchCancel={handleTouchEnd}
-                      title={
-                        isMobile
-                          ? isMultiSelectMode
-                            ? "Tap to select/deselect"
-                            : "Hold for 2s to start multi-select"
-                          : isMultiSelectMode
-                          ? "Click to select/deselect"
-                          : "Ctrl+Click to start multi-select"
-                      }
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-medium">{word.german}</span>
-                          <span className="text-muted-foreground">—</span>
-                          <span>{word.english}</span>
-                          {word.isFavorite && (
-                            <Heart className="h-4 w-4 fill-current text-red-500" />
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-                          {/* Learning Progress */}
-                          <div className="flex items-center gap-2">
-                            <Target className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">
-                              Progress: {calculateSuccessRate(word)}%
-                            </span>
-                            <Progress
-                              value={calculateSuccessRate(word)}
-                              className="h-1 w-16"
-                            />
-                          </div>
-
-                          {/* Last Learning Date */}
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">
-                              Last:{" "}
-                              {word.lastLearningDate
-                                ? word.lastLearningDate.toLocaleDateString()
-                                : "Never"}
-                            </span>
-                          </div>
-
-                          {/* Date Added */}
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">
-                              Added: {word.dateAdded.toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1">
-                          {word.categories.map((category, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {category}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(word.id);
-                          }}
-                          className="h-8 w-8"
-                        >
-                          <Heart
-                            className={`h-4 w-4 ${
-                              word.isFavorite
-                                ? "fill-current text-red-500"
-                                : "text-muted-foreground"
-                            }`}
-                          />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteWord(word.id);
-                          }}
-                          className="h-8 w-8"
-                        >
-                          <Trash className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                        </Button>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </div>
-                  ))}
-
-                  {totalPages > 1 && (
-                    <Pagination className="mt-6">
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() =>
-                              setCurrentPage((prev) => Math.max(prev - 1, 1))
-                            }
-                            className={
-                              currentPage === 1
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-
-                        {Array.from(
-                          { length: totalPages },
-                          (_, i) => i + 1
-                        ).map((page) => (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                              className="cursor-pointer"
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() =>
-                              setCurrentPage((prev) =>
-                                Math.min(prev + 1, totalPages)
-                              )
-                            }
-                            className={
-                              currentPage === totalPages
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Exercise Drop Zone - Full width on mobile, 1 column on large screens */}
-          <div className={isMobile ? "" : "lg:col-span-1"}>
-            <div
-              className="w-full"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                if (draggedWord) {
-                  handleDrop(draggedWord);
-                }
-              }}
-            >
-              <ExerciseDropZone
-                droppedWords={droppedWords}
-                onRemoveWord={handleRemoveFromDropZone}
-                onClearAll={handleClearDropZone}
-              />
+      {/* Filters and Search */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="search">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Search words..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="category">Category</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All categories</SelectItem>
+                  {/* Add categories dynamically */}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="sort">Sort by</Label>
+              <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dateAdded">Date Added</SelectItem>
+                  <SelectItem value="targetWord">{languageSettings.targetLanguage.nativeName} (A-Z)</SelectItem>
+                  <SelectItem value="nativeWord">{languageSettings.nativeLanguage.nativeName} (A-Z)</SelectItem>
+                  <SelectItem value="learningProgress">Learning Progress</SelectItem>
+                  <SelectItem value="lastLearning">Last Learned</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              >
+                {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+              </Button>
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="h-5 w-5" />
-                My Favorites
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Your starred vocabulary words
-              </p>
-              <div className="space-y-2">
-                {favoriteWords.map((word) => (
-                  <div
-                    key={word.id}
-                    className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
-                    onClick={() => handleWordClick(word.id)}
+      {/* Words Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {currentWords.map((word) => (
+          <Card
+            key={word.id}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              selectedWords.has(word.id) ? 'ring-2 ring-primary' : ''
+            }`}
+            draggable
+            onDragStart={() => handleDragStart(word)}
+            onDragEnd={handleDragEnd}
+            onTouchStart={() => handleTouchStart(word.id)}
+            onTouchEnd={handleTouchEnd}
+            onClick={() => handleWordSelection(word.id, false)}
+          >
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <CardTitle className="text-lg">
+                    <span className="font-medium">{word.targetWord}</span> -{" "}
+                    <span className="text-muted-foreground">{word.nativeWord}</span>
+                  </CardTitle>
+                </div>
+                <div className="flex gap-1">
+                  {word.isFavorite && (
+                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(word.id);
+                    }}
                   >
-                    <div className="flex-1 min-w-0">
-                      <div className="mb-1">
-                        <span className="font-medium">{word.german}</span> -{" "}
-                        {word.english}
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {word.categories.slice(0, 3).map((category, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {category}
-                          </Badge>
-                        ))}
-                        {word.categories.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{word.categories.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteWord(word.id);
-                        }}
-                        className="h-6 w-6"
-                      >
-                        <Trash className="h-3 w-3" />
-                      </Button>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                    <Heart
+                      className={`h-4 w-4 ${
+                        word.isFavorite ? 'text-red-500 fill-current' : 'text-muted-foreground'
+                      }`}
+                    />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {word.categories.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {word.categories.slice(0, 3).map((category) => (
+                      <Badge key={category} variant="secondary" className="text-xs">
+                        {category}
+                      </Badge>
+                    ))}
+                    {word.categories.length > 3 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{word.categories.length - 3}
+                      </Badge>
+                    )}
                   </div>
-                ))}
+                )}
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>Success: {calculateSuccessRate(word)}%</span>
+                  <span>{word.learningHistory.length} exercises</span>
+                </div>
               </div>
             </CardContent>
           </Card>
+        ))}
+      </div>
 
-          <div className="h-fit">
-            <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="flex items-center px-4">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Exercise Drop Zone */}
+      {droppedWords.length > 0 && (
+        <ExerciseDropZone
+          droppedWords={droppedWords}
+          onRemoveWord={handleRemoveFromDropZone}
+          onClearAll={handleClearDropZone}
+        />
+      )}
+
+      {/* Anki Export */}
+      {droppedWords.length > 0 && (
+        <AnkiExport
+          items={getAnkiItems()}
+          defaultDeckName={`${languageSettings.targetLanguage.nativeName} Vocabulary`}
+        />
+      )}
+
+      {/* Photo Word Extractor */}
+      <PhotoWordExtractor onWordsExtracted={handleWordsExtracted} />
     </div>
   );
 };

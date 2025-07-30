@@ -8,9 +8,11 @@ import { useWordFormationExercise } from '@/hooks/useWordFormationExercise';
 import { WordInputForm } from '@/components/exercises/WordInputForm';
 import { ExerciseLayout } from '@/components/exercises/ExerciseLayout';
 import { VocabularySelector } from '@/components/VocabularySelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const WordFormation = () => {
   const { apiKey } = useOpenAI();
+  const { languageSettings } = useLanguage();
   const {
     currentExercise,
     userAnswers,
@@ -26,7 +28,7 @@ const WordFormation = () => {
 
   return (
     <ExerciseLayout
-      title="Word Formation Exercise"
+      title={`${languageSettings.targetLanguage.nativeName} Word Formation Exercise`}
       previousExercises={previousExercises}
       onLoadExercise={loadPreviousExercise}
       currentExercise={currentExercise}
@@ -123,16 +125,16 @@ const WordFormation = () => {
           exerciseType="word-formation"
           exercisePath="/exercises/word-formation"
           title="Use Vocabulary from Category"
-          description="Select a category from your vocabulary to create word formation exercises."
+          description={`Select a category from your ${languageSettings.targetLanguage.nativeName} vocabulary to create word formation exercises.`}
         />
         
         <WordInputForm
           onGenerateExercise={generateExercise}
           isLoading={isLoading}
           apiKey={apiKey}
-          description="Add German base words to practice word formation with prefixes and suffixes."
-          placeholder="Base word (e.g., spielen, Haus)"
-          title="Create New Word Formation Exercise"
+          description={`Add ${languageSettings.targetLanguage.nativeName} base words to practice word formation with prefixes and suffixes.`}
+          placeholder={`Base word (e.g., ${languageSettings.targetLanguage.code === 'de' ? 'spielen, Haus' : 'play, house'})`}
+          title={`Create New ${languageSettings.targetLanguage.nativeName} Word Formation Exercise`}
         />
       </div>
     </ExerciseLayout>

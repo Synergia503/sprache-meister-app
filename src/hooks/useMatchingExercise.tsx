@@ -1,83 +1,85 @@
-import { useState, useEffect } from "react";
-import { useOpenAI } from "@/hooks/useOpenAI";
-import { useToast } from "@/hooks/use-toast";
-import { MatchingExercise, MatchingPair } from "@/types/exercises";
-import { vocabularyExerciseService } from "@/services/vocabularyExerciseService";
+import { useState, useEffect } from 'react';
+import { MatchingExercise, MatchingPair } from '@/types/exercises';
+import { useOpenAI } from './useOpenAI';
+import { useToast } from './use-toast';
+import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+interface WordPair {
+  targetWord: string;
+  nativeWord: string;
+}
 
 const SAMPLE_EXERCISE: MatchingExercise = {
-  id: "sample-matching",
-  words: ["Hund", "Katze", "Haus", "Auto", "Wasser"],
+  id: 'sample-matching',
+  words: ['Haus', 'Auto', 'Buch', 'Tisch'],
   pairs: [
-    { pairOrder: 1, germanWord: "Hund", englishWord: "dog" },
-    { pairOrder: 2, germanWord: "Katze", englishWord: "cat" },
-    { pairOrder: 3, germanWord: "Haus", englishWord: "house" },
-    { pairOrder: 4, germanWord: "Auto", englishWord: "car" },
-    { pairOrder: 5, germanWord: "Wasser", englishWord: "water" },
+    { pairOrder: 1, targetWord: 'Haus', nativeWord: 'house' },
+    { pairOrder: 2, targetWord: 'Auto', nativeWord: 'car' },
+    { pairOrder: 3, targetWord: 'Buch', nativeWord: 'book' },
+    { pairOrder: 4, targetWord: 'Tisch', nativeWord: 'table' },
   ],
-  userAnswers: {},
   userMatches: {},
+  userAnswers: {},
   isCompleted: false,
   createdAt: new Date(),
+  targetLanguage: 'de',
+  nativeLanguage: 'en',
 };
 
 export const useMatchingExercise = () => {
-  const [currentExercise, setCurrentExercise] =
-    useState<MatchingExercise | null>(null);
+  const [currentExercise, setCurrentExercise] = useState<MatchingExercise | null>(null);
   const [userMatches, setUserMatches] = useState<{ [key: number]: number }>({});
   const [showResults, setShowResults] = useState(false);
   const [shuffledEnglish, setShuffledEnglish] = useState<MatchingPair[]>([]);
   const [selectedGerman, setSelectedGerman] = useState<number | null>(null);
   const [selectedEnglish, setSelectedEnglish] = useState<number | null>(null);
-  const [previousExercises, setPreviousExercises] = useState<
-    MatchingExercise[]
-  >([]);
+  const [previousExercises, setPreviousExercises] = useState<MatchingExercise[]>([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
+  const { languageSettings } = useLanguage();
 
   useEffect(() => {
     // Check if there's vocabulary data from the service
     if (vocabularyExerciseService.hasExerciseData()) {
       const exerciseData = vocabularyExerciseService.getExerciseData();
-      console.log(
-        "Matching exercise: Found exercise data from service:",
-        exerciseData
-      );
-
+      console.log("Matching exercise: Found exercise data from service:", exerciseData);
+      
       if (exerciseData && exerciseData.words.length > 0) {
         const categoryExercise: MatchingExercise = {
           id: `category-${Date.now()}`,
-          words: exerciseData.words.map((word) => word.german),
+          words: exerciseData.words.map(word => word.targetWord),
           pairs: exerciseData.words.map((word, index) => ({
             pairOrder: index + 1,
-            germanWord: word.german,
-            englishWord: word.english,
+            targetWord: word.targetWord,
+            nativeWord: word.nativeWord
           })),
-          userAnswers: {},
           userMatches: {},
+          userAnswers: {},
           isCompleted: false,
           createdAt: new Date(),
+          targetLanguage: languageSettings.targetLanguage.code,
+          nativeLanguage: languageSettings.nativeLanguage.code,
         };
-
+        
         setCurrentExercise(categoryExercise);
-        setShuffledEnglish(shuffleArray(categoryExercise.pairs));
         setUserMatches({});
         setShowResults(false);
-        setSelectedGerman(null);
-        setSelectedEnglish(null);
-
+        setShuffledEnglish(shuffleArray([...categoryExercise.pairs]));
+        
         toast({
           title: "Exercise loaded",
           description: `Using vocabulary from ${exerciseData.category}`,
         });
-
+        
         // Clear the service data after using it
         vocabularyExerciseService.clearExerciseData();
         return;
       }
     }
-
+    
     loadSampleExercise();
-  }, []);
+  }, [languageSettings]);
 
   const shuffleArray = (array: MatchingPair[]) => {
     const shuffled = [...array];
@@ -90,79 +92,67 @@ export const useMatchingExercise = () => {
 
   const loadSampleExercise = () => {
     setCurrentExercise(SAMPLE_EXERCISE);
-    setShuffledEnglish(shuffleArray(SAMPLE_EXERCISE.pairs));
     setUserMatches({});
     setShowResults(false);
-    setSelectedGerman(null);
-    setSelectedEnglish(null);
+    setShuffledEnglish(shuffleArray([...SAMPLE_EXERCISE.pairs]));
   };
 
-  const generateExercise = async (input: string[] | any[]) => {
-    // Handle both word objects and string arrays
-    let validWords: string[] = [];
-
-    if (
-      input.length > 0 &&
-      typeof input[0] === "object" &&
-      "german" in input[0]
-    ) {
-      // Input is word objects from vocabulary
-      validWords = input.map((word: any) => word.german);
-    } else {
-      // Input is string array
-      validWords = (input as string[]).filter((word) => word.trim());
-    }
-
-    if (validWords.length === 0) {
+  const generateExercise = async (input: string[] | WordPair[]) => {
+    if (!input || input.length === 0) {
       toast({
         title: "No words provided",
-        description: "Please add at least one word to generate an exercise.",
+        description: "Please provide some words to generate the exercise.",
         variant: "destructive",
       });
       return;
     }
 
-    const prompt = `Create a German-English matching exercise with these German words: ${validWords.join(
-      ", "
-    )}. For each German word, provide its most common English translation.
+    const words = Array.isArray(input) ? input : [];
+    
+    const prompt = `Create a matching exercise with ${words.length} ${languageSettings.targetLanguage.nativeName}-${languageSettings.nativeLanguage.nativeName} word pairs. 
+    Use these words: ${words.join(', ')}
+    
+    Return only a JSON array with this exact format:
+    [
+      {"targetWord": "word1", "nativeWord": "translation1"},
+      {"targetWord": "word2", "nativeWord": "translation2"}
+    ]`;
 
-Return only a JSON object with this exact format:
-{
-  "pairs": [
-    {
-      "pairOrder": 1,
-      "germanWord": "Hund",
-      "englishWord": "dog"
-    }
-  ]
-}`;
-
-    const systemMessage =
-      "You are a German language teacher creating matching exercises. Return only valid JSON without any additional text or explanations.";
-
+    const systemMessage = `You are a ${languageSettings.targetLanguage.nativeName} language teacher creating matching exercises. Return only valid JSON without any additional text or explanations.`;
+    
     const result = await callOpenAI(prompt, systemMessage);
     if (result) {
       try {
-        const exerciseData = JSON.parse(result);
+        const pairs = JSON.parse(result);
         const exercise: MatchingExercise = {
-          id: Date.now().toString(),
-          words: validWords,
-          pairs: exerciseData.pairs,
-          userAnswers: {},
+          id: `matching-${Date.now()}`,
+          words: pairs.map((pair: WordPair) => pair.targetWord),
+          pairs: pairs.map((pair: WordPair, index: number) => ({
+            pairOrder: index + 1,
+            targetWord: pair.targetWord,
+            nativeWord: pair.nativeWord
+          })),
           userMatches: {},
+          userAnswers: {},
           isCompleted: false,
           createdAt: new Date(),
+          targetLanguage: languageSettings.targetLanguage.code,
+          nativeLanguage: languageSettings.nativeLanguage.code,
         };
+        
         setCurrentExercise(exercise);
-        setShuffledEnglish(shuffleArray(exerciseData.pairs));
         setUserMatches({});
         setShowResults(false);
-        setSelectedGerman(null);
-        setSelectedEnglish(null);
+        setShuffledEnglish(shuffleArray([...exercise.pairs]));
+        
+        toast({
+          title: "Exercise generated!",
+          description: `Created matching exercise with ${pairs.length} word pairs.`,
+        });
       } catch (error) {
         toast({
-          title: "Error parsing exercise",
-          description: "Failed to generate exercise. Please try again.",
+          title: "Error generating exercise",
+          description: "Failed to parse generated exercise. Please try again.",
           variant: "destructive",
         });
       }
@@ -170,119 +160,94 @@ Return only a JSON object with this exact format:
   };
 
   const handleSelectGerman = (index: number) => {
-    setSelectedGerman(selectedGerman === index ? null : index);
-    setSelectedEnglish(null);
+    setSelectedGerman(index);
   };
 
   const handleSelectEnglish = (index: number) => {
-    setSelectedEnglish(selectedEnglish === index ? null : index);
-    setSelectedGerman(null);
+    setSelectedEnglish(index);
   };
 
   const handleMatch = (germanIndex: number, englishIndex: number) => {
-    if (showResults) return;
-
     if (englishIndex === -1) {
       // Clear the match
-      setUserMatches((prev) => {
+      setUserMatches(prev => {
         const newMatches = { ...prev };
         delete newMatches[germanIndex];
         return newMatches;
       });
-    } else {
-      // Set new match
-      setUserMatches((prev) => ({
-        ...prev,
-        [germanIndex]: englishIndex,
-      }));
+      setSelectedGerman(null);
+      setSelectedEnglish(null);
+      return;
     }
 
-    // Clear selections after matching
+    setUserMatches(prev => ({
+      ...prev,
+      [germanIndex]: englishIndex
+    }));
+    
     setSelectedGerman(null);
     setSelectedEnglish(null);
   };
 
   const checkAnswers = () => {
     if (!currentExercise) return;
-
-    const updatedExercise = {
-      ...currentExercise,
-      userMatches,
-      isCompleted: true,
-    };
-
-    setPreviousExercises((prev) => [...prev, updatedExercise]);
-    setShowResults(true);
-
-    // Calculate score
+    
     const correctMatches = currentExercise.pairs.filter((pair, index) => {
       const userMatch = userMatches[index];
-      if (userMatch === undefined) return false;
-      const selectedPair = shuffledEnglish[userMatch];
-      return selectedPair.englishWord === pair.englishWord;
+      return userMatch !== undefined && shuffledEnglish[userMatch].nativeWord === pair.nativeWord;
     }).length;
-
+    
+    const totalPairs = currentExercise.pairs.length;
+    const score = Math.round((correctMatches / totalPairs) * 100);
+    
+    setShowResults(true);
+    
     toast({
       title: "Exercise completed!",
-      description: `You got ${correctMatches} out of ${currentExercise.pairs.length} correct.`,
+      description: `You got ${correctMatches} out of ${totalPairs} correct (${score}%).`,
     });
   };
 
   const getMatchingResult = (germanIndex: number) => {
-    if (!showResults || !currentExercise) return "";
-
+    if (!currentExercise || !showResults) return '';
+    
     const userMatch = userMatches[germanIndex];
-    if (userMatch === undefined) return "";
-
-    const correctPair = currentExercise.pairs[germanIndex];
-    const selectedPair = shuffledEnglish[userMatch];
-
-    return correctPair.englishWord === selectedPair.englishWord
-      ? "correct"
-      : "incorrect";
+    if (userMatch === undefined) return 'Not answered';
+    
+    const userSelected = shuffledEnglish[userMatch];
+    const correct = currentExercise.pairs[germanIndex];
+    
+    if (userSelected.nativeWord === correct.nativeWord) {
+      return 'Correct';
+    } else {
+      return `Incorrect (Correct: ${correct.nativeWord})`;
+    }
   };
 
   const resetExercise = () => {
-    // Store the current exercise data to enable restart functionality
-    const currentVocabulary = currentExercise?.pairs;
-
-    if (currentVocabulary && currentVocabulary.length > 0) {
-      // Keep current exercise vocabulary for restart
-      setCurrentExercise((prev) =>
-        prev
-          ? {
-              ...prev,
-              userMatches: {},
-              isCompleted: false,
-            }
-          : null
-      );
-      setShuffledEnglish(
-        currentVocabulary ? shuffleArray(currentVocabulary) : []
-      );
-      setUserMatches({});
-      setShowResults(false);
-      setSelectedGerman(null);
-      setSelectedEnglish(null);
-    } else {
-      loadSampleExercise();
-    }
+    setCurrentExercise(null);
+    setUserMatches({});
+    setShowResults(false);
+    setSelectedGerman(null);
+    setSelectedEnglish(null);
+    setShuffledEnglish([]);
   };
 
   const loadPreviousExercise = (exercise: MatchingExercise) => {
     setCurrentExercise(exercise);
-    setShuffledEnglish(shuffleArray(exercise.pairs));
     setUserMatches(exercise.userMatches);
     setShowResults(exercise.isCompleted);
-    setSelectedGerman(null);
-    setSelectedEnglish(null);
+    setShuffledEnglish(shuffleArray([...exercise.pairs]));
   };
 
   const shuffleEnglishWords = () => {
-    setShuffledEnglish(shuffleArray(shuffledEnglish));
-    setUserMatches({});
-    setSelectedGerman(null);
-    setSelectedEnglish(null);
+    if (currentExercise) {
+      setShuffledEnglish(shuffleArray([...currentExercise.pairs]));
+      setUserMatches({});
+      setShowResults(false);
+      setSelectedGerman(null);
+      setSelectedEnglish(null);
+    }
   };
 
   return {
@@ -292,15 +257,15 @@ Return only a JSON object with this exact format:
     shuffledEnglish,
     selectedGerman,
     selectedEnglish,
-    previousExercises,
-    isLoading,
-    generateExercise,
-    handleMatch,
-    handleSelectGerman,
-    handleSelectEnglish,
-    checkAnswers,
+    onMatch: handleMatch,
+    onCheckAnswers: checkAnswers,
+    onShuffle: shuffleEnglishWords,
+    onNewExercise: resetExercise,
+    onSelectGerman: handleSelectGerman,
+    onSelectEnglish: handleSelectEnglish,
     getMatchingResult,
-    resetExercise,
+    generateExercise,
+    loadSampleExercise,
     loadPreviousExercise,
     shuffleEnglishWords,
   };

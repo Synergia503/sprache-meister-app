@@ -47,14 +47,28 @@ export const VocabularySelector = ({
         // Convert to VocabularyWord format and use service
         const vocabularyWords: VocabularyWord[] = categoryWords.map(word => ({
           id: word.id,
-          german: word.german,
-          english: word.english,
+          targetWord: word.targetWord,
+          nativeWord: word.nativeWord,
           categories: word.categories
         }));
         
         console.log('🔥 VocabularySelector: Setting exercise data for', exerciseType, 'with', vocabularyWords.length, 'words');
+        // Convert VocabularyWord back to CustomWord format for the service
+        const customWords: CustomWord[] = vocabularyWords.map(word => ({
+          id: word.id,
+          targetLanguage: { code: 'de', name: 'German', nativeName: 'Deutsch' }, // Default values
+          nativeLanguage: { code: 'en', name: 'English', nativeName: 'English' }, // Default values
+          targetWord: word.targetWord,
+          nativeWord: word.nativeWord,
+          categories: word.categories,
+          sampleSentence: '',
+          dateAdded: new Date(),
+          learningHistory: [],
+          isFavorite: false
+        }));
+
         vocabularyExerciseService.setExerciseData(
-          vocabularyWords,
+          customWords,
           selectedCategory,
           exerciseType
         );

@@ -4,12 +4,14 @@ export interface BaseExercise {
   userAnswers: { [key: number]: string };
   isCompleted: boolean;
   createdAt: Date;
+  targetLanguage: string;
+  nativeLanguage: string;
 }
 
 export interface TranslationSentence {
   sentenceOrder: number;
-  germanSentence: string;
-  englishSentence: string;
+  targetSentence: string;
+  nativeSentence: string;
 }
 
 export interface TranslationExercise extends BaseExercise {
@@ -29,8 +31,8 @@ export interface MultipleChoiceExercise extends BaseExercise {
 
 export interface MatchingPair {
   pairOrder: number;
-  germanWord: string;
-  englishWord: string;
+  targetWord: string;
+  nativeWord: string;
 }
 
 export interface MatchingExercise extends BaseExercise {

@@ -2,23 +2,19 @@ import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
 import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
+import { BaseExercise } from '@/types/exercises';
 
 interface SameMeaningExercise {
   exerciseOrder: number;
   word: string;
-  englishMeaning: string;
+  nativeMeaning: string;
   solution: string;
   hint?: string;
   explanation?: string;
 }
 
-interface SameMeaningExerciseData {
-  id: string;
-  words: string[];
+interface SameMeaningExerciseData extends BaseExercise {
   exercises: SameMeaningExercise[];
-  userAnswers: { [key: number]: string };
-  isCompleted: boolean;
-  createdAt: Date;
 }
 
 const SAMPLE_EXERCISE: SameMeaningExerciseData = {
@@ -62,6 +58,7 @@ export const useSameMeaningExercise = () => {
   const [previousExercises, setPreviousExercises] = useState<SameMeaningExerciseData[]>([]);
   const { callOpenAI, isLoading } = useOpenAI();
   const { toast } = useToast();
+  const { languageSettings } = useLanguage();
 
   useEffect(() => {
     // Check if there's vocabulary data from the service
@@ -73,8 +70,8 @@ export const useSameMeaningExercise = () => {
         // Generate same meaning exercises from vocabulary words
         const exercises = exerciseData.words.map((word, index) => ({
           exerciseOrder: index + 1,
-          word: word.german,
-          englishMeaning: word.english,
+          word: word.targetWord,
+          nativeMeaning: word.nativeWord,
           solution: '', // Will be filled by AI
           hint: 'Think about similar concepts',
           explanation: 'Generated from your vocabulary'
@@ -82,11 +79,13 @@ export const useSameMeaningExercise = () => {
         
         const categoryExercise: SameMeaningExerciseData = {
           id: `category-${Date.now()}`,
-          words: exerciseData.words.map(word => word.german),
+          words: exerciseData.words.map(word => word.targetWord),
           exercises,
           userAnswers: {},
           isCompleted: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          targetLanguage: languageSettings.targetLanguage.code,
+          nativeLanguage: languageSettings.nativeLanguage.code
         };
         
         // Generate AI solutions for the vocabulary words
@@ -99,121 +98,147 @@ export const useSameMeaningExercise = () => {
     }
     
     loadSampleExercise();
-  }, []);
+  }, [languageSettings]);
 
   const generateAISolutions = async (exercise: SameMeaningExerciseData, category: string) => {
-    const words = exercise.exercises.map(ex => ex.word);
-    const prompt = `For these German words: ${words.join(', ')}, provide their most common German synonyms (words with similar meanings).
+    try {
+      const prompt = `Generate same meaning (synonym) exercises for the following ${languageSettings.targetLanguage.nativeName} words. For each word, provide:
+1. A synonym word in ${languageSettings.targetLanguage.nativeName}
+2. A helpful hint
+3. A brief explanation
 
-Return only a JSON object with this exact format:
+Words: ${exercise.words.join(', ')}
+Category: ${category}
+
+Format the response as JSON with this structure:
 {
   "exercises": [
     {
-      "exerciseOrder": 1,
-      "word": "schön",
-      "englishMeaning": "beautiful/nice",
-      "solution": "hübsch",
-      "hint": "Another word for attractive",
-      "explanation": "Schön and hübsch both mean beautiful/pretty."
+      "word": "original_word",
+      "synonym": "synonym_word",
+      "hint": "helpful_hint",
+      "explanation": "brief_explanation"
     }
   ]
 }`;
 
-    const systemMessage = "You are a German language teacher creating synonym exercises. Return only valid JSON without any additional text or explanations.";
-    
-    const result = await callOpenAI(prompt, systemMessage);
-    if (result) {
-      try {
-        const exerciseData = JSON.parse(result);
+      const response = await callOpenAI(prompt, 'You are a helpful language learning assistant.');
+      const data = JSON.parse(response);
+      
+      if (data.exercises) {
+        const updatedExercises = exercise.exercises.map((ex, index) => {
+          const aiExercise = data.exercises.find((ai: any) => ai.word === ex.word);
+          return {
+            ...ex,
+            solution: aiExercise?.synonym || ex.solution,
+            hint: aiExercise?.hint || ex.hint,
+            explanation: aiExercise?.explanation || ex.explanation
+          };
+        });
+        
         const updatedExercise = {
           ...exercise,
-          exercises: exerciseData.exercises
+          exercises: updatedExercises
         };
-        setCurrentExercise(updatedExercise);
-        setUserAnswers({});
-        setShowResults(false);
         
-        toast({
-          title: "Exercise loaded",
-          description: `Using vocabulary from ${category}`,
-        });
-      } catch (error) {
-        console.error('Error parsing AI response:', error);
-        loadSampleExercise();
+        setCurrentExercise(updatedExercise);
+        setPreviousExercises(prev => [updatedExercise, ...prev.slice(0, 4)]);
       }
-    } else {
-      loadSampleExercise();
+    } catch (error) {
+      console.error('Error generating AI solutions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate AI solutions. Using sample data instead.",
+        variant: "destructive",
+      });
+      setCurrentExercise(exercise);
+      setPreviousExercises(prev => [exercise, ...prev.slice(0, 4)]);
     }
   };
 
   const loadSampleExercise = () => {
-    setCurrentExercise(SAMPLE_EXERCISE);
-    setUserAnswers({});
-    setShowResults(false);
+    const sampleExercise = {
+      ...SAMPLE_EXERCISE,
+      targetLanguage: languageSettings.targetLanguage.code,
+      nativeLanguage: languageSettings.nativeLanguage.code
+    };
+    setCurrentExercise(sampleExercise);
+    setPreviousExercises(prev => [sampleExercise, ...prev.slice(0, 4)]);
   };
 
   const generateExercise = async (input: string[] | any[]) => {
-    // Handle both word objects and string arrays
-    let validWords: string[] = [];
-    
-    if (input.length > 0 && typeof input[0] === 'object' && 'german' in input[0]) {
-      // Input is word objects from vocabulary
-      validWords = input.map((word: any) => word.german);
-    } else {
-      // Input is string array
-      validWords = (input as string[]).filter(word => word.trim());
-    }
-    
-    if (validWords.length === 0) {
-      toast({
-        title: "No words provided",
-        description: "Please add at least one word to generate an exercise.",
-        variant: "destructive",
-      });
-      return;
-    }
+    try {
+      const words = Array.isArray(input) ? input : [];
+      
+      if (words.length === 0) {
+        toast({
+          title: "Error",
+          description: "Please provide at least one word.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    const prompt = `Create synonym exercises for these German words: ${validWords.join(', ')}. 
-    For each word, provide a German word with similar meaning and explanation.
+      const prompt = `Generate same meaning (synonym) exercises for the following ${languageSettings.targetLanguage.nativeName} words. For each word, provide:
+1. A synonym word in ${languageSettings.targetLanguage.nativeName}
+2. A helpful hint
+3. A brief explanation
 
-Return only a JSON object with this exact format:
+Words: ${words.join(', ')}
+
+Format the response as JSON with this structure:
 {
   "exercises": [
     {
-      "exerciseOrder": 1,
-      "word": "schön",
-      "englishMeaning": "beautiful/nice",
-      "solution": "hübsch",
-      "hint": "Another word for attractive",
-      "explanation": "Schön and hübsch both mean beautiful/pretty."
+      "word": "original_word",
+      "synonym": "synonym_word",
+      "hint": "helpful_hint",
+      "explanation": "brief_explanation"
     }
   ]
 }`;
 
-    const systemMessage = "You are a German language teacher creating synonym exercises. Return only valid JSON without any additional text or explanations.";
-    
-    const result = await callOpenAI(prompt, systemMessage);
-    if (result) {
-      try {
-        const exerciseData = JSON.parse(result);
-        const exercise: SameMeaningExerciseData = {
-          id: Date.now().toString(),
-          words: validWords,
-          exercises: exerciseData.exercises,
+      const response = await callOpenAI(prompt, 'You are a helpful language learning assistant.');
+      const data = JSON.parse(response);
+      
+      if (data.exercises) {
+        const exercises = data.exercises.map((ex: any, index: number) => ({
+          exerciseOrder: index + 1,
+          word: ex.word,
+          nativeMeaning: '', // Will be filled by AI
+          solution: ex.synonym,
+          hint: ex.hint,
+          explanation: ex.explanation
+        }));
+        
+        const newExercise: SameMeaningExerciseData = {
+          id: `same-meaning-${Date.now()}`,
+          words,
+          exercises,
           userAnswers: {},
           isCompleted: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          targetLanguage: languageSettings.targetLanguage.code,
+          nativeLanguage: languageSettings.nativeLanguage.code
         };
-        setCurrentExercise(exercise);
+        
+        setCurrentExercise(newExercise);
+        setPreviousExercises(prev => [newExercise, ...prev.slice(0, 4)]);
         setUserAnswers({});
         setShowResults(false);
-      } catch (error) {
+        
         toast({
-          title: "Error parsing exercise",
-          description: "Failed to generate exercise. Please try again.",
-          variant: "destructive",
+          title: "Success",
+          description: `Generated ${exercises.length} same meaning exercises.`,
         });
       }
+    } catch (error) {
+      console.error('Error generating exercise:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate exercise. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -226,45 +251,45 @@ Return only a JSON object with this exact format:
 
   const checkAnswers = () => {
     if (!currentExercise) return;
-
-    const updatedExercise = {
-      ...currentExercise,
-      userAnswers,
-      isCompleted: true
-    };
-
-    setPreviousExercises(prev => [...prev, updatedExercise]);
+    
+    const answeredCount = Object.keys(userAnswers).length;
+    const totalCount = currentExercise.exercises.length;
+    
+    if (answeredCount < totalCount) {
+      toast({
+        title: "Incomplete",
+        description: `Please answer all ${totalCount} questions before checking.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setShowResults(true);
     
-    // Calculate score
-    const correctAnswers = currentExercise.exercises.filter(exercise => 
-      userAnswers[exercise.exerciseOrder]?.toLowerCase().trim() === exercise.solution.toLowerCase().trim()
-    ).length;
-
+    const correctAnswers = currentExercise.exercises.filter(exercise => {
+      const userAnswer = userAnswers[exercise.exerciseOrder];
+      return userAnswer?.toLowerCase().trim() === exercise.solution.toLowerCase().trim();
+    }).length;
+    
+    const percentage = Math.round((correctAnswers / totalCount) * 100);
+    
     toast({
-      title: "Exercise completed!",
-      description: `You got ${correctAnswers} out of ${currentExercise.exercises.length} correct.`,
+      title: "Results",
+      description: `You got ${correctAnswers} out of ${totalCount} correct (${percentage}%).`,
     });
   };
 
   const resetExercise = () => {
-    if (currentExercise) {
-      setCurrentExercise(prev => prev ? {
-        ...prev,
-        userAnswers: {},
-        isCompleted: false
-      } : null);
-      setUserAnswers({});
-      setShowResults(false);
-    } else {
-      loadSampleExercise();
-    }
+    if (!currentExercise) return;
+    
+    setUserAnswers({});
+    setShowResults(false);
   };
 
   const loadPreviousExercise = (exercise: SameMeaningExerciseData) => {
     setCurrentExercise(exercise);
-    setUserAnswers(exercise.userAnswers);
-    setShowResults(exercise.isCompleted);
+    setUserAnswers({});
+    setShowResults(false);
   };
 
   return {

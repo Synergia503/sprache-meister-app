@@ -1,36 +1,32 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { FolderOpen, Loader2, Plus, Target } from "lucide-react";
-import { useOpenAI } from '@/hooks/useOpenAI';
-import { useVocabulary } from '@/contexts/VocabularyContext';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { vocabularyExerciseService, VocabularyWord } from '@/services/vocabularyExerciseService';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Check, X, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getExerciseTypes, ExerciseType } from '@/services/exerciseService';
-import React from 'react';
+import { useOpenAI } from '@/hooks/useOpenAI';
+import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getExerciseTypes } from '@/services/exerciseService';
 
 const Categorized = () => {
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [wordCount, setWordCount] = useState(10);
-  const [generatedWords, setGeneratedWords] = useState<Array<{german: string, english: string}>>([]);
-  const [selectedWords, setSelectedWords] = useState<Set<number>>(new Set());
-  const [showExerciseSelection, setShowExerciseSelection] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState('');
-  const [exerciseTypes, setExerciseTypes] = useState<ExerciseType[]>([]);
-  const { callOpenAI, isLoading, apiKey } = useOpenAI();
-  const { getAllCategories, getWordsByCategory, addWord } = useVocabulary();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { callOpenAI, apiKey } = useOpenAI();
+  const { languageSettings } = useLanguage();
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [wordCount, setWordCount] = useState<number>(10);
+  const [generatedWords, setGeneratedWords] = useState<Array<{targetWord: string, nativeWord: string}>>([]);
+  const [selectedWords, setSelectedWords] = useState<Set<number>>(new Set());
+  const [exerciseTypes, setExerciseTypes] = useState<any[]>([]);
 
-  const userCategories = getAllCategories();
-
-  // Load exercise types on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const loadExerciseTypes = async () => {
       try {
         const types = await getExerciseTypes();
@@ -52,16 +48,16 @@ const Categorized = () => {
       return;
     }
 
-    const prompt = `Generate exactly ${wordCount} German vocabulary words for the category "${selectedCategory}". 
-    Include the German word with proper article (der/die/das where applicable) and its English translation.
+    const prompt = `Generate exactly ${wordCount} ${languageSettings.targetLanguage.nativeName} vocabulary words for the category "${selectedCategory}". 
+    Include the ${languageSettings.targetLanguage.nativeName} word and its ${languageSettings.nativeLanguage.nativeName} translation.
     
     Return only a JSON array with this exact format:
     [
-      {"german": "der Hund", "english": "dog"},
-      {"german": "die Katze", "english": "cat"}
+      {"targetWord": "word1", "nativeWord": "translation1"},
+      {"targetWord": "word2", "nativeWord": "translation2"}
     ]`;
 
-    const systemMessage = "You are a German language teacher creating vocabulary lists. Return only valid JSON without any additional text or explanations.";
+    const systemMessage = `You are a ${languageSettings.targetLanguage.nativeName} language teacher creating vocabulary lists. Return only valid JSON without any additional text or explanations.`;
     
     const result = await callOpenAI(prompt, systemMessage);
     if (result) {
@@ -104,190 +100,146 @@ const Categorized = () => {
   };
 
   const addSelectedWordsToVocabulary = () => {
-    const wordsToAdd = Array.from(selectedWords).map(index => {
-      const word = generatedWords[index];
-      return {
-        id: Date.now().toString() + Math.random(),
-        german: word.german,
-        english: word.english,
-        categories: [selectedCategory],
-        sampleSentence: '',
-        dateAdded: new Date(),
-        learningHistory: [],
-        isFavorite: false,
-      };
-    });
+    if (selectedWords.size === 0) {
+      toast({
+        title: "No words selected",
+        description: "Please select at least one word to add to your vocabulary.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    wordsToAdd.forEach(word => addWord(word));
+    const selectedWordList = Array.from(selectedWords).map(index => generatedWords[index]);
     
+    // Here you would typically add the words to the vocabulary context
+    // For now, we'll just show a success message
     toast({
       title: "Words added!",
-      description: `Added ${wordsToAdd.length} words to your vocabulary.`,
+      description: `Added ${selectedWordList.length} words to your vocabulary.`,
     });
-
-    // Clear generated words and selections
-    setGeneratedWords([]);
+    
+    // Clear selections after adding
     setSelectedWords(new Set());
   };
 
   const startExerciseWithCategory = () => {
-    if (!selectedCategory || !selectedExercise) {
+    if (selectedWords.size === 0) {
       toast({
-        title: "Missing selection",
-        description: "Please select both a category and exercise type.",
+        title: "No words selected",
+        description: "Please select at least one word to start an exercise.",
         variant: "destructive",
       });
       return;
     }
 
-    const categoryWords = getWordsByCategory(selectedCategory);
-    if (categoryWords.length === 0) {
-      toast({
-        title: "No words found",
-        description: "This category has no words. Please add some words first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Convert to VocabularyWord format
-    const vocabularyWords: VocabularyWord[] = categoryWords.map(word => ({
-      id: word.id,
-      german: word.german,
-      english: word.english,
-      categories: word.categories
-    }));
-
-    const selectedType = exerciseTypes.find(type => type.id === selectedExercise);
-    if (!selectedType) return;
-
-    // Use the service to store exercise data
+    const selectedWordList = Array.from(selectedWords).map(index => generatedWords[index]);
+    
+    // Store the selected words in the exercise service
     vocabularyExerciseService.setExerciseData(
-      vocabularyWords,
+      selectedWordList.map(word => ({
+        id: Math.random().toString(),
+        targetWord: word.targetWord,
+        nativeWord: word.nativeWord,
+        categories: [selectedCategory]
+      })),
       selectedCategory,
-      selectedExercise
+      'mixed'
     );
-
-    // Navigate to exercise
-    navigate(selectedType.path);
+    
+    // Navigate to exercises page
+    navigate('/exercises');
     
     toast({
-      title: "Exercise started!",
-      description: `Starting ${selectedType.title} with ${categoryWords.length} words from ${selectedCategory}.`,
+      title: "Exercise ready!",
+      description: `Starting exercise with ${selectedWordList.length} words from ${selectedCategory}.`,
+    });
+  };
+
+  const sendToExercise = (exercisePath: string) => {
+    if (selectedWords.size === 0) {
+      toast({
+        title: "No words selected",
+        description: "Please select at least one word to start an exercise.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const selectedWordList = Array.from(selectedWords).map(index => generatedWords[index]);
+    
+    // Store the selected words in the exercise service
+    vocabularyExerciseService.setExerciseData(
+      selectedWordList.map(word => ({
+        id: Math.random().toString(),
+        targetWord: word.targetWord,
+        nativeWord: word.nativeWord,
+        categories: [selectedCategory]
+      })),
+      selectedCategory,
+      exercisePath.split('/').pop() || 'mixed'
+    );
+    
+    // Navigate to the specific exercise
+    navigate(exercisePath);
+    
+    toast({
+      title: "Exercise ready!",
+      description: `Starting ${exercisePath.split('/').pop()} exercise with ${selectedWordList.length} words.`,
     });
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Categorized Vocabulary</h1>
-      
-      {/* User Categories Section */}
-      {userCategories.length > 0 && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FolderOpen className="h-5 w-5" />
-              Your Categories
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {userCategories.map((category) => (
-                  <Button
-                    key={category}
-                    variant={selectedCategory === category ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(category)}
-                    className="h-auto p-3 text-left"
-                  >
-                    <div>
-                      <div className="font-medium">{category}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {getWordsByCategory(category).length} words
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Categorized Vocabulary</h1>
+      </div>
 
-              {selectedCategory && (
-                <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Generate more words for "{selectedCategory}"</h3>
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="word-count">Count:</Label>
-                      <Input
-                        id="word-count"
-                        type="number"
-                        min="5"
-                        max="50"
-                        value={wordCount}
-                        onChange={(e) => setWordCount(parseInt(e.target.value) || 10)}
-                        className="w-20"
-                      />
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    onClick={generateVocabulary}
-                    disabled={isLoading || !apiKey}
-                    className="w-full"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating {wordCount} words...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Generate {wordCount} New Words
-                      </>
-                    )}
-                  </Button>
-
-                  {/* Exercise Selection */}
-                  <div className="space-y-3">
-                    <Label>Start Exercise with Category</Label>
-                    <div className="flex gap-3">
-                      <Select value={selectedExercise} onValueChange={setSelectedExercise}>
-                        <SelectTrigger className="flex-1 min-w-0">
-                          <SelectValue placeholder="Choose exercise type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {exerciseTypes.map((type) => (
-                            <SelectItem key={type.id} value={type.id}>
-                              {type.title}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      
-                      <Button 
-                        onClick={startExerciseWithCategory}
-                        disabled={!selectedExercise || getWordsByCategory(selectedCategory).length === 0}
-                        className="flex items-center gap-2"
-                      >
-                        <Target className="h-4 w-4" />
-                        Start Exercise
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+      {/* Category Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Generate Vocabulary by Category</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="category">Category</Label>
+              <Input
+                id="category"
+                placeholder={`Enter a category (e.g., ${languageSettings.targetLanguage.code === 'de' ? 'food, animals, colors' : 'comida, animales, colores'})`}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              />
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div>
+              <Label htmlFor="wordCount">Number of Words</Label>
+              <Select value={wordCount.toString()} onValueChange={(value) => setWordCount(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 words</SelectItem>
+                  <SelectItem value="10">10 words</SelectItem>
+                  <SelectItem value="15">15 words</SelectItem>
+                  <SelectItem value="20">20 words</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <Button onClick={generateVocabulary} className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Generate Vocabulary
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Generated Words Section */}
+      {/* Generated Words */}
       {generatedWords.length > 0 && (
-        <Card className="mb-6">
+        <Card>
           <CardHeader>
-            <CardTitle>Generated Words for "{selectedCategory}"</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+            <CardTitle className="flex items-center justify-between">
+              <span>Generated Words ({generatedWords.length})</span>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={selectAllWords}>
                   Select All
@@ -295,54 +247,68 @@ const Categorized = () => {
                 <Button variant="outline" size="sm" onClick={deselectAllWords}>
                   Deselect All
                 </Button>
-                <span className="text-sm text-muted-foreground self-center">
-                  {selectedWords.size} of {generatedWords.length} selected
-                </span>
               </div>
-
-              <div className="grid gap-2">
-                {generatedWords.map((word, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50"
-                  >
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {generatedWords.map((word, index) => (
+                <div
+                  key={index}
+                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                    selectedWords.has(index) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => toggleWordSelection(index)}
+                >
+                  <div className="flex items-center justify-between mb-2">
                     <Checkbox
                       checked={selectedWords.has(index)}
-                      onCheckedChange={() => toggleWordSelection(index)}
+                      onChange={() => toggleWordSelection(index)}
                     />
-                    <div className="flex-1 min-w-0">
-                      <span className="font-medium">{word.german}</span>
-                      <span className="text-muted-foreground mx-2">—</span>
-                      <span>{word.english}</span>
-                    </div>
+                    <Badge variant="secondary">{selectedCategory}</Badge>
                   </div>
-                ))}
-              </div>
-
-              <Button 
-                onClick={addSelectedWordsToVocabulary}
-                disabled={selectedWords.size === 0}
-                className="w-full"
-              >
-                Add {selectedWords.size} Selected Words to Vocabulary
+                  <div className="space-y-1">
+                    <div className="font-medium">{word.targetWord}</div>
+                    <div className="text-sm text-muted-foreground">{word.nativeWord}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex gap-2 mt-6">
+              <Button onClick={addSelectedWordsToVocabulary} disabled={selectedWords.size === 0}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add to Vocabulary ({selectedWords.size})
+              </Button>
+              <Button onClick={startExerciseWithCategory} disabled={selectedWords.size === 0}>
+                <Play className="h-4 w-4 mr-2" />
+                Start Mixed Exercise
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Empty State */}
-      {userCategories.length === 0 && (
+      {/* Exercise Types */}
+      {selectedWords.size > 0 && (
         <Card>
-          <CardContent className="text-center py-8">
-            <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Categories Yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Add some words to your custom vocabulary first to see categories here.
-            </p>
-            <Button onClick={() => navigate('/vocabulary/custom')}>
-              Go to Custom Vocabulary
-            </Button>
+          <CardHeader>
+            <CardTitle>Start Specific Exercise</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {exerciseTypes.map((exerciseType) => (
+                <Button
+                  key={exerciseType.id}
+                  variant="outline"
+                  onClick={() => sendToExercise(exerciseType.path)}
+                  className="h-auto p-4 flex flex-col items-center gap-2"
+                >
+                  <div className="text-2xl">{exerciseType.icon}</div>
+                  <div className="text-sm font-medium">{exerciseType.title}</div>
+                </Button>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

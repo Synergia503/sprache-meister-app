@@ -26,6 +26,18 @@ const SAMPLE_EXERCISE: MultipleChoiceExercise = {
       sentence: 'Er trägt ein____ schwarz____ Jacke.',
       options: ['e, e', 'en, en', 'e, en', 'er, e'],
       solution: 'e, e'
+    },
+    {
+      sentenceOrder: 4,
+      sentence: 'Die Sonne scheint ____.',
+      options: ['heute', 'morgen', 'gestern', 'nächste Woche'],
+      solution: 'heute'
+    },
+    {
+      sentenceOrder: 5,
+      sentence: 'Die Kinder ____ eine neue Schule.',
+      options: ['gehen', 'geht', 'gingen', 'ging'],
+      solution: 'gehen'
     }
   ],
   userAnswers: {},

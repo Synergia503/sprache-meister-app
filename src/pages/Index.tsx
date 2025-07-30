@@ -2,10 +2,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { LogOut } from "lucide-react";
 
 const Index = () => {
   const { user, logout } = useAuth();
+  const { languageSettings } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -36,11 +38,33 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4">Welcome to German Learning</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+          Welcome to {languageSettings.targetLanguage.nativeName} Learning
+        </h1>
         <p className="text-lg sm:text-xl text-muted-foreground">
-          Start your journey to master the German language with our comprehensive learning tools.
+          Start your journey to master the {languageSettings.targetLanguage.nativeName} language with our comprehensive learning tools.
           Navigate through different sections using the sidebar menu.
         </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-2">Current Learning Path</h3>
+              <p className="text-sm text-muted-foreground">
+                {languageSettings.nativeLanguage.nativeName} → {languageSettings.targetLanguage.nativeName}
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-2">Quick Start</h3>
+              <p className="text-sm text-muted-foreground">
+                Use the sidebar to access vocabulary, exercises, and flashcards.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

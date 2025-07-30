@@ -1,6 +1,3 @@
-// https://stackoverflow.com/questions/76284643/how-to-rotate-text-around-its-center-in-jspdf
-
-
 import {
   BaseExercise,
   TranslationExercise,
@@ -26,26 +23,28 @@ interface WordFormationExerciseData {
   userAnswers: { [key: number]: string };
   isCompleted: boolean;
   createdAt: Date;
+  targetLanguage: string;
+  nativeLanguage: string;
 }
 
 // Type guards to safely identify exercise types
-const isMatchingExercise = (exercise: any): exercise is MatchingExercise => {
+const isMatchingExercise = (exercise: MatchingExercise): exercise is MatchingExercise => {
   return "pairs" in exercise && "userMatches" in exercise;
 };
 
 const isTranslationExercise = (
-  exercise: any
+  exercise: TranslationExercise
 ): exercise is TranslationExercise => {
   return (
     "sentences" in exercise &&
     exercise.sentences.length > 0 &&
-    "germanSentence" in exercise.sentences[0] &&
-    "englishSentence" in exercise.sentences[0]
+    "targetSentence" in exercise.sentences[0] &&
+    "nativeSentence" in exercise.sentences[0]
   );
 };
 
 const isMultipleChoiceExercise = (
-  exercise: any
+  exercise: MultipleChoiceExercise
 ): exercise is MultipleChoiceExercise => {
   return (
     "sentences" in exercise &&
@@ -55,18 +54,20 @@ const isMultipleChoiceExercise = (
   );
 };
 
-const isGapFillExercise = (exercise: any): exercise is GapFillExercise => {
+const isGapFillExercise = (
+  exercise: GapFillExercise
+): exercise is GapFillExercise => {
   return (
     "sentences" in exercise &&
     exercise.sentences.length > 0 &&
     "solution" in exercise.sentences[0] &&
     !("options" in exercise.sentences[0]) &&
-    !("germanSentence" in exercise.sentences[0])
+    !("targetSentence" in exercise.sentences[0])
   );
 };
 
 const isWordFormationExercise = (
-  exercise: any
+  exercise: WordFormationExerciseData
 ): exercise is WordFormationExerciseData => {
   return (
     "exercises" in exercise &&
@@ -76,8 +77,34 @@ const isWordFormationExercise = (
   );
 };
 
+// Helper function to determine exercise type
+const getExerciseType = (exercise: BaseExercise | GapFillExercise | TranslationExercise | MultipleChoiceExercise | MatchingExercise | WordFormationExerciseData): string => {
+  if ("pairs" in exercise && "userMatches" in exercise) {
+    return "matching";
+  }
+  if ("sentences" in exercise && exercise.sentences.length > 0) {
+    const firstSentence = exercise.sentences[0];
+    if ("targetSentence" in firstSentence && "nativeSentence" in firstSentence) {
+      return "translation";
+    }
+    if ("options" in firstSentence && "solution" in firstSentence) {
+      return "multiple-choice";
+    }
+    if ("solution" in firstSentence && !("options" in firstSentence) && !("targetSentence" in firstSentence)) {
+      return "gap-fill";
+    }
+  }
+  if ("exercises" in exercise && exercise.exercises.length > 0) {
+    const firstExercise = exercise.exercises[0];
+    if ("baseWord" in firstExercise && "instruction" in firstExercise) {
+      return "word-formation";
+    }
+  }
+  return "unknown";
+};
+
 export const generateExercisePDF = (
-  exercise: BaseExercise | GapFillExercise
+  exercise: BaseExercise | GapFillExercise | TranslationExercise | MultipleChoiceExercise | MatchingExercise | WordFormationExerciseData
 ) => {
   try {
     console.log(
@@ -125,7 +152,7 @@ export const generateExercisePDF = (
     };
 
     const addAnswersToFooter = () => {
-      doc.addPage();
+      // doc.addPage();
       const pageHeight = doc.internal.pageSize.getHeight();
       const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -134,7 +161,7 @@ export const generateExercisePDF = (
       doc.setFont(undefined, "normal");
       doc.saveGraphicsState?.();
 
-      let flippedY = 20;
+      let flippedY = pageHeight - 20; // Start from bottom of the page
       doc.setFontSize(8);
       doc.setFont(undefined, "bold");
       doc.text("Answer Key:", 15, flippedY);
@@ -166,46 +193,51 @@ export const generateExercisePDF = (
       doc.restoreGraphicsState?.();
     };
 
-    if (isMatchingExercise(exercise)) {
+    const exerciseType = getExerciseType(exercise);
+
+    if (exerciseType === "matching" && isMatchingExercise(exercise as MatchingExercise)) {
+      const matchingExercise = exercise as MatchingExercise;
       console.log("🔥 PDF Generation: Generating matching exercise PDF");
       addTitle("Matching Exercise");
       filename = "matching-exercise.pdf";
       console.log("🔥 PDF Generation: Set filename to:", filename);
 
       addSection("Instructions:");
-      addText("Match the German words with their English translations.");
+      addText("Match the words with their translations.");
 
-      addSection("German Words:");
-      exercise.pairs.forEach((pair, i) => {
-        addText(`${i + 1}. ${pair.germanWord}`);
+      addSection("Target Language Words:");
+      matchingExercise.pairs.forEach((pair, i) => {
+        addText(`${i + 1}. ${pair.targetWord}`);
       });
 
-      addSection("English Words:");
-      exercise.pairs.forEach((pair, i) => {
-        addText(`${String.fromCharCode(65 + i)}. ${pair.englishWord}`);
+      addSection("Native Language Words:");
+      matchingExercise.pairs.forEach((pair, i) => {
+        addText(`${String.fromCharCode(65 + i)}. ${pair.nativeWord}`);
       });
 
       // Prepare answers
-      exercise.pairs.forEach((pair, i) => {
-        answers.push(`${pair.germanWord} - ${pair.englishWord}`);
+      matchingExercise.pairs.forEach((pair, i) => {
+        answers.push(`${pair.targetWord} - ${pair.nativeWord}`);
       });
-    } else if (isTranslationExercise(exercise)) {
+    } else if (exerciseType === "translation" && isTranslationExercise(exercise as TranslationExercise)) {
+      const translationExercise = exercise as TranslationExercise;
       console.log("🔥 PDF Generation: Generating translation exercise PDF");
       addTitle("Translation Exercise");
       filename = "translation-exercise.pdf";
       console.log("🔥 PDF Generation: Set filename to:", filename);
 
       addSection("Instructions:");
-      addText("Translate the following German sentences into English.");
+      addText("Translate the following sentences.");
 
       addSection("Questions:");
-      exercise.sentences.forEach((sentence, i) => {
-        addText(`${i + 1}. ${sentence.germanSentence}`);
+      translationExercise.sentences.forEach((sentence, i) => {
+        addText(`${i + 1}. ${sentence.targetSentence}`);
         addText("   _________________________________");
         yPosition += 5;
-        answers.push(sentence.englishSentence);
+        answers.push(sentence.nativeSentence);
       });
-    } else if (isMultipleChoiceExercise(exercise)) {
+    } else if (exerciseType === "multiple-choice" && isMultipleChoiceExercise(exercise as MultipleChoiceExercise)) {
+      const multipleChoiceExercise = exercise as MultipleChoiceExercise;
       console.log("🔥 PDF Generation: Generating multiple choice exercise PDF");
       addTitle("Multiple Choice Exercise");
       filename = "multiple-choice-exercise.pdf";
@@ -215,7 +247,7 @@ export const generateExercisePDF = (
       addText("Choose the correct answer for each question.");
 
       addSection("Questions:");
-      exercise.sentences.forEach((sentence, i) => {
+      multipleChoiceExercise.sentences.forEach((sentence, i) => {
         addText(`${i + 1}. ${sentence.sentence}`);
         sentence.options.forEach((option, idx) => {
           addText(`   ${String.fromCharCode(65 + idx)}) ${option}`);
@@ -223,7 +255,8 @@ export const generateExercisePDF = (
         yPosition += 5;
         answers.push(sentence.solution);
       });
-    } else if (isGapFillExercise(exercise)) {
+    } else if (exerciseType === "gap-fill" && isGapFillExercise(exercise as GapFillExercise)) {
+      const gapFillExercise = exercise as GapFillExercise;
       console.log("🔥 PDF Generation: Generating gap-fill exercise PDF");
       addTitle("Gap-Fill Exercise");
       filename = "gap-fill-exercise.pdf";
@@ -233,13 +266,14 @@ export const generateExercisePDF = (
       addText("Fill in the blanks with the correct word.");
 
       addSection("Questions:");
-      exercise.sentences.forEach((sentence, i) => {
+      gapFillExercise.sentences.forEach((sentence, i) => {
         addText(`${i + 1}. ${sentence.sentence}`);
         addText("   Answer: _______________");
         yPosition += 5;
         answers.push(sentence.solution);
       });
-    } else if (isWordFormationExercise(exercise)) {
+    } else if (exerciseType === "word-formation" && isWordFormationExercise(exercise as WordFormationExerciseData)) {
+      const wordFormationExercise = exercise as WordFormationExerciseData;
       console.log("🔥 PDF Generation: Generating word formation exercise PDF");
       addTitle("Word Formation Exercise");
       filename = "word-formation-exercise.pdf";
@@ -249,7 +283,7 @@ export const generateExercisePDF = (
       addText("Create new words using the given base words and instructions.");
 
       addSection("Questions:");
-      exercise.exercises.forEach((ex, i) => {
+      wordFormationExercise.exercises.forEach((ex, i) => {
         addText(`${i + 1}. ${ex.instruction}`);
         addText(`   Base word: ${ex.baseWord}`);
         if (ex.hint) {
