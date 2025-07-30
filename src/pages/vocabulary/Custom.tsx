@@ -1,23 +1,39 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Heart, Search, Plus, Trash2, Edit, Star, Filter, SortAsc, SortDesc } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useVocabulary } from '@/contexts/VocabularyContext';
-import { CustomWord, ExtractedWord, SortOption } from '@/types/vocabulary';
-import ExerciseDropZone from '@/components/ExerciseDropZone';
-import PhotoWordExtractor from '@/components/PhotoWordExtractor';
-import { AnkiExport } from '@/components/AnkiExport';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Heart,
+  Search,
+  Plus,
+  Trash2,
+  Edit,
+  Star,
+  Filter,
+  SortAsc,
+  SortDesc,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useVocabulary } from "@/contexts/VocabularyContext";
+import { CustomWord, ExtractedWord, SortOption } from "@/types/vocabulary";
+import ExerciseDropZone from "@/components/ExerciseDropZone";
+import PhotoWordExtractor from "@/components/PhotoWordExtractor";
+import { AnkiExport } from "@/components/AnkiExport";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DraggedData {
-  type: 'word';
+  type: "word";
   word: CustomWord;
 }
 
@@ -86,8 +102,8 @@ const Custom = () => {
 
     const newWord: CustomWord = {
       id: Date.now().toString(),
-      targetLanguage: languageSettings.targetLanguage.code,
-      nativeLanguage: languageSettings.nativeLanguage.code,
+      targetLanguage: languageSettings.targetLanguage,
+      nativeLanguage: languageSettings.nativeLanguage,
       targetWord: newTargetWord.trim(),
       nativeWord: newNativeWord.trim(),
       categories: [],
@@ -120,8 +136,8 @@ const Custom = () => {
     extractedWords.forEach((extractedWord) => {
       const newWord: CustomWord = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        targetLanguage: languageSettings.targetLanguage.code,
-        nativeLanguage: languageSettings.nativeLanguage.code,
+        targetLanguage: languageSettings.targetLanguage,
+        nativeLanguage: languageSettings.nativeLanguage,
         targetWord: extractedWord.targetWord,
         nativeWord: extractedWord.nativeWord,
         categories: extractedWord.categories || [],
@@ -159,10 +175,10 @@ const Custom = () => {
   };
 
   const handleDrop = (draggedData: DraggedData) => {
-    if (draggedData && draggedData.type === 'word') {
+    if (draggedData && draggedData.type === "word") {
       const word = draggedData.word as CustomWord;
-      if (!droppedWords.find(w => w.id === word.id)) {
-        setDroppedWords(prev => [...prev, word]);
+      if (!droppedWords.find((w) => w.id === word.id)) {
+        setDroppedWords((prev) => [...prev, word]);
         toast({
           title: "Word added to exercise",
           description: `${word.targetWord} has been added to the exercise.`,
@@ -175,7 +191,7 @@ const Custom = () => {
     setTouchStarted(wordId);
     touchTimeoutRef.current = setTimeout(() => {
       setIsMultiSelectMode(true);
-      setSelectedWords(prev => new Set([...prev, wordId]));
+      setSelectedWords((prev) => new Set([...prev, wordId]));
     }, 500);
   };
 
@@ -188,7 +204,7 @@ const Custom = () => {
 
   const handleWordSelection = (wordId: string, ctrlKey: boolean) => {
     if (isMultiSelectMode || ctrlKey) {
-      setSelectedWords(prev => {
+      setSelectedWords((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(wordId)) {
           newSet.delete(wordId);
@@ -203,7 +219,7 @@ const Custom = () => {
   };
 
   const handleAddToExercise = () => {
-    const selectedWordsList = getFilteredAndSortedWords().filter(word =>
+    const selectedWordsList = getFilteredAndSortedWords().filter((word) =>
       selectedWords.has(word.id)
     );
 
@@ -216,7 +232,7 @@ const Custom = () => {
       return;
     }
 
-    setDroppedWords(prev => [...prev, ...selectedWordsList]);
+    setDroppedWords((prev) => [...prev, ...selectedWordsList]);
     setSelectedWords(new Set());
     setIsMultiSelectMode(false);
 
@@ -227,7 +243,7 @@ const Custom = () => {
   };
 
   const handleRemoveFromDropZone = (wordId: string) => {
-    setDroppedWords(prev => prev.filter(word => word.id !== wordId));
+    setDroppedWords((prev) => prev.filter((word) => word.id !== wordId));
   };
 
   const handleClearDropZone = () => {
@@ -236,7 +252,7 @@ const Custom = () => {
 
   const calculateSuccessRate = (word: CustomWord) => {
     if (!word.learningHistory.length) return 0;
-    const successCount = word.learningHistory.filter(h => h.success).length;
+    const successCount = word.learningHistory.filter((h) => h.success).length;
     return Math.round((successCount / word.learningHistory.length) * 100);
   };
 
@@ -247,10 +263,12 @@ const Custom = () => {
   const currentWords = filteredWords.slice(startIndex, endIndex);
 
   const getAnkiItems = () => {
-    return droppedWords.map(word => ({
+    return droppedWords.map((word) => ({
       front: word.targetWord,
-      back: `${word.nativeWord}${word.sampleSentence ? `\n\n${word.sampleSentence}` : ''}`,
-      tags: ['custom-vocabulary', ...word.categories]
+      back: `${word.nativeWord}${
+        word.sampleSentence ? `\n\n${word.sampleSentence}` : ""
+      }`,
+      tags: ["custom-vocabulary", ...word.categories],
     }));
   };
 
@@ -278,7 +296,9 @@ const Custom = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="target-word">{languageSettings.targetLanguage.nativeName} Word</Label>
+                <Label htmlFor="target-word">
+                  {languageSettings.targetLanguage.nativeName} Word
+                </Label>
                 <Input
                   id="target-word"
                   placeholder={`Enter ${languageSettings.targetLanguage.nativeName} word`}
@@ -287,7 +307,9 @@ const Custom = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="native-word">{languageSettings.nativeLanguage.nativeName} Translation</Label>
+                <Label htmlFor="native-word">
+                  {languageSettings.nativeLanguage.nativeName} Translation
+                </Label>
                 <Input
                   id="native-word"
                   placeholder={`Enter ${languageSettings.nativeLanguage.nativeName} translation`}
@@ -325,7 +347,10 @@ const Custom = () => {
             </div>
             <div>
               <Label htmlFor="category">Category</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
@@ -337,15 +362,24 @@ const Custom = () => {
             </div>
             <div>
               <Label htmlFor="sort">Sort by</Label>
-              <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
+              <Select
+                value={sortOption}
+                onValueChange={(value: SortOption) => setSortOption(value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="dateAdded">Date Added</SelectItem>
-                  <SelectItem value="targetWord">{languageSettings.targetLanguage.nativeName} (A-Z)</SelectItem>
-                  <SelectItem value="nativeWord">{languageSettings.nativeLanguage.nativeName} (A-Z)</SelectItem>
-                  <SelectItem value="learningProgress">Learning Progress</SelectItem>
+                  <SelectItem value="targetWord">
+                    {languageSettings.targetLanguage.nativeName} (A-Z)
+                  </SelectItem>
+                  <SelectItem value="nativeWord">
+                    {languageSettings.nativeLanguage.nativeName} (A-Z)
+                  </SelectItem>
+                  <SelectItem value="learningProgress">
+                    Learning Progress
+                  </SelectItem>
                   <SelectItem value="lastLearning">Last Learned</SelectItem>
                 </SelectContent>
               </Select>
@@ -354,9 +388,15 @@ const Custom = () => {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                onClick={() =>
+                  setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                }
               >
-                {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                {sortOrder === "asc" ? (
+                  <SortAsc className="h-4 w-4" />
+                ) : (
+                  <SortDesc className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -369,7 +409,7 @@ const Custom = () => {
           <Card
             key={word.id}
             className={`cursor-pointer transition-all hover:shadow-md ${
-              selectedWords.has(word.id) ? 'ring-2 ring-primary' : ''
+              selectedWords.has(word.id) ? "ring-2 ring-primary" : ""
             }`}
             draggable
             onDragStart={() => handleDragStart(word)}
@@ -383,7 +423,9 @@ const Custom = () => {
                 <div className="flex-1">
                   <CardTitle className="text-lg">
                     <span className="font-medium">{word.targetWord}</span> -{" "}
-                    <span className="text-muted-foreground">{word.nativeWord}</span>
+                    <span className="text-muted-foreground">
+                      {word.nativeWord}
+                    </span>
                   </CardTitle>
                 </div>
                 <div className="flex gap-1">
@@ -400,7 +442,9 @@ const Custom = () => {
                   >
                     <Heart
                       className={`h-4 w-4 ${
-                        word.isFavorite ? 'text-red-500 fill-current' : 'text-muted-foreground'
+                        word.isFavorite
+                          ? "text-red-500 fill-current"
+                          : "text-muted-foreground"
                       }`}
                     />
                   </Button>
@@ -412,7 +456,11 @@ const Custom = () => {
                 {word.categories.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {word.categories.slice(0, 3).map((category) => (
-                      <Badge key={category} variant="secondary" className="text-xs">
+                      <Badge
+                        key={category}
+                        variant="secondary"
+                        className="text-xs"
+                      >
                         {category}
                       </Badge>
                     ))}
@@ -439,7 +487,7 @@ const Custom = () => {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
               Previous
@@ -449,7 +497,9 @@ const Custom = () => {
             </span>
             <Button
               variant="outline"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
               disabled={currentPage === totalPages}
             >
               Next
