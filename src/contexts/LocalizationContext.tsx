@@ -889,11 +889,31 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
   },
 
   it: {
-    // Add Italian translations...
+    // Navigation
     'nav.home': 'Home',
-    'nav.dashboard': 'Dashboard',
+    'nav.dashboard': 'Cruscotto',
     'nav.vocabulary': 'Vocabolario',
+    'nav.vocabulary.categorized': 'Categorizzato',
+    'nav.vocabulary.custom': 'Personalizzato',
     'nav.exercises': 'Esercizi',
+    'nav.exercises.all': 'Tutti',
+    'nav.exercises.gapFill': 'Riempi gli spazi',
+    'nav.exercises.multipleChoice': 'Scelta multipla',
+    'nav.exercises.translation': 'Traduzione',
+    'nav.exercises.matching': 'Abbinamento',
+    'nav.exercises.wordFormation': 'Formazione parole',
+    'nav.exercises.oppositeMeaning': 'Significato opposto',
+    'nav.exercises.sameMeaning': 'Stesso significato',
+    'nav.exercises.wordDefinition': 'Definizione parola',
+    'nav.exercises.describePicture': 'Descrivi immagine',
+    'nav.exercises.grammar': 'Grammatica',
+    'nav.exercises.mixed': 'Misto',
+    'nav.flashcards': 'Flashcard',
+    'nav.voiceConversation': 'Conversazione Vocale',
+    'nav.profile': 'Profilo',
+    'nav.settings': 'Impostazioni',
+
+    // Add Italian translations...
     'auth.login': 'Accedi',
     'auth.logout': 'Esci',
     'dashboard.welcome': 'Benvenuto all\'apprendimento del {language}',
