@@ -71,6 +71,7 @@ const Custom = () => {
     setSortOption,
     sortOrder,
     setSortOrder,
+    getAllCategories,
   } = useVocabulary();
 
   // Apply filters when local state changes
@@ -263,6 +264,7 @@ const Custom = () => {
   const startIndex = (currentPage - 1) * wordsPerPage;
   const endIndex = startIndex + wordsPerPage;
   const currentWords = filteredWords.slice(startIndex, endIndex);
+  const availableCategories = getAllCategories();
 
   const getAnkiItems = () => {
     return droppedWords.map((word) => ({
@@ -358,7 +360,11 @@ const Custom = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('vocabulary.allCategories')}</SelectItem>
-                  {/* Add categories dynamically */}
+                  {availableCategories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
