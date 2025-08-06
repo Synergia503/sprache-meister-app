@@ -79,7 +79,7 @@ const Matching = () => {
             exercise={currentExercise}
             userMatches={userMatches}
             showResults={showResults}
-            shuffledNative={shuffledEnglish}
+            shuffledNative={shuffledNative}
             selectedTarget={selectedGerman}
             selectedNative={selectedEnglish}
             onMatch={onMatch}
