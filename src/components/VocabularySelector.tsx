@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { CustomWord } from '@/types/vocabulary';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocalization } from '@/contexts/LocalizationContext';
 
 interface VocabularySelectorProps {
   onWordsSelected?: (words: string[] | CustomWord[]) => void;
@@ -26,6 +27,7 @@ export const VocabularySelector = ({
 }: VocabularySelectorProps) => {
   const { getAllCategories, getWordsByCategory } = useVocabulary();
   const { languageSettings } = useLanguage();
+  const { t } = useLocalization();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
