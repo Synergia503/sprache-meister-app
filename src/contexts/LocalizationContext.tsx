@@ -857,6 +857,7 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'dashboard.welcome': 'Bienvenido al aprendizaje de {language}',
     'vocabulary.title': 'Vocabulario',
     'exercises.title': 'Ejercicios',
+    'exercises.main': 'Ejercicios',
     'settings.title': 'Configuración',
     'profile.title': 'Configuración del perfil',
   },
