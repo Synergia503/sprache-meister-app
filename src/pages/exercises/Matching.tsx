@@ -16,7 +16,7 @@ const Matching = () => {
     currentExercise,
     userMatches,
     showResults,
-    shuffledEnglish,
+    shuffledNative,
     selectedGerman,
     selectedEnglish,
     onMatch,
