@@ -58,18 +58,18 @@ export const WordInputForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>{defaultTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {description}
+            {defaultDescription}
           </p>
           
           {words.map((word, index) => (
             <div key={index} className="flex flex-col sm:flex-row gap-2">
               <Input
-                placeholder={`${placeholder} ${index + 1}`}
+                placeholder={`${defaultPlaceholder} ${index + 1}`}
                 value={word}
                 onChange={(e) => updateWord(index, e.target.value)}
                 className="flex-1 min-w-0"
@@ -91,7 +91,7 @@ export const WordInputForm = ({
             {words.length < 20 && (
               <Button variant="outline" onClick={addWordField} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Word
+                {t('wordInputForm.addWord')}
               </Button>
             )}
             <Button 
@@ -99,7 +99,7 @@ export const WordInputForm = ({
               disabled={isLoading || !apiKey}
               className="w-full sm:w-auto"
             >
-              Generate Exercise
+              {t('wordInputForm.generateExercise')}
             </Button>
           </div>
         </div>

@@ -1002,18 +1002,18 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Account Management
+            {t('profile.accountManagement')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Export Data</Label>
-              <p className="text-sm text-muted-foreground">Download all your learning data</p>
+              <Label>{t('profile.exportData')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.downloadLearningData')}</p>
             </div>
             <Button variant="outline" onClick={handleExportData} className="flex items-center gap-2">
               <Download className="h-4 w-4" />
-              Export
+              {t('profile.export')}
             </Button>
           </div>
           
@@ -1021,28 +1021,27 @@ const Profile = () => {
           
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-destructive">Delete Account</Label>
-              <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
+              <Label className="text-destructive">{t('profile.deleteAccount')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.permanentlyDeleteAccount')}</p>
             </div>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="destructive" className="flex items-center gap-2">
                   <Trash2 className="h-4 w-4" />
-                  Delete
+                  {t('profile.delete')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
+                  <DialogTitle>{t('profile.confirmDeleteAccount')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    This action cannot be undone. This will permanently delete your account
-                    and remove all your data from our servers.
+                    {t('profile.deleteAccountWarning')}
                   </p>
                   <div className="flex gap-3">
                     <Button variant="destructive" onClick={handleDeleteAccount} className="flex-1 min-w-0">
-                      Yes, delete my account
+                      {t('profile.yesDeleteAccount')}
                     </Button>
                   </div>
                 </div>

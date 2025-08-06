@@ -14,7 +14,7 @@ export const PreviousExercises = ({ exercises, onLoadExercise }: PreviousExercis
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle>Previous Exercises</CardTitle>
+        <CardTitle>{t('exercises.previousExercises')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
@@ -28,7 +28,7 @@ export const PreviousExercises = ({ exercises, onLoadExercise }: PreviousExercis
                 size="sm"
                 onClick={() => onLoadExercise(exercise)}
               >
-                Open
+                {t('exercises.open')}
               </Button>
             </div>
           ))}

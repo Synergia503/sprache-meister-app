@@ -68,7 +68,7 @@ export const ExerciseHeader = ({ title, exercise }: ExerciseHeaderProps) => {
           disabled={isGenerating}
         >
           <Download className="h-4 w-4 mr-2" />
-          {isGenerating ? 'Generating...' : 'Generate PDF'}
+          {isGenerating ? t('exercises.generating') : t('exercises.generatePDF')}
         </Button>
       )}
     </div>

@@ -104,23 +104,23 @@ export const VocabularySelector = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>{defaultTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {description}
+            {defaultDescription}
           </p>
           
           <div className="space-y-3">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
+                <SelectValue placeholder={t('vocabularySelector.selectCategoryPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
-                    {category} ({getWordsByCategory(category).length} words)
+                    {category} ({t('vocabularySelector.wordsCount', { count: getWordsByCategory(category).length })})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -132,7 +132,7 @@ export const VocabularySelector = ({
               className="w-full"
               variant="secondary"
             >
-              Use Selected Category
+              {t('vocabularySelector.useSelectedCategory')}
             </Button>
           </div>
         </div>
