@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useLocalization } from "@/contexts/LocalizationContext";
 import { Book, FileText, Home, LayoutDashboard, Settings, User, CreditCard, Mic, ChevronDown, ChevronRight, PenTool } from "lucide-react";
 import {
   Sidebar,
@@ -57,6 +58,7 @@ interface MainSidebarProps {
 export function MainSidebar({ children }: MainSidebarProps) {
   const [vocabularyOpen, setVocabularyOpen] = useState(false);
   const [exercisesOpen, setExercisesOpen] = useState(false);
+  const { t } = useLocalization();
 
   return (
     <SidebarProvider>
@@ -73,7 +75,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     <SidebarMenuButton asChild>
                       <Link to="/" className="flex items-center gap-2">
                         <Home className="h-4 w-4" />
-                        <span>Home</span>
+                        <span>{t('nav.home')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -82,7 +84,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     <SidebarMenuButton asChild>
                       <Link to="/dashboard" className="flex items-center gap-2">
                         <LayoutDashboard className="h-4 w-4" />
-                        <span>Dashboard</span>
+                        <span>{t('nav.dashboard')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -156,7 +158,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     <SidebarMenuButton asChild>
                       <Link to="/flashcards" className="flex items-center gap-2">
                         <CreditCard className="h-4 w-4" />
-                        <span>Flashcards</span>
+                        <span>{t('nav.flashcards')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -165,7 +167,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     <SidebarMenuButton asChild>
                       <Link to="/exercises/grammar" className="flex items-center gap-2">
                         <PenTool className="h-4 w-4" />
-                        <span>Grammar</span>
+                        <span>{t('nav.exercises.grammar')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -174,7 +176,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     <SidebarMenuButton asChild>
                       <Link to="/voice-conversation" className="flex items-center gap-2">
                         <Mic className="h-4 w-4" />
-                        <span>Voice Conversation</span>
+                        <span>{t('nav.voiceConversation')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -183,7 +185,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     <SidebarMenuButton asChild>
                       <Link to="/profile" className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        <span>Profile</span>
+                        <span>{t('nav.profile')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -192,7 +194,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                     <SidebarMenuButton asChild>
                       <Link to="/settings" className="flex items-center gap-2">
                         <Settings className="h-4 w-4" />
-                        <span>Settings</span>
+                        <span>{t('nav.settings')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

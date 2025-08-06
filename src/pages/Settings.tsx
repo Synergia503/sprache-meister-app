@@ -8,11 +8,14 @@ import { Separator } from '@/components/ui/separator';
 import { useTheme } from 'next-themes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { useLocalization } from '@/contexts/LocalizationContext';
+import { InterfaceLanguageSelector } from '@/components/InterfaceLanguageSelector';
 import { Moon, Sun, Monitor, Languages, Bell, Shield, Database, Settings as SettingsIcon } from 'lucide-react';
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
   const { languageSettings } = useLanguage();
+  const { t } = useLocalization();
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
 
@@ -31,15 +34,28 @@ const Settings = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-2">
         <SettingsIcon className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
       </div>
+
+      {/* Interface Language Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Languages className="h-5 w-5" />
+            {t('settings.interfaceLanguage')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InterfaceLanguageSelector />
+        </CardContent>
+      </Card>
 
       {/* Language Settings */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Languages className="h-5 w-5" />
-            Language Settings
+            {t('settings.languageSettings')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -52,16 +68,16 @@ const Settings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Monitor className="h-5 w-5" />
-            Appearance
+            {t('settings.appearance')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <label className="text-sm font-medium">Theme</label>
+                <label className="text-sm font-medium">{t('settings.theme')}</label>
                 <p className="text-sm text-muted-foreground">
-                  Choose your preferred theme
+                  {t('settings.chooseTheme')}
                 </p>
               </div>
               <Select value={theme} onValueChange={setTheme}>
@@ -72,19 +88,19 @@ const Settings = () => {
                   <SelectItem value="light">
                     <div className="flex items-center gap-2">
                       <Sun className="h-4 w-4" />
-                      Light
+                      {t('settings.light')}
                     </div>
                   </SelectItem>
                   <SelectItem value="dark">
                     <div className="flex items-center gap-2">
                       <Moon className="h-4 w-4" />
-                      Dark
+                      {t('settings.dark')}
                     </div>
                   </SelectItem>
                   <SelectItem value="system">
                     <div className="flex items-center gap-2">
                       <Monitor className="h-4 w-4" />
-                      System
+                      {t('settings.system')}
                     </div>
                   </SelectItem>
                 </SelectContent>

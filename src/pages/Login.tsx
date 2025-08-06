@@ -109,22 +109,22 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-6">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-          <p className="text-muted-foreground">Sign in to your account</p>
+          <CardTitle className="text-2xl font-bold">{t('auth.welcomeBack')}</CardTitle>
+          <p className="text-muted-foreground">{t('auth.signInToAccount')}</p>
           <div className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
-            <strong>Demo credentials:</strong><br />
-            Email: demo@german-learning.com<br />
-            Password: Demo123!
+            <strong>{t('auth.demoCredentials')}:</strong><br />
+            {t('auth.email')}: demo@german-learning.com<br />
+            {t('auth.password')}: Demo123!
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('auth.enterEmail')}
                 {...register('email')}
                 autoComplete="email"
                 aria-invalid={errors.email ? 'true' : 'false'}
@@ -137,11 +137,11 @@ const Login = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder={t('auth.enterPassword')}
                 {...register('password')}
                 autoComplete="current-password"
                 aria-invalid={errors.password ? 'true' : 'false'}
@@ -161,6 +161,7 @@ const Login = () => {
                   onCheckedChange={(checked) => setValue('rememberMe', checked as boolean)}
                 />
                 <Label htmlFor="remember" className="text-sm">Remember me</Label>
+                <Label htmlFor="remember" className="text-sm">{t('auth.rememberMe')}</Label>
               </div>
               <Button
                 type="button"
@@ -168,12 +169,12 @@ const Login = () => {
                 className="p-0 h-auto text-sm"
                 onClick={handleForgotPassword}
               >
-                Forgot password?
+                {t('auth.forgotPassword')}
               </Button>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
           </form>
 
@@ -248,12 +249,12 @@ const Login = () => {
           </div>
 
           <div className="text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
+            <span className="text-muted-foreground">{t('auth.dontHaveAccount')} </span>
             <Link 
               to="/register" 
               className="text-primary hover:underline font-medium"
             >
-              Sign up
+              {t('auth.signUp')}
             </Link>
           </div>
         </CardContent>

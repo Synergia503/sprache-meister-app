@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocalization } from '@/contexts/LocalizationContext';
 import { useVocabulary } from '@/contexts/VocabularyContext';
 import { BookOpen, Target, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
 
@@ -31,6 +32,7 @@ const DashboardCard = ({
 const Dashboard = () => {
   const { languageSettings } = useLanguage();
   const { words } = useVocabulary();
+  const { t } = useLocalization();
 
   // Calculate statistics
   const totalWords = words.length;
@@ -52,36 +54,36 @@ const Dashboard = () => {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('nav.dashboard')}</h1>
         <p className="text-muted-foreground">
-          Your {languageSettings.targetLanguage.nativeName} learning progress overview
+          {t('dashboard.learningProgressOverview', { language: languageSettings.targetLanguage.nativeName })}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <DashboardCard
-          title="Total Words"
+          title={t('dashboard.totalWords')}
           value={totalWords.toString()}
-          description={`${languageSettings.targetLanguage.nativeName} vocabulary words`}
+          description={t('dashboard.vocabularyWords', { language: languageSettings.targetLanguage.nativeName })}
           icon={BookOpen}
         />
         <DashboardCard
-          title="Favorite Words"
+          title={t('dashboard.favoriteWords')}
           value={favoriteWords.toString()}
-          description="Words marked as favorite"
+          description={t('dashboard.wordsMarkedFavorite')}
           icon={Target}
         />
         <DashboardCard
-          title="Words Practiced"
+          title={t('dashboard.wordsPracticed')}
           value={wordsWithHistory.toString()}
-          description="Words with learning history"
+          description={t('dashboard.wordsWithHistory')}
           icon={CheckCircle}
         />
         <DashboardCard
-          title="Success Rate"
+          title={t('dashboard.successRate')}
           value={`${averageSuccessRate}%`}
-          description="Average exercise success rate"
+          description={t('dashboard.averageSuccessRate')}
           icon={TrendingUp}
         />
       </div>

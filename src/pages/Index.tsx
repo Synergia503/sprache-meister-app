@@ -49,7 +49,7 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-2">Current Learning Path</h3>
+              <h3 className="font-semibold mb-2">{t('dashboard.currentLearningPath')}</h3>
               <p className="text-sm text-muted-foreground">
                 {languageSettings.nativeLanguage.nativeName} → {languageSettings.targetLanguage.nativeName}
               </p>
@@ -58,9 +58,9 @@ const Index = () => {
           
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-2">Quick Start</h3>
+              <h3 className="font-semibold mb-2">{t('dashboard.quickStart')}</h3>
               <p className="text-sm text-muted-foreground">
-                Use the sidebar to access vocabulary, exercises, and flashcards.
+                {t('dashboard.useSidebarToAccess')}
               </p>
             </CardContent>
           </Card>

@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { LocalizationProvider } from "./contexts/LocalizationContext";
 import { VocabularyProvider } from "./contexts/VocabularyContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -119,21 +120,23 @@ const AppRoutes = () => {
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AuthProvider>
-          <LanguageProvider>
-            <VocabularyProvider>
-              <BrowserRouter>
-                <AppRoutes />
-              </BrowserRouter>
-            </VocabularyProvider>
-          </LanguageProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <LocalizationProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AuthProvider>
+            <LanguageProvider>
+              <VocabularyProvider>
+                <BrowserRouter>
+                  <AppRoutes />
+                </BrowserRouter>
+              </VocabularyProvider>
+            </LanguageProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </LocalizationProvider>
   </ThemeProvider>
 );
 

@@ -26,6 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useVocabulary } from "@/contexts/VocabularyContext";
 import { CustomWord, ExtractedWord, SortOption } from "@/types/vocabulary";
+import { useLocalization } from "@/contexts/LocalizationContext";
 import ExerciseDropZone from "@/components/ExerciseDropZone";
 import PhotoWordExtractor from "@/components/PhotoWordExtractor";
 import { AnkiExport } from "@/components/AnkiExport";
@@ -42,6 +43,7 @@ const Custom = () => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { languageSettings } = useLanguage();
+  const { t } = useLocalization();
   const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -276,14 +278,14 @@ const Custom = () => {
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Custom Vocabulary</h1>
+          <h1 className="text-3xl font-bold">{t('vocabulary.custom')}</h1>
           <p className="text-muted-foreground">
-            Manage your personal vocabulary collection
+            {t('vocabulary.managePersonalCollection')}
           </p>
         </div>
         <Button onClick={() => setShowAddForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Word
+          {t('vocabulary.addWord')}
         </Button>
       </div>
 
@@ -291,37 +293,37 @@ const Custom = () => {
       {showAddForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Add New Word</CardTitle>
+            <CardTitle>{t('vocabulary.addNewWord')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="target-word">
-                  {languageSettings.targetLanguage.nativeName} Word
+                  {t('vocabulary.targetWord', { language: languageSettings.targetLanguage.nativeName })}
                 </Label>
                 <Input
                   id="target-word"
-                  placeholder={`Enter ${languageSettings.targetLanguage.nativeName} word`}
+                  placeholder={t('vocabulary.enterTargetWord', { language: languageSettings.targetLanguage.nativeName })}
                   value={newTargetWord}
                   onChange={(e) => setNewTargetWord(e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="native-word">
-                  {languageSettings.nativeLanguage.nativeName} Translation
+                  {t('vocabulary.nativeWord', { language: languageSettings.nativeLanguage.nativeName })}
                 </Label>
                 <Input
                   id="native-word"
-                  placeholder={`Enter ${languageSettings.nativeLanguage.nativeName} translation`}
+                  placeholder={t('vocabulary.enterNativeWord', { language: languageSettings.nativeLanguage.nativeName })}
                   value={newNativeWord}
                   onChange={(e) => setNewNativeWord(e.target.value)}
                 />
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleAddCustomWord}>Add Word</Button>
+              <Button onClick={handleAddCustomWord}>{t('vocabulary.addWord')}</Button>
               <Button variant="outline" onClick={() => setShowAddForm(false)}>
-                Cancel
+                {t('common.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -333,12 +335,12 @@ const Custom = () => {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <Label htmlFor="search">Search</Label>
+              <Label htmlFor="search">{t('common.search')}</Label>
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Search words..."
+                  placeholder={t('vocabulary.searchWords')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8"
@@ -346,22 +348,22 @@ const Custom = () => {
               </div>
             </div>
             <div>
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t('vocabulary.categories')}</Label>
               <Select
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All categories" />
+                  <SelectValue placeholder={t('vocabulary.allCategories')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
+                  <SelectItem value="all">{t('vocabulary.allCategories')}</SelectItem>
                   {/* Add categories dynamically */}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="sort">Sort by</Label>
+              <Label htmlFor="sort">{t('vocabulary.sortBy')}</Label>
               <Select
                 value={sortOption}
                 onValueChange={(value: SortOption) => setSortOption(value)}
@@ -370,7 +372,7 @@ const Custom = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dateAdded">Date Added</SelectItem>
+                  <SelectItem value="dateAdded">{t('vocabulary.dateAdded')}</SelectItem>
                   <SelectItem value="targetWord">
                     {languageSettings.targetLanguage.nativeName} (A-Z)
                   </SelectItem>
