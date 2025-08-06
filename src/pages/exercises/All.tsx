@@ -20,11 +20,13 @@ import {
 import { useOpenAI } from "@/hooks/useOpenAI";
 import { useNavigate } from "react-router-dom";
 import { useVocabulary } from "@/contexts/VocabularyContext";
+import { useLocalization } from "@/contexts/LocalizationContext";
 
 const All = () => {
   const { isLoading } = useOpenAI();
   const navigate = useNavigate();
   const { getAllCategories, getWordsByCategory } = useVocabulary();
+  const { t } = useLocalization();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const categories = getAllCategories();
@@ -101,7 +103,7 @@ const All = () => {
   return (
     <div className="p-4 sm:p-6">
       <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
-        All Exercises
+        {t('exercises.allExercises')}
       </h1>
 
       <div className="mb-6">
@@ -109,8 +111,7 @@ const All = () => {
           <CardContent className="pt-6">
             <div className="space-y-4">
               <p className="text-muted-foreground">
-                Select a vocabulary category to practice with specific words, or
-                leave empty to use general exercises.
+                {t('exercises.selectCategoryDescription')}
               </p>
 
               <div className="max-w-md">
@@ -119,11 +120,11 @@ const All = () => {
                   onValueChange={setSelectedCategory}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select vocabulary category (optional)" />
+                    <SelectValue placeholder={t('exercises.selectCategoryPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">
-                      No category (general exercise)
+                      {t('exercises.noCategoryGeneral')}
                     </SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
@@ -136,8 +137,10 @@ const All = () => {
 
               {selectedCategory && selectedCategory !== "none" && (
                 <p className="text-sm text-blue-600">
-                  Selected: <strong>{selectedCategory}</strong> (
-                  {getWordsByCategory(selectedCategory).length} words)
+                  {t('exercises.selectedCategory', { 
+                    category: selectedCategory, 
+                    count: getWordsByCategory(selectedCategory).length 
+                  })}
                 </p>
               )}
             </div>
@@ -161,7 +164,7 @@ const All = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  {exercise.description}
+                  {t(`exercises.descriptions.${exercise.id}`)}
                 </p>
                 <Button
                   variant="outline"
@@ -169,7 +172,7 @@ const All = () => {
                   onClick={() => sendToExercise(exercise.path)}
                   disabled={isLoading}
                 >
-                  Start Exercise
+                  {t('exercises.startExercise')}
                 </Button>
               </CardContent>
             </Card>
