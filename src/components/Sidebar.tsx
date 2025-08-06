@@ -96,7 +96,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                         <SidebarMenuButton className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <Book className="h-4 w-4" />
-                            <span>Vocabulary</span>
+                            <span>{t('nav.vocabulary')}</span>
                           </div>
                           {vocabularyOpen ? (
                             <ChevronDown className="h-3 w-3" />
@@ -111,7 +111,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                             <SidebarMenuSubItem key={subItem.path}>
                               <SidebarMenuSubButton asChild>
                                 <Link to={subItem.path}>
-                                  <span>{subItem.title}</span>
+                                  <span>{t(`nav.vocabulary.${subItem.title.toLowerCase()}`)}</span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -128,7 +128,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                         <SidebarMenuButton className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4" />
-                            <span>Exercises</span>
+                            <span>{t('nav.exercises')}</span>
                           </div>
                           {exercisesOpen ? (
                             <ChevronDown className="h-3 w-3" />
@@ -143,7 +143,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                             <SidebarMenuSubItem key={subItem.path}>
                               <SidebarMenuSubButton asChild>
                                 <Link to={subItem.path}>
-                                  <span>{subItem.title}</span>
+                                  <span>{t(`nav.exercises.${subItem.title.toLowerCase().replace(/\s+/g, '')}`)}</span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
