@@ -1,7 +1,15 @@
-import { Language } from './languages';
+import { Language } from "./languages";
 
 export interface ExerciseResult {
-  exerciseType: 'translation' | 'multiple-choice' | 'matching' | 'gap-fill';
+  exerciseType:
+    | "translation"
+    | "multiple-choice"
+    | "matching"
+    | "gap-fill"
+    | "word-definition"
+    | "word-formation"
+    | "opposite-meaning"
+    | "same-meaning";
   success: boolean;
   date: Date;
   timeSpent: number; // in seconds
@@ -27,8 +35,13 @@ export interface ExtractedWord {
   categories?: string[];
 }
 
-export type SortOption = 'dateAdded' | 'targetWord' | 'nativeWord' | 'learningProgress' | 'lastLearning';
-export type SortOrder = 'asc' | 'desc';
+export type SortOption =
+  | "dateAdded"
+  | "targetWord"
+  | "nativeWord"
+  | "learningProgress"
+  | "lastLearning";
+export type SortOrder = "asc" | "desc";
 
 export interface VocabularyFilters {
   category?: string;
