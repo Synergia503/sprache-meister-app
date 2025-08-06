@@ -223,6 +223,7 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'settings.privacy': 'Privacy & Security',
     'settings.interfaceLanguage': 'Interface Language',
     'settings.languageForMenus': 'Language for menus and buttons',
+    'settings.currentInterface': 'Current interface',
     'settings.theme': 'Theme',
     'settings.chooseTheme': 'Choose your preferred theme',
     'settings.light': 'Light',
@@ -256,9 +257,6 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'error.fillBothWords': 'Please fill in both {targetLanguage} and {nativeLanguage} words.',
     'error.noWordsProvided': 'No words provided',
     'error.addAtLeastOneWord': 'Please add at least one word to generate an exercise.',
-
-    // Settings
-    'settings.currentInterface': 'Current interface',
 
     // Welcome page
     'welcome.title': 'Welcome to {language} Learning',
@@ -612,6 +610,7 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'settings.privacy': 'Datenschutz & Sicherheit',
     'settings.interfaceLanguage': 'Oberflächensprache',
     'settings.languageForMenus': 'Sprache für Menüs und Schaltflächen',
+    'settings.currentInterface': 'Aktuelle Oberfläche',
     'settings.theme': 'Design',
     'settings.chooseTheme': 'Wählen Sie Ihr bevorzugtes Design',
     'settings.light': 'Hell',
@@ -645,9 +644,6 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'error.fillBothWords': 'Bitte füllen Sie sowohl {targetLanguage} als auch {nativeLanguage} Wörter aus.',
     'error.noWordsProvided': 'Keine Wörter angegeben',
     'error.addAtLeastOneWord': 'Bitte fügen Sie mindestens ein Wort hinzu, um eine Übung zu generieren.',
-
-    // Settings
-    'settings.currentInterface': 'Aktuelle Oberfläche',
 
     // Welcome page
     'welcome.title': 'Willkommen zum {language} Lernen',
@@ -858,6 +854,9 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'vocabulary.title': 'Vocabulario',
     'exercises.title': 'Ejercicios',
     'settings.title': 'Configuración',
+    'settings.interfaceLanguage': 'Idioma de la interfaz',
+    'settings.languageForMenus': 'Idioma para menús y botones',
+    'settings.currentInterface': 'Interfaz actual',
     'profile.title': 'Configuración del perfil',
   },
 
@@ -885,6 +884,9 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'vocabulary.title': 'Vocabulaire',
     'exercises.title': 'Exercices',
     'settings.title': 'Paramètres',
+    'settings.interfaceLanguage': 'Langue de l\'interface',
+    'settings.languageForMenus': 'Langue pour les menus et boutons',
+    'settings.currentInterface': 'Interface actuelle',
     'profile.title': 'Paramètres du profil',
   },
 
@@ -921,6 +923,9 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'exercises.title': 'Esercizi',
     'exercises.main': 'Esercizi',
     'settings.title': 'Impostazioni',
+    'settings.interfaceLanguage': 'Lingua dell\'interfaccia',
+    'settings.languageForMenus': 'Lingua per menu e pulsanti',
+    'settings.currentInterface': 'Interfaccia attuale',
     'profile.title': 'Impostazioni profilo',
   },
 

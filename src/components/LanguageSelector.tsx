@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeftRight, Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUPPORTED_LANGUAGES } from "@/types/languages";
+import { useLocalization } from "@/contexts/LocalizationContext";
 
 export const LanguageSelector = () => {
   const {
@@ -20,19 +21,20 @@ export const LanguageSelector = () => {
     setNativeLanguage,
     swapLanguages,
   } = useLanguage();
+  const { t } = useLocalization();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Languages className="h-5 w-5" />
-          Language Settings
+          {t('settings.languageSettings')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="native-language">Native Language</Label>
+            <Label htmlFor="native-language">{t('languageSelector.nativeLanguage')}</Label>
             <Select
               value={languageSettings.nativeLanguage.code}
               onValueChange={(value) => {
@@ -43,7 +45,7 @@ export const LanguageSelector = () => {
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select native language" />
+                <SelectValue placeholder={t('languageSelector.selectNativeLanguage')} />
               </SelectTrigger>
               <SelectContent>
                 {SUPPORTED_LANGUAGES.map((language) => (
@@ -56,7 +58,7 @@ export const LanguageSelector = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="target-language">Target Language</Label>
+            <Label htmlFor="target-language">{t('languageSelector.targetLanguage')}</Label>
             <Select
               value={languageSettings.targetLanguage.code}
               onValueChange={(value) => {
@@ -67,7 +69,7 @@ export const LanguageSelector = () => {
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select target language" />
+                <SelectValue placeholder={t('languageSelector.selectTargetLanguage')} />
               </SelectTrigger>
               <SelectContent>
                 {SUPPORTED_LANGUAGES.map((language) => (
@@ -82,16 +84,16 @@ export const LanguageSelector = () => {
 
         <Button variant="outline" onClick={swapLanguages} className="w-full">
           <ArrowLeftRight className="mr-2 h-4 w-4" />
-          Swap Languages
+          {t('languageSelector.swapLanguages')}
         </Button>
 
         <div className="text-sm text-muted-foreground">
           <p>
-            Learning:{" "}
+            {t('languageSelector.learning')}:{" "}
             <strong>{languageSettings.targetLanguage.nativeName}</strong>
           </p>
           <p>
-            From: <strong>{languageSettings.nativeLanguage.nativeName}</strong>
+            {t('languageSelector.from')}: <strong>{languageSettings.nativeLanguage.nativeName}</strong>
           </p>
         </div>
       </CardContent>
