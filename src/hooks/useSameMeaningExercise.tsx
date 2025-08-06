@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOpenAI } from '@/hooks/useOpenAI';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { vocabularyExerciseService } from '@/services/vocabularyExerciseService';
 import { BaseExercise } from '@/types/exercises';
 
