@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Facebook, Linkedin, Twitter } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocalization } from '@/contexts/LocalizationContext';
 import { loginSchema, checkRateLimit, sanitizeInput } from '@/lib/validation';
 import type { z } from 'zod';
 
@@ -20,6 +21,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { login } = useAuth();
+  const { t } = useLocalization();
 
   const {
     register,

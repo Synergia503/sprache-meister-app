@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLocalization } from "@/contexts/LocalizationContext";
 import { LogOut } from "lucide-react";
 
 const Index = () => {
   const { user, logout } = useAuth();
   const { languageSettings } = useLanguage();
+  const { t } = useLocalization();
 
   const handleLogout = () => {
     logout();
