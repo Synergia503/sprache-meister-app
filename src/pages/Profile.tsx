@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocalization } from '@/contexts/LocalizationContext';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +57,7 @@ import {
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLocalization();
   
   // Form states
   const [personalInfo, setPersonalInfo] = useState({
@@ -289,7 +291,7 @@ const Profile = () => {
     <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-4 sm:mb-6">
         <User className="h-6 sm:h-8 w-6 sm:w-8" />
-        <h1 className="text-2xl sm:text-3xl font-bold">Profile Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t('profile.title')}</h1>
       </div>
 
       {/* Profile Picture */}
@@ -297,7 +299,7 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Profile Picture
+            {t('profile.profilePicture')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -320,7 +322,7 @@ const Profile = () => {
             </div>
             <div>
               <p className="font-medium">{personalInfo.firstName} {personalInfo.lastName}</p>
-              <p className="text-sm text-muted-foreground">Click the camera icon to change your picture</p>
+              <p className="text-sm text-muted-foreground">{t('profile.clickCameraToChange')}</p>
             </div>
           </div>
         </CardContent>
@@ -331,13 +333,13 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Personal Information
+            {t('profile.personalInformation')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstName">{t('profile.firstName')}</Label>
               <Input
                 id="firstName"
                 value={personalInfo.firstName}
@@ -345,7 +347,7 @@ const Profile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastName">{t('profile.lastName')}</Label>
               <Input
                 id="lastName"
                 value={personalInfo.lastName}
@@ -353,7 +355,7 @@ const Profile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('profile.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -362,7 +364,7 @@ const Profile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">{t('profile.phone')}</Label>
               <Input
                 id="phone"
                 value={personalInfo.phone}
@@ -371,7 +373,7 @@ const Profile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">{t('profile.location')}</Label>
               <Input
                 id="location"
                 value={personalInfo.location}
@@ -380,7 +382,7 @@ const Profile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <Label htmlFor="dateOfBirth">{t('profile.dateOfBirth')}</Label>
               <Input
                 id="dateOfBirth"
                 type="date"
@@ -390,7 +392,7 @@ const Profile = () => {
             </div>
           </div>
           <Button onClick={handleSavePersonalInfo} className="w-full sm:w-auto">
-            Save Changes
+            {t('profile.saveChanges')}
           </Button>
         </CardContent>
       </Card>
@@ -400,14 +402,14 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5" />
-            Privacy Settings
+            {t('profile.privacySettings')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Profile Visibility</Label>
-              <p className="text-sm text-muted-foreground">Who can see your profile</p>
+              <Label>{t('profile.profileVisibility')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.whoCanSeeProfile')}</p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -430,8 +432,8 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Show Learning Progress</Label>
-              <p className="text-sm text-muted-foreground">Display your progress publicly</p>
+              <Label>{t('profile.showLearningProgress')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.displayProgressPublicly')}</p>
             </div>
             <Switch
               checked={privacySettings.showProgress}
@@ -440,8 +442,8 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Show Achievements</Label>
-              <p className="text-sm text-muted-foreground">Display your badges and achievements</p>
+              <Label>{t('profile.showAchievements')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.displayBadgesAchievements')}</p>
             </div>
             <Switch
               checked={privacySettings.showAchievements}
@@ -450,8 +452,8 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Allow Messages</Label>
-              <p className="text-sm text-muted-foreground">Let other users send you messages</p>
+              <Label>{t('profile.allowMessages')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.letUsersMessage')}</p>
             </div>
             <Switch
               checked={privacySettings.allowMessages}
@@ -466,14 +468,14 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
-            Interface & Theme
+            {t('profile.interfaceTheme')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Interface Language</Label>
-              <p className="text-sm text-muted-foreground">Language for menus and buttons</p>
+              <Label>{t('profile.interfaceLanguage')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.languageForMenus')}</p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -496,8 +498,8 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Theme Preference</Label>
-              <p className="text-sm text-muted-foreground">Choose your preferred appearance</p>
+              <Label>{t('profile.themePreference')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.chooseAppearance')}</p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -526,13 +528,13 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
-            Learning Goals
+            {t('profile.learningGoals')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Daily Study Minutes</Label>
+              <Label>{t('profile.dailyStudyMinutes')}</Label>
               <Input
                 type="number"
                 value={learningGoals.dailyMinutes}
@@ -542,7 +544,7 @@ const Profile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Weekly Sessions Goal</Label>
+              <Label>{t('profile.weeklySessionsGoal')}</Label>
               <Input
                 type="number"
                 value={learningGoals.weeklyGoal}
@@ -553,7 +555,7 @@ const Profile = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Target Level</Label>
+            <Label>{t('profile.targetLevel')}</Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-full">
@@ -574,7 +576,7 @@ const Profile = () => {
             </DropdownMenu>
           </div>
           <div className="space-y-2">
-            <Label>Focus Areas</Label>
+            <Label>{t('profile.focusAreas')}</Label>
             <div className="flex flex-wrap gap-2">
               {['vocabulary', 'grammar', 'listening', 'speaking', 'reading', 'writing'].map((area) => (
                 <Badge
@@ -594,10 +596,10 @@ const Profile = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Current Progress</Label>
+            <Label>{t('profile.currentProgress')}</Label>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Daily Goal Progress</span>
+                <span>{t('profile.dailyGoalProgress')}</span>
                 <span>23/30 minutes</span>
               </div>
               <Progress value={77} className="h-2" />
@@ -611,14 +613,14 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
-            Achievement Settings
+            {t('profile.achievementSettings')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Show Achievement Badges</Label>
-              <p className="text-sm text-muted-foreground">Display badges on your profile</p>
+              <Label>{t('profile.showAchievementBadges')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.displayBadgesOnProfile')}</p>
             </div>
             <Switch
               checked={achievementSettings.showBadges}
@@ -627,8 +629,8 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Share Achievements</Label>
-              <p className="text-sm text-muted-foreground">Automatically share new achievements</p>
+              <Label>{t('profile.shareAchievements')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.autoShareAchievements')}</p>
             </div>
             <Switch
               checked={achievementSettings.shareAchievements}
@@ -637,8 +639,8 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Celebrate Streaks</Label>
-              <p className="text-sm text-muted-foreground">Show celebrations for learning streaks</p>
+              <Label>{t('profile.celebrateStreaks')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.showCelebrationsForStreaks')}</p>
             </div>
             <Switch
               checked={achievementSettings.celebrateStreaks}
@@ -667,12 +669,12 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Lock className="h-5 w-5" />
-            Password & Security
+            {t('profile.passwordSecurity')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">Current Password</Label>
+            <Label htmlFor="currentPassword">{t('profile.currentPassword')}</Label>
             <Input
               id="currentPassword"
               type="password"
@@ -682,7 +684,7 @@ const Profile = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+            <Label htmlFor="newPassword">{t('profile.newPassword')}</Label>
             <Input
               id="newPassword"
               type="password"
@@ -692,7 +694,7 @@ const Profile = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Label htmlFor="confirmPassword">{t('profile.confirmNewPassword')}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -702,7 +704,7 @@ const Profile = () => {
             />
           </div>
           <Button onClick={handleChangePassword} className="w-full md:w-auto">
-            Change Password
+            {t('profile.changePassword')}
           </Button>
         </CardContent>
       </Card>
@@ -712,15 +714,15 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Two-Factor Authentication
+            {t('profile.twoFactorAuth')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Enable Two-Factor Authentication</Label>
+              <Label>{t('profile.enableTwoFactor')}</Label>
               <p className="text-sm text-muted-foreground">
-                Add an extra layer of security to your account
+                {t('profile.extraSecurityLayer')}
               </p>
             </div>
             <Switch
@@ -731,10 +733,10 @@ const Profile = () => {
           {twoFactorEnabled && (
             <div className="p-4 border rounded-lg bg-muted/50">
               <p className="text-sm">
-                Two-factor authentication is enabled. You'll need to enter a verification code when signing in.
+                {t('profile.twoFactorEnabled')}
               </p>
               <Button variant="outline" size="sm" className="mt-2">
-                View Recovery Codes
+                {t('profile.viewRecoveryCodes')}
               </Button>
             </div>
           )}
@@ -746,7 +748,7 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Smartphone className="h-5 w-5" />
-            Active Sessions
+            {t('profile.activeSessions')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -773,7 +775,7 @@ const Profile = () => {
                     className="flex items-center gap-1"
                   >
                     <LogOut className="h-3 w-3" />
-                    End Session
+                    {t('profile.endSession')}
                   </Button>
                 )}
               </div>
@@ -787,14 +789,14 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Cloud className="h-5 w-5" />
-            Backup & Sync
+            {t('profile.backupSync')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Automatic Backup</Label>
-              <p className="text-sm text-muted-foreground">Automatically backup your progress</p>
+              <Label>{t('profile.automaticBackup')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.autoBackupProgress')}</p>
             </div>
             <Switch
               checked={backupSettings.autoBackup}
@@ -803,8 +805,8 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Cloud Sync</Label>
-              <p className="text-sm text-muted-foreground">Sync data across all devices</p>
+              <Label>{t('profile.cloudSync')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.syncDataAcrossDevices')}</p>
             </div>
             <Switch
               checked={backupSettings.cloudSync}
@@ -813,18 +815,18 @@ const Profile = () => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label>Manual Backup</Label>
-              <p className="text-sm text-muted-foreground">Create a backup now</p>
+              <Label>{t('profile.manualBackup')}</Label>
+              <p className="text-sm text-muted-foreground">{t('profile.createBackupNow')}</p>
             </div>
             <Button variant="outline" onClick={handleBackupNow} className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
-              Backup Now
+              {t('profile.backupNow')}
             </Button>
           </div>
           <div className="p-3 border rounded-lg bg-muted/50">
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4" />
-              <span>Last backup: 2 hours ago</span>
+              <span>{t('profile.lastBackup', { time: '2 hours ago' })}</span>
             </div>
           </div>
         </CardContent>
@@ -835,7 +837,7 @@ const Profile = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            Learning History
+            {t('profile.learningHistory')}
           </CardTitle>
         </CardHeader>
         <CardContent>

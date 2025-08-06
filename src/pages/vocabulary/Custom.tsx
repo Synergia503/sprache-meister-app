@@ -280,7 +280,7 @@ const Custom = () => {
         <div>
           <h1 className="text-3xl font-bold">{t('vocabulary.custom')}</h1>
           <p className="text-muted-foreground">
-            {t('vocabulary.managePersonalCollection')}
+            {t('vocabulary.manageCollection')}
           </p>
         </div>
         <Button onClick={() => setShowAddForm(true)}>

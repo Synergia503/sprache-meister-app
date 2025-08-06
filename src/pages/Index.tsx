@@ -21,7 +21,7 @@ const Index = () => {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <span className="text-left sm:text-center">Welcome, {user?.firstName}!</span>
+              <span className="text-left sm:text-center">{t('dashboard.welcomeUser', { name: user?.firstName || '' })}</span>
               <Button 
                 variant="outline" 
                 size="sm"
@@ -29,29 +29,28 @@ const Index = () => {
                 className="flex items-center gap-2 w-full sm:w-auto"
               >
                 <LogOut className="h-4 w-4" />
-                Logout
+                {t('welcome.logout')}
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-left sm:text-center">
-              Logged in as: {user?.email}
+              {t('welcome.loggedInAs')}: {user?.email}
             </p>
           </CardContent>
         </Card>
 
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-          Welcome to {languageSettings.targetLanguage.nativeName} Learning
+          {t('welcome.title', { language: languageSettings.targetLanguage.nativeName })}
         </h1>
         <p className="text-lg sm:text-xl text-muted-foreground">
-          Start your journey to master the {languageSettings.targetLanguage.nativeName} language with our comprehensive learning tools.
-          Navigate through different sections using the sidebar menu.
+          {t('welcome.subtitle', { language: languageSettings.targetLanguage.nativeName })} {t('welcome.navigation')}
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-2">{t('dashboard.currentLearningPath')}</h3>
+              <h3 className="font-semibold mb-2">{t('welcome.currentPath')}</h3>
               <p className="text-sm text-muted-foreground">
                 {languageSettings.nativeLanguage.nativeName} → {languageSettings.targetLanguage.nativeName}
               </p>
@@ -60,9 +59,9 @@ const Index = () => {
           
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-2">{t('dashboard.quickStart')}</h3>
+              <h3 className="font-semibold mb-2">{t('welcome.quickStart')}</h3>
               <p className="text-sm text-muted-foreground">
-                {t('dashboard.useSidebarToAccess')}
+                {t('welcome.sidebarAccess')}
               </p>
             </CardContent>
           </Card>

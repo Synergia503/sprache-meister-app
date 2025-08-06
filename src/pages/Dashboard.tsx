@@ -92,19 +92,19 @@ const Dashboard = () => {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Learning Progress</CardTitle>
+            <CardTitle>{t('dashboard.learningProgress')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-2">
-                <span>Vocabulary Mastery</span>
+                <span>{t('dashboard.vocabularyMastery')}</span>
                 <span>{Math.round((wordsWithHistory / Math.max(totalWords, 1)) * 100)}%</span>
               </div>
               <Progress value={(wordsWithHistory / Math.max(totalWords, 1)) * 100} />
             </div>
             <div>
               <div className="flex justify-between text-sm mb-2">
-                <span>Exercise Completion</span>
+                <span>{t('dashboard.exerciseCompletion')}</span>
                 <span>{averageSuccessRate}%</span>
               </div>
               <Progress value={averageSuccessRate} />
@@ -114,7 +114,7 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>{t('dashboard.recentActivity')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -124,7 +124,7 @@ const Dashboard = () => {
                     <div>
                       <div className="font-medium">{word.targetWord}</div>
                       <div className="text-sm text-muted-foreground">
-                        {word.learningHistory.length} exercises completed
+                        {t('dashboard.exercisesCompleted', { count: word.learningHistory.length })}
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground">
@@ -134,7 +134,7 @@ const Dashboard = () => {
                 ))
               ) : (
                 <div className="text-center text-muted-foreground py-4">
-                  No recent activity
+                  {t('dashboard.noRecentActivity')}
                 </div>
               )}
             </div>
@@ -145,24 +145,24 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle>{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="text-center p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer">
               <BookOpen className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="font-medium">Add New Words</div>
-              <div className="text-sm text-muted-foreground">Expand your vocabulary</div>
+              <div className="font-medium">{t('dashboard.addNewWords')}</div>
+              <div className="text-sm text-muted-foreground">{t('dashboard.expandVocabulary')}</div>
             </div>
             <div className="text-center p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer">
               <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="font-medium">Start Exercise</div>
-              <div className="text-sm text-muted-foreground">Practice what you've learned</div>
+              <div className="font-medium">{t('dashboard.startExercise')}</div>
+              <div className="text-sm text-muted-foreground">{t('dashboard.practiceWhatLearned')}</div>
             </div>
             <div className="text-center p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer">
               <TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="font-medium">View Progress</div>
-              <div className="text-sm text-muted-foreground">Track your improvement</div>
+              <div className="font-medium">{t('dashboard.viewProgress')}</div>
+              <div className="text-sm text-muted-foreground">{t('dashboard.trackImprovement')}</div>
             </div>
           </div>
         </CardContent>

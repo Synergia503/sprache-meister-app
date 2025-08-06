@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Image, Loader2, X } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
+import { useLocalization } from '@/contexts/LocalizationContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ExtractedWord {
   targetWord: string;
@@ -16,6 +18,8 @@ interface PhotoWordExtractorProps {
 }
 
 const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
+  const { t } = useLocalization();
+  const { languageSettings } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -66,16 +70,19 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
     setIsAnalyzing(false);
     
     toast({
-      title: "Analysis complete!",
-      description: `Extracted ${selectedWords.length} target language words with suggested categories.`,
+      title: t('vocabulary.analysisComplete'),
+      description: t('vocabulary.extractedWordsCount', { 
+        count: selectedWords.length, 
+        language: languageSettings.targetLanguage.nativeName 
+      }),
     });
   };
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please select an image file.",
+        title: t('vocabulary.invalidFileType'),
+        description: t('vocabulary.selectImageFile'),
         variant: "destructive",
       });
       return;
@@ -153,7 +160,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
     
     onWordsExtracted(wordsWithSelectedCategories);
     toast({
-      title: "Words added!",
+      title: t('toast.wordAdded'),
       description: `${extractedWords.length} words have been added to your custom vocabulary.`,
     });
   };
@@ -163,7 +170,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Image className="h-5 w-5" />
-          Extract Words from Photo
+          {t('vocabulary.extractWordsFromPhoto')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -181,8 +188,8 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
                 <Upload className="h-12 w-12 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-lg font-medium">Drop your image here</p>
-                <p className="text-muted-foreground">or choose from the options below</p>
+                <p className="text-lg font-medium">{t('vocabulary.dropImageHere')}</p>
+                <p className="text-muted-foreground">{t('vocabulary.chooseFromOptions')}</p>
               </div>
               <div className="flex flex-wrap gap-2 justify-center">
                 <Button
@@ -190,14 +197,14 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
                   onClick={() => document.getElementById('file-input')?.click()}
                 >
                   <Upload className="mr-2 h-4 w-4" />
-                  Choose File
+                  {t('vocabulary.chooseFile')}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => document.getElementById('camera-input')?.click()}
                 >
                   <Camera className="mr-2 h-4 w-4" />
-                  Take Photo
+                  {t('vocabulary.takePhoto')}
                 </Button>
               </div>
             </div>
@@ -229,10 +236,10 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
                 {isAnalyzing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing Image...
+                    {t('vocabulary.analyzingImage')}
                   </>
                 ) : (
-                  'Analyze Image'
+                  t('vocabulary.analyzeImage')
                 )}
               </Button>
             </div>
@@ -242,7 +249,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
         {extractedWords.length > 0 && (
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium mb-3">Extracted target language Words with Suggested Categories:</h3>
+              <h3 className="font-medium mb-3">{t('vocabulary.extractedWords', { language: languageSettings.targetLanguage.nativeName })}:</h3>
               <div className="grid gap-4">
                 {extractedWords.map((word, index) => (
                   <div key={index} className="p-3 bg-background rounded border space-y-2">
@@ -253,7 +260,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
                     
                     {word.categories && word.categories.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Suggested categories:</p>
+                        <p className="text-sm text-muted-foreground">{t('vocabulary.suggestedCategories')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {word.categories.map((category, catIndex) => (
                             <Button
@@ -268,7 +275,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
                           ))}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Click to select/deselect categories for this word
+                          {t('vocabulary.clickToSelectCategories')}
                         </p>
                       </div>
                     )}
@@ -278,7 +285,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
             </div>
             
             <Button onClick={addWordsToVocabulary} className="w-full">
-              Add Selected Words with Categories to Vocabulary
+              {t('vocabulary.addSelectedWords')}
             </Button>
           </div>
         )}
