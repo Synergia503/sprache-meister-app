@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
+import { useLocalization } from "@/contexts/LocalizationContext";
 
 interface WordInputFormProps {
   onGenerateExercise: (words: string[]) => void;
@@ -24,6 +25,8 @@ export const WordInputForm = ({
   description = "Add up to 20 German words or phrases.",
   placeholder = "Word"
 }: WordInputFormProps) => {
+  const { t } = useLocalization();
+
   // Check for words from session storage first
   const getInitialWords = () => {
     // No longer using session storage, just return initial words
@@ -58,18 +61,18 @@ export const WordInputForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{defaultTitle}</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {defaultDescription}
+            {description}
           </p>
           
           {words.map((word, index) => (
             <div key={index} className="flex flex-col sm:flex-row gap-2">
               <Input
-                placeholder={`${defaultPlaceholder} ${index + 1}`}
+                placeholder={`${placeholder} ${index + 1}`}
                 value={word}
                 onChange={(e) => updateWord(index, e.target.value)}
                 className="flex-1 min-w-0"

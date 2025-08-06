@@ -104,12 +104,12 @@ export const VocabularySelector = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{defaultTitle}</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {defaultDescription}
+            {description}
           </p>
           
           <div className="space-y-3">
