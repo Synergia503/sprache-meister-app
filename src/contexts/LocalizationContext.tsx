@@ -417,7 +417,7 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'nav.vocabulary.custom': 'Benutzerdefiniert',
     'nav.exercises': 'Übungen',
     'nav.exercises.all': 'Alle',
-    'nav.exercises.gapFill': 'Lückentext',
+    'nav.exercises.gapfill': 'Lückentext',
     'nav.exercises.multipleChoice': 'Multiple Choice',
     'nav.exercises.translation': 'Übersetzung',
     'nav.exercises.matching': 'Zuordnung',
