@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 import { BaseExercise } from '@/types/exercises';
 import { GapFillExercise } from '@/types/gapFill';
 import { generateExercisePDF } from '@/utils/pdfGenerator';
+import { useLocalization } from '@/contexts/LocalizationContext';
 
 interface ExerciseHeaderProps {
   title: string;
@@ -13,6 +14,7 @@ interface ExerciseHeaderProps {
 }
 
 export const ExerciseHeader = ({ title, exercise }: ExerciseHeaderProps) => {
+  const { t } = useLocalization();
   const [isGenerating, setIsGenerating] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
