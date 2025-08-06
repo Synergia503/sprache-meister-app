@@ -919,7 +919,6 @@ const translations: Record<SupportedLocale, Record<string, string>> = {
     'dashboard.welcome': 'Benvenuto all\'apprendimento del {language}',
     'vocabulary.title': 'Vocabolario',
     'exercises.title': 'Esercizi',
-    'exercises.main': 'Esercizi',
     'settings.title': 'Impostazioni',
     'profile.title': 'Impostazioni profilo',
   },
