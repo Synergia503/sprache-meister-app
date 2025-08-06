@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BaseExercise } from "@/types/exercises";
+import { useLocalization } from "@/contexts/LocalizationContext";
 
 interface PreviousExercisesProps {
   exercises: BaseExercise[];
@@ -9,6 +10,8 @@ interface PreviousExercisesProps {
 }
 
 export const PreviousExercises = ({ exercises, onLoadExercise }: PreviousExercisesProps) => {
+  const { t } = useLocalization();
+
   if (exercises.length === 0) return null;
 
   return (
