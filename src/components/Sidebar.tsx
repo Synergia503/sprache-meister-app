@@ -128,7 +128,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                         <SidebarMenuButton className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4" />
-                            <span>{t('nav.exercises')}</span>
+                            <span>{t('nav.exercises.main')}</span>
                           </div>
                           {exercisesOpen ? (
                             <ChevronDown className="h-3 w-3" />
@@ -143,7 +143,7 @@ export function MainSidebar({ children }: MainSidebarProps) {
                             <SidebarMenuSubItem key={subItem.path}>
                               <SidebarMenuSubButton asChild>
                                 <Link to={subItem.path}>
-                                  <span>{t(`nav.exercises.${subItem.title.toLowerCase().replace(/\s+/g, '')}`)}</span>
+                                  <span>{t(`nav.exercises.${subItem.title.toLowerCase().replace(/\s+/g, '').replace('-', '')}`)}</span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
