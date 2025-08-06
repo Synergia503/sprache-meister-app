@@ -79,15 +79,15 @@ const Matching = () => {
             exercise={currentExercise}
             userMatches={userMatches}
             showResults={showResults}
-            shuffledEnglish={shuffledEnglish}
-            selectedGerman={selectedGerman}
-            selectedEnglish={selectedEnglish}
+            shuffledNative={shuffledEnglish}
+            selectedTarget={selectedGerman}
+            selectedNative={selectedEnglish}
             onMatch={onMatch}
             onCheckAnswers={onCheckAnswers}
             onShuffle={onShuffle}
             onNewExercise={onNewExercise}
-            onSelectGerman={onSelectGerman}
-            onSelectEnglish={onSelectEnglish}
+            onSelectTarget={onSelectGerman}
+            onSelectNative={onSelectEnglish}
             getMatchingResult={getMatchingResult}
           />
         )}
