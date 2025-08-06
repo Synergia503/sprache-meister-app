@@ -75,34 +75,34 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
   };
 
   return (
-    <Card className="border-2 border-dashed border-muted-foreground/25 bg-muted/10">
+    <Card className="border-2 border-dashed border-muted-foreground/25 bg-muted/10 mx-2 sm:mx-0">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 text-lg sm:text-xl">
           <div className="flex items-center gap-2">
             <Target className="h-5 w-5" />
             Exercise Preparation
-            {isMobile && <Smartphone className="h-4 w-4 text-muted-foreground" />}
+            {isMobile && <Smartphone className="h-4 w-4 text-muted-foreground ml-1" />}
           </div>
           {droppedWords.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={onClearAll}>
+            <Button variant="ghost" onClick={onClearAll} className="w-full sm:w-auto min-h-[48px]">
               Clear All
             </Button>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className={`min-h-20 p-3 sm:p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg ${
+      <CardContent className="space-y-3 sm:space-y-4">
+        <div className={`min-h-[80px] sm:min-h-20 p-3 sm:p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg ${
           isMobile ? 'touch-none' : ''
         }`}>
           {droppedWords.length === 0 ? (
-            <div className="text-center">
-              <p className="text-muted-foreground text-sm sm:text-base">
+            <div className="text-center py-4">
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                 {isMobile 
                   ? "Use buttons above to add words" 
                   : "Drag words here to create an exercise"
                 }
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                 {isMobile 
                   ? "Hold words for 2s to select multiple"
                   : "Select multiple words with Ctrl+Click"
@@ -115,20 +115,20 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
                 <Badge
                   key={word.id}
                   variant="secondary"
-                  className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10 text-xs sm:text-sm"
+                  className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10 text-xs sm:text-sm p-2 touch-manipulation"
                   onClick={() => onRemoveWord(word.id)}
                 >
-                  {word.targetWord} - {word.nativeWord}
-                  <X className="h-3 w-3" />
+                  <span className="break-words">{word.targetWord} - {word.nativeWord}</span>
+                  <X className="h-3 w-3 ml-1 flex-shrink-0" />
                 </Badge>
               ))}
             </div>
           )}
         </div>
 
-        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3`}>
+        <div className="flex flex-col sm:flex-row gap-3">
           <Select value={selectedExercise} onValueChange={setSelectedExercise}>
-            <SelectTrigger className="flex-1 min-w-0">
+            <SelectTrigger className="flex-1 min-w-0 min-h-[48px]">
               <SelectValue placeholder="Choose exercise type" />
             </SelectTrigger>
             <SelectContent>
@@ -143,10 +143,10 @@ const ExerciseDropZone: React.FC<ExerciseDropZoneProps> = ({
           <Button 
             onClick={handleStartExercise}
             disabled={!selectedExercise || droppedWords.length === 0 || isLoading}
-            className={`flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}
+            className="flex items-center gap-2 w-full sm:w-auto min-h-[48px]"
           >
             <Play className="h-4 w-4" />
-            {isMobile ? 'Start Exercise' : 'Start'}
+            Start Exercise
           </Button>
         </div>
       </CardContent>

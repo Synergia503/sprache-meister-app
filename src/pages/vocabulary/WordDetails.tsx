@@ -111,47 +111,49 @@ const WordDetails = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
         <Button
           variant="outline"
           onClick={() => navigate("/vocabulary/custom")}
+          className="w-full sm:w-auto min-h-[48px]"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Vocabulary
         </Button>
-        <div className="flex-1" />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => toggleFavorite(word.id)}
-        >
-          <Heart
-            className={`h-5 w-5 ${
-              word.isFavorite
-                ? "text-red-500 fill-current"
-                : "text-muted-foreground"
-            }`}
-          />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          {isEditing ? <X className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
+          <Button
+            variant="ghost"
+            onClick={() => toggleFavorite(word.id)}
+            className="flex-1 sm:flex-none min-h-[48px] px-3"
+          >
+            <Heart
+              className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                word.isFavorite
+                  ? "text-red-500 fill-current"
+                  : "text-muted-foreground"
+              }`}
+            />
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => setIsEditing(!isEditing)}
+            className="flex-1 sm:flex-none min-h-[48px] px-3"
+          >
+            {isEditing ? <X className="h-4 w-4 sm:h-5 sm:w-5" /> : <Edit className="h-4 w-4 sm:h-5 sm:w-5" />}
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4 sm:gap-6">
         {/* Word Information */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-xl sm:text-2xl">
               {isEditing ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
                   <div>
-                    <Label htmlFor="target-word">
+                    <Label htmlFor="target-word" className="text-sm font-medium">
                       {languageSettings.targetLanguage.nativeName} Word
                     </Label>
                     <Input
@@ -163,10 +165,11 @@ const WordDetails = () => {
                           targetWord: e.target.value,
                         }))
                       }
+                      className="min-h-[48px]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="native-word">
+                    <Label htmlFor="native-word" className="text-sm font-medium">
                       {languageSettings.nativeLanguage.nativeName} Translation
                     </Label>
                     <Input
@@ -178,27 +181,28 @@ const WordDetails = () => {
                           nativeWord: e.target.value,
                         }))
                       }
+                      className="min-h-[48px]"
                     />
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                   <span className="font-bold text-primary">
                     {word.targetWord}
                   </span>
-                  <span className="text-muted-foreground">—</span>
-                  <span>{word.nativeWord}</span>
+                  <span className="text-muted-foreground hidden sm:inline">—</span>
+                  <span className="break-words">{word.nativeWord}</span>
                 </div>
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             {/* Categories */}
             <div>
-              <Label>Categories</Label>
+              <Label className="text-sm font-medium">Categories</Label>
               {isEditing ? (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Input
                       placeholder="Add category"
                       value={newCategory}
@@ -206,10 +210,12 @@ const WordDetails = () => {
                       onKeyPress={(e) =>
                         e.key === "Enter" && handleAddCategory()
                       }
+                      className="min-h-[48px] flex-1"
                     />
                     <Button
                       onClick={handleAddCategory}
                       disabled={!newCategory.trim()}
+                      className="w-full sm:w-auto min-h-[48px]"
                     >
                       Add
                     </Button>
@@ -224,8 +230,7 @@ const WordDetails = () => {
                         {category}
                         <Button
                           variant="ghost"
-                          size="icon"
-                          className="h-4 w-4 p-0"
+                          className="h-4 w-4 p-0 min-h-0"
                           onClick={() => handleRemoveCategory(category)}
                         >
                           <X className="h-3 w-3" />
@@ -247,7 +252,7 @@ const WordDetails = () => {
 
             {/* Sample Sentence */}
             <div>
-              <Label htmlFor="sample-sentence">Sample Sentence</Label>
+              <Label htmlFor="sample-sentence" className="text-sm font-medium">Sample Sentence</Label>
               {isEditing ? (
                 <Textarea
                   id="sample-sentence"
@@ -260,18 +265,19 @@ const WordDetails = () => {
                     }))
                   }
                   rows={3}
+                  className="min-h-[48px]"
                 />
               ) : (
-                <p className="text-muted-foreground">
+                <p className="text-sm sm:text-base text-muted-foreground break-words">
                   {word.sampleSentence || "No sample sentence provided"}
                 </p>
               )}
             </div>
 
             {isEditing && (
-              <div className="flex gap-2">
-                <Button onClick={handleSave}>Save Changes</Button>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={handleSave} className="w-full sm:w-auto min-h-[48px]">Save Changes</Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)} className="w-full sm:w-auto min-h-[48px]">
                   Cancel
                 </Button>
               </div>
@@ -282,39 +288,39 @@ const WordDetails = () => {
         {/* Learning Statistics */}
         <Card>
           <CardHeader>
-            <CardTitle>Learning Statistics</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Learning Statistics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="text-center p-2 sm:p-3">
+                <div className="text-xl sm:text-2xl font-bold text-primary">
                   {calculateSuccessRate()}%
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Success Rate
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">
+              <div className="text-center p-2 sm:p-3">
+                <div className="text-xl sm:text-2xl font-bold">
                   {word.learningHistory.length}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Exercises Completed
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">
+              <div className="text-center p-2 sm:p-3">
+                <div className="text-xl sm:text-2xl font-bold">
                   {word.learningHistory.filter((h) => h.success).length}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Correct Answers
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">
+              <div className="text-center p-2 sm:p-3">
+                <div className="text-xl sm:text-2xl font-bold">
                   {word.lastLearningDate ? "Yes" : "No"}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Recently Practiced
                 </div>
               </div>
@@ -326,33 +332,34 @@ const WordDetails = () => {
         {word.learningHistory.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Learning History</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">Learning History</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 {word.learningHistory
                   .slice(-5)
                   .reverse()
                   .map((result, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center p-2 border rounded"
+                      className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 border rounded gap-2 sm:gap-0"
                     >
                       <div>
-                        <div className="font-medium capitalize">
+                        <div className="font-medium capitalize text-sm sm:text-base">
                           {result.exerciseType.replace("-", " ")}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                           {result.date.toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
                         <Badge
                           variant={result.success ? "default" : "destructive"}
+                          className="text-xs"
                         >
                           {result.success ? "Correct" : "Incorrect"}
                         </Badge>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs sm:text-sm text-muted-foreground">
                           {result.timeSpent}s
                         </span>
                       </div>

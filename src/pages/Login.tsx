@@ -108,27 +108,28 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-6">
-      <Card className="w-full max-w-md mx-auto">
+    <div className="min-h-screen flex items-center justify-center bg-background p-3 sm:p-4 lg:p-6">
+      <Card className="w-full max-w-md mx-auto shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t('auth.welcomeBack')}</CardTitle>
-          <p className="text-muted-foreground">{t('auth.signInToAccount')}</p>
-          <div className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
+          <CardTitle className="text-xl sm:text-2xl font-bold">{t('auth.welcomeBack')}</CardTitle>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('auth.signInToAccount')}</p>
+          <div className="text-xs sm:text-sm text-muted-foreground mt-2 p-3 bg-muted rounded">
             <strong>{t('auth.demoCredentials')}:</strong><br />
             {t('auth.email')}: demo@german-learning.com<br />
             {t('auth.password')}: Demo123!
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.email')}</Label>
+              <Label htmlFor="email" className="text-sm font-medium">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder={t('auth.enterEmail')}
                 {...register('email')}
                 autoComplete="email"
+                className="min-h-[48px] text-base"
                 aria-invalid={errors.email ? 'true' : 'false'}
               />
               {errors.email && (
@@ -139,13 +140,14 @@ const Login = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Label htmlFor="password" className="text-sm font-medium">{t('auth.password')}</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder={t('auth.enterPassword')}
                 {...register('password')}
                 autoComplete="current-password"
+                className="min-h-[48px] text-base"
                 aria-invalid={errors.password ? 'true' : 'false'}
               />
               {errors.password && (
@@ -155,27 +157,26 @@ const Login = () => {
               )}
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={(checked) => setValue('rememberMe', checked as boolean)}
                 />
-                <Label htmlFor="remember" className="text-sm">Remember me</Label>
                 <Label htmlFor="remember" className="text-sm">{t('auth.rememberMe')}</Label>
               </div>
               <Button
                 type="button"
                 variant="link"
-                className="p-0 h-auto text-sm"
+                className="p-0 h-auto text-sm self-start sm:self-auto"
                 onClick={handleForgotPassword}
               >
                 {t('auth.forgotPassword')}
               </Button>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full min-h-[48px] text-base font-medium" disabled={isLoading}>
               {isLoading ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
           </form>
@@ -184,19 +185,19 @@ const Login = () => {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
+            <div className="relative flex justify-center text-xs sm:text-sm uppercase">
               <span className="bg-background px-2 text-muted-foreground">
                 Or continue with
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={() => handleSocialLogin('Google')}
-              className="w-full"
+              className="w-full min-h-[48px] text-sm sm:text-base"
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
@@ -223,7 +224,7 @@ const Login = () => {
               type="button"
               variant="outline"
               onClick={() => handleSocialLogin('Facebook')}
-              className="w-full"
+              className="w-full min-h-[48px] text-sm sm:text-base"
             >
               <Facebook className="mr-2 h-4 w-4" />
               Facebook
@@ -233,7 +234,7 @@ const Login = () => {
               type="button"
               variant="outline"
               onClick={() => handleSocialLogin('Twitter')}
-              className="w-full"
+              className="w-full min-h-[48px] text-sm sm:text-base"
             >
               <Twitter className="mr-2 h-4 w-4" />
               Twitter
@@ -243,18 +244,18 @@ const Login = () => {
               type="button"
               variant="outline"
               onClick={() => handleSocialLogin('LinkedIn')}
-              className="w-full"
+              className="w-full min-h-[48px] text-sm sm:text-base"
             >
               <Linkedin className="mr-2 h-4 w-4" />
               LinkedIn
             </Button>
           </div>
 
-          <div className="text-center text-sm">
+          <div className="text-center text-sm sm:text-base">
             <span className="text-muted-foreground">{t('auth.dontHaveAccount')} </span>
             <Link 
               to="/register" 
-              className="text-primary hover:underline font-medium"
+              className="text-primary hover:underline font-medium break-words"
             >
               {t('auth.signUp')}
             </Link>

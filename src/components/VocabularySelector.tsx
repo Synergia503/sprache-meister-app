@@ -106,17 +106,17 @@ export const VocabularySelector = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-3 sm:space-y-4">
+          <p className="text-sm sm:text-base text-muted-foreground">
             {description}
           </p>
           
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
+              <SelectTrigger className="min-h-[48px]">
                 <SelectValue placeholder={t('vocabularySelector.selectCategoryPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -131,7 +131,7 @@ export const VocabularySelector = ({
             <Button 
               onClick={handleUseCategory}
               disabled={!selectedCategory}
-              className="w-full"
+              className="w-full min-h-[48px]"
               variant="secondary"
             >
               {t('vocabularySelector.useSelectedCategory')}

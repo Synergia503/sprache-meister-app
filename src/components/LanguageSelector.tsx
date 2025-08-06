@@ -26,15 +26,15 @@ export const LanguageSelector = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
           <Languages className="h-5 w-5" />
           {t('settings.languageSettings')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <CardContent className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           <div className="space-y-2">
-            <Label htmlFor="native-language">{t('languageSelector.nativeLanguage')}</Label>
+            <Label htmlFor="native-language" className="text-sm font-medium">{t('languageSelector.nativeLanguage')}</Label>
             <Select
               value={languageSettings.nativeLanguage.code}
               onValueChange={(value) => {
@@ -44,7 +44,7 @@ export const LanguageSelector = () => {
                 if (language) setNativeLanguage(language);
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="min-h-[48px]">
                 <SelectValue placeholder={t('languageSelector.selectNativeLanguage')} />
               </SelectTrigger>
               <SelectContent>
@@ -58,7 +58,7 @@ export const LanguageSelector = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="target-language">{t('languageSelector.targetLanguage')}</Label>
+            <Label htmlFor="target-language" className="text-sm font-medium">{t('languageSelector.targetLanguage')}</Label>
             <Select
               value={languageSettings.targetLanguage.code}
               onValueChange={(value) => {
@@ -68,7 +68,7 @@ export const LanguageSelector = () => {
                 if (language) setTargetLanguage(language);
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="min-h-[48px]">
                 <SelectValue placeholder={t('languageSelector.selectTargetLanguage')} />
               </SelectTrigger>
               <SelectContent>
@@ -82,12 +82,12 @@ export const LanguageSelector = () => {
           </div>
         </div>
 
-        <Button variant="outline" onClick={swapLanguages} className="w-full">
+        <Button variant="outline" onClick={swapLanguages} className="w-full min-h-[48px]">
           <ArrowLeftRight className="mr-2 h-4 w-4" />
           {t('languageSelector.swapLanguages')}
         </Button>
 
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm sm:text-base text-muted-foreground space-y-1">
           <p>
             {t('languageSelector.learning')}:{" "}
             <strong>{languageSettings.targetLanguage.nativeName}</strong>

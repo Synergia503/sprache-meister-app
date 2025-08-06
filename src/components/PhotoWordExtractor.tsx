@@ -168,33 +168,34 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
           <Image className="h-5 w-5" />
           {t('vocabulary.extractWordsFromPhoto')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         {!imagePreview ? (
           <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            className={`border-2 border-dashed rounded-lg p-4 sm:p-6 lg:p-8 text-center transition-colors ${
               isDragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
           >
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-center">
-                <Upload className="h-12 w-12 text-muted-foreground" />
+                <Upload className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-lg font-medium">{t('vocabulary.dropImageHere')}</p>
-                <p className="text-muted-foreground">{t('vocabulary.chooseFromOptions')}</p>
+                <p className="text-base sm:text-lg font-medium">{t('vocabulary.dropImageHere')}</p>
+                <p className="text-sm sm:text-base text-muted-foreground">{t('vocabulary.chooseFromOptions')}</p>
               </div>
-              <div className="flex flex-wrap gap-2 justify-center">
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <Button
                   variant="outline"
                   onClick={() => document.getElementById('file-input')?.click()}
+                  className="w-full sm:w-auto min-h-[48px]"
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   {t('vocabulary.chooseFile')}
@@ -202,6 +203,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
                 <Button
                   variant="outline"
                   onClick={() => document.getElementById('camera-input')?.click()}
+                  className="w-full sm:w-auto min-h-[48px]"
                 >
                   <Camera className="mr-2 h-4 w-4" />
                   {t('vocabulary.takePhoto')}
@@ -210,28 +212,27 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="relative">
               <img
                 src={imagePreview}
                 alt="Selected"
-                className="w-full max-h-64 object-contain rounded-lg border"
+                className="w-full max-h-48 sm:max-h-64 object-contain rounded-lg border"
               />
               <Button
                 variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+                className="absolute top-2 right-2 bg-background/80 hover:bg-background h-8 w-8 p-1"
                 onClick={removeImage}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
             
-            <div className="flex gap-2">
+            <div>
               <Button
                 onClick={simulateAnalysis}
                 disabled={isAnalyzing}
-                className="flex-1 min-w-0"
+                className="w-full min-h-[48px]"
               >
                 {isAnalyzing ? (
                   <>
@@ -247,34 +248,33 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
         )}
 
         {extractedWords.length > 0 && (
-          <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium mb-3">{t('vocabulary.extractedWords', { language: languageSettings.targetLanguage.nativeName })}:</h3>
-              <div className="grid gap-4">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="p-3 sm:p-4 bg-muted rounded-lg">
+              <h3 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('vocabulary.extractedWords', { language: languageSettings.targetLanguage.nativeName })}:</h3>
+              <div className="grid gap-3 sm:gap-4">
                 {extractedWords.map((word, index) => (
-                  <div key={index} className="p-3 bg-background rounded border space-y-2">
+                  <div key={index} className="p-3 sm:p-4 bg-background rounded border space-y-2 sm:space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{word.targetWord}</span>
-                      <span className="text-muted-foreground">{word.nativeWord}</span>
+                      <span className="font-medium text-sm sm:text-base break-words">{word.targetWord}</span>
+                      <span className="text-muted-foreground text-sm sm:text-base break-words ml-2">{word.nativeWord}</span>
                     </div>
                     
                     {word.categories && word.categories.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">{t('vocabulary.suggestedCategories')}:</p>
+                      <div className="space-y-1 sm:space-y-2">
+                        <p className="text-xs sm:text-sm text-muted-foreground">{t('vocabulary.suggestedCategories')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {word.categories.map((category, catIndex) => (
                             <Button
                               key={catIndex}
                               variant={wordCategoryStates[index]?.includes(category) ? "default" : "outline"}
-                              size="sm"
                               onClick={() => toggleCategory(index, category)}
-                              className="text-xs h-6"
+                              className="text-xs h-8 px-2 sm:px-3"
                             >
                               {category}
                             </Button>
                           ))}
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {t('vocabulary.clickToSelectCategories')}
                         </p>
                       </div>
@@ -284,7 +284,7 @@ const PhotoWordExtractor = ({ onWordsExtracted }: PhotoWordExtractorProps) => {
               </div>
             </div>
             
-            <Button onClick={addWordsToVocabulary} className="w-full">
+            <Button onClick={addWordsToVocabulary} className="w-full min-h-[48px]">
               {t('vocabulary.addSelectedWords')}
             </Button>
           </div>

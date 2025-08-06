@@ -119,16 +119,44 @@
   /* Touch-friendly button sizing for mobile */
   @media (max-width: 767px) {
     .btn {
-      @apply min-h-[44px] px-4 py-2;
+      @apply min-h-[48px] px-4 py-3 text-base;
     }
     
     input {
-      @apply min-h-[44px];
+      @apply min-h-[48px] text-base;
+    }
+    
+    textarea {
+      @apply min-h-[48px] text-base;
+    }
+    
+    select {
+      @apply min-h-[48px] text-base;
     }
     
     /* Ensure sidebar trigger is visible and touchable on mobile */
     .sidebar-trigger {
-      @apply p-3 m-2 bg-background border rounded-md;
+      @apply p-3 m-2 bg-background border rounded-md min-h-[48px] min-w-[48px];
+    }
+    
+    /* Improve card spacing on mobile */
+    .mobile-card-spacing {
+      @apply p-4 space-y-4;
+    }
+    
+    /* Better text sizing for mobile */
+    .mobile-text {
+      @apply text-sm leading-relaxed;
+    }
+    
+    /* Responsive grid improvements */
+    .mobile-responsive-grid {
+      @apply grid-cols-1 gap-3;
+    }
+    
+    /* Modal improvements for mobile */
+    .mobile-modal {
+      @apply mx-4 my-8 max-h-[90vh] overflow-y-auto;
     }
   }
 }

@@ -101,25 +101,25 @@ const All = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
+    <div className="p-3 sm:p-4 lg:p-6">
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6">
         {t('exercises.allExercises')}
       </h1>
 
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <p className="text-muted-foreground">
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="space-y-3 sm:space-y-4">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 {t('exercises.selectCategoryDescription')}
               </p>
 
-              <div className="max-w-md">
+              <div className="w-full sm:max-w-md">
                 <Select
                   value={selectedCategory}
                   onValueChange={setSelectedCategory}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="min-h-[48px]">
                     <SelectValue placeholder={t('exercises.selectCategoryPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -136,7 +136,7 @@ const All = () => {
               </div>
 
               {selectedCategory && selectedCategory !== "none" && (
-                <p className="text-sm text-blue-600">
+                <p className="text-xs sm:text-sm text-blue-600">
                   {t('exercises.selectedCategory', { 
                     category: selectedCategory, 
                     count: getWordsByCategory(selectedCategory).length 
@@ -148,7 +148,7 @@ const All = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {exercises.map((exercise) => {
           const IconComponent = exercise.icon;
           return (
@@ -157,18 +157,18 @@ const All = () => {
               className="hover:shadow-lg transition-shadow"
             >
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <IconComponent className="h-5 w-5" />
                   {exercise.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
                   {t(`exercises.descriptions.${exercise.id}`)}
                 </p>
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full min-h-[48px]"
                   onClick={() => sendToExercise(exercise.path)}
                   disabled={isLoading}
                 >

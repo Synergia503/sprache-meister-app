@@ -31,17 +31,17 @@ const Settings = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-2">
-        <SettingsIcon className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+        <h1 className="text-xl sm:text-2xl font-bold">{t('settings.title')}</h1>
       </div>
 
       {/* Interface Language Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Languages className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Languages className="h-4 w-4 sm:h-5 sm:w-5" />
             {t('settings.interfaceLanguage')}
           </CardTitle>
         </CardHeader>
@@ -53,8 +53,8 @@ const Settings = () => {
       {/* Language Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Languages className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Languages className="h-4 w-4 sm:h-5 sm:w-5" />
             {t('settings.languageSettings')}
           </CardTitle>
         </CardHeader>
@@ -66,22 +66,22 @@ const Settings = () => {
       {/* Appearance Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Monitor className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Monitor className="h-4 w-4 sm:h-5 sm:w-5" />
             {t('settings.appearance')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
               <div className="space-y-0.5">
-                <label className="text-sm font-medium">{t('settings.theme')}</label>
-                <p className="text-sm text-muted-foreground">
+                <label className="text-sm sm:text-base font-medium">{t('settings.theme')}</label>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {t('settings.chooseTheme')}
                 </p>
               </div>
               <Select value={theme} onValueChange={setTheme}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

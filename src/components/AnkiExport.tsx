@@ -112,8 +112,8 @@ export const AnkiExport = ({ items, defaultDeckName = 'German Learning' }: AnkiE
   if (items.length === 0) {
     return (
       <Card>
-        <CardContent className="pt-6">
-          <p className="text-muted-foreground text-center">No items available for export</p>
+        <CardContent className="pt-4 sm:pt-6">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">No items available for export</p>
         </CardContent>
       </Card>
     );
@@ -122,14 +122,14 @@ export const AnkiExport = ({ items, defaultDeckName = 'German Learning' }: AnkiE
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
           <Download className="h-5 w-5" />
           Export to Anki ({items.length} items)
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         {isConnected === null && (
-          <Button onClick={checkConnection} disabled={isLoading}>
+          <Button onClick={checkConnection} disabled={isLoading} className="w-full min-h-[48px]">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -142,27 +142,27 @@ export const AnkiExport = ({ items, defaultDeckName = 'German Learning' }: AnkiE
         )}
 
         {isConnected === false && (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm sm:text-base text-muted-foreground space-y-2">
             <p>Could not connect to AnkiConnect.</p>
             <p>Make sure:</p>
-            <ul className="list-disc list-inside mt-2">
+            <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Anki is running</li>
               <li>AnkiConnect addon is installed</li>
               <li>AnkiConnect is enabled</li>
             </ul>
-            <Button onClick={checkConnection} className="mt-2" size="sm">
+            <Button onClick={checkConnection} className="mt-3 w-full sm:w-auto min-h-[48px]">
               Try Again
             </Button>
           </div>
         )}
 
         {isConnected === true && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label htmlFor="deck-select">Select Deck</Label>
-              <div className="flex gap-2 mt-1">
+              <Label htmlFor="deck-select" className="text-sm font-medium">Select Deck</Label>
+              <div className="flex flex-col sm:flex-row gap-2 mt-1">
                 <Select value={selectedDeck} onValueChange={setSelectedDeck}>
-                  <SelectTrigger className="flex-1 min-w-0">
+                  <SelectTrigger className="flex-1 min-w-0 min-h-[48px]">
                     <SelectValue placeholder="Select a deck" />
                   </SelectTrigger>
                   <SelectContent>
@@ -175,7 +175,7 @@ export const AnkiExport = ({ items, defaultDeckName = 'German Learning' }: AnkiE
                 </Select>
                 <Button
                   variant="outline"
-                  size="icon"
+                  className="w-full sm:w-auto min-h-[48px] px-4"
                   onClick={() => setShowNewDeck(!showNewDeck)}
                 >
                   <Plus className="h-4 w-4" />
@@ -184,13 +184,14 @@ export const AnkiExport = ({ items, defaultDeckName = 'German Learning' }: AnkiE
             </div>
 
             {showNewDeck && (
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   placeholder="New deck name"
                   value={newDeckName}
                   onChange={(e) => setNewDeckName(e.target.value)}
+                  className="min-h-[48px]"
                 />
-                <Button onClick={createDeck} disabled={!newDeckName.trim()}>
+                <Button onClick={createDeck} disabled={!newDeckName.trim()} className="w-full sm:w-auto min-h-[48px]">
                   Create
                 </Button>
               </div>
@@ -199,7 +200,7 @@ export const AnkiExport = ({ items, defaultDeckName = 'German Learning' }: AnkiE
             <Button 
               onClick={exportToAnki} 
               disabled={!selectedDeck || isLoading}
-              className="w-full"
+              className="w-full min-h-[48px]"
             >
               {isLoading ? (
                 <>

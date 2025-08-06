@@ -74,22 +74,23 @@ export const ApiKeyInput = ({ apiKey, onSaveApiKey }: ApiKeyInputProps) => {
   };
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-4 sm:mb-6">
       <CardHeader>
-        <CardTitle>OpenAI API Configuration</CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <CardTitle className="text-lg sm:text-xl">OpenAI API Configuration</CardTitle>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Your API key is stored locally in your browser and never sent to our servers.
         </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="api-key">OpenAI API Key</Label>
+            <Label htmlFor="api-key" className="text-sm font-medium">OpenAI API Key</Label>
             <Input
               id="api-key"
               type="password"
               placeholder="sk-..."
               {...register('apiKey')}
+              className="min-h-[48px]"
               aria-invalid={errors.apiKey ? 'true' : 'false'}
             />
             {errors.apiKey && (
@@ -97,11 +98,11 @@ export const ApiKeyInput = ({ apiKey, onSaveApiKey }: ApiKeyInputProps) => {
                 {errors.apiKey.message}
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Enter your OpenAI API key starting with "sk-"
             </p>
           </div>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto min-h-[48px]">
             {isLoading ? 'Saving...' : 'Save API Key'}
           </Button>
         </form>

@@ -52,16 +52,16 @@ const Dashboard = () => {
     .slice(0, 5);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">{t('nav.dashboard')}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">{t('nav.dashboard')}</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           {t('dashboard.learningProgressOverview', { language: languageSettings.targetLanguage.nativeName })}
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <DashboardCard
           title={t('dashboard.totalWords')}
           value={totalWords.toString()}
@@ -89,21 +89,21 @@ const Dashboard = () => {
       </div>
 
       {/* Progress Overview */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{t('dashboard.learningProgress')}</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{t('dashboard.learningProgress')}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-xs sm:text-sm mb-2">
                 <span>{t('dashboard.vocabularyMastery')}</span>
                 <span>{Math.round((wordsWithHistory / Math.max(totalWords, 1)) * 100)}%</span>
               </div>
               <Progress value={(wordsWithHistory / Math.max(totalWords, 1)) * 100} />
             </div>
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-xs sm:text-sm mb-2">
                 <span>{t('dashboard.exerciseCompletion')}</span>
                 <span>{averageSuccessRate}%</span>
               </div>
@@ -114,26 +114,26 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('dashboard.recentActivity')}</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{t('dashboard.recentActivity')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {recentActivity.length > 0 ? (
                 recentActivity.map((word) => (
-                  <div key={word.id} className="flex items-center justify-between p-2 border rounded">
+                  <div key={word.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded gap-2 sm:gap-0">
                     <div>
-                      <div className="font-medium">{word.targetWord}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-medium text-sm sm:text-base">{word.targetWord}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         {t('dashboard.exercisesCompleted', { count: word.learningHistory.length })}
                       </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xs sm:text-sm text-muted-foreground">
                       {word.lastLearningDate?.toLocaleDateString()}
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center text-muted-foreground py-4">
+                <div className="text-center text-muted-foreground py-6 text-sm sm:text-base">
                   {t('dashboard.noRecentActivity')}
                 </div>
               )}
@@ -145,24 +145,24 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('dashboard.quickActions')}</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">{t('dashboard.quickActions')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="text-center p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer">
-              <BookOpen className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="font-medium">{t('dashboard.addNewWords')}</div>
-              <div className="text-sm text-muted-foreground">{t('dashboard.expandVocabulary')}</div>
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="text-center p-4 sm:p-6 border rounded-lg hover:bg-muted transition-colors cursor-pointer min-h-[120px] flex flex-col justify-center">
+              <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-primary" />
+              <div className="font-medium text-sm sm:text-base">{t('dashboard.addNewWords')}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">{t('dashboard.expandVocabulary')}</div>
             </div>
-            <div className="text-center p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer">
-              <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="font-medium">{t('dashboard.startExercise')}</div>
-              <div className="text-sm text-muted-foreground">{t('dashboard.practiceWhatLearned')}</div>
+            <div className="text-center p-4 sm:p-6 border rounded-lg hover:bg-muted transition-colors cursor-pointer min-h-[120px] flex flex-col justify-center">
+              <Target className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-primary" />
+              <div className="font-medium text-sm sm:text-base">{t('dashboard.startExercise')}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">{t('dashboard.practiceWhatLearned')}</div>
             </div>
-            <div className="text-center p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer">
-              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <div className="font-medium">{t('dashboard.viewProgress')}</div>
-              <div className="text-sm text-muted-foreground">{t('dashboard.trackImprovement')}</div>
+            <div className="text-center p-4 sm:p-6 border rounded-lg hover:bg-muted transition-colors cursor-pointer min-h-[120px] flex flex-col justify-center sm:col-span-2 lg:col-span-1">
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-primary" />
+              <div className="font-medium text-sm sm:text-base">{t('dashboard.viewProgress')}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">{t('dashboard.trackImprovement')}</div>
             </div>
           </div>
         </CardContent>

@@ -161,14 +161,14 @@ const Flashcards = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">Flashcards</h1>
+    <div className="p-3 sm:p-4 lg:p-6">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Flashcards</h1>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button variant="outline" onClick={() => setShowAnkiExport(!showAnkiExport)} className="w-full sm:w-auto">
+          <Button variant="outline" onClick={() => setShowAnkiExport(!showAnkiExport)} className="w-full sm:w-auto min-h-[48px]">
             Export to Anki
           </Button>
-          <Button onClick={handleAddNew} className="w-full sm:w-auto">
+          <Button onClick={handleAddNew} className="w-full sm:w-auto min-h-[48px]">
             <BookPlus className="mr-2 h-4 w-4" />
             Add Flashcard
           </Button>
@@ -188,23 +188,24 @@ const Flashcards = () => {
           {/* Search and Filter Controls */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <List className="h-5 w-5" />
                 My Flashcards ({filteredFlashcards.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <div className="flex flex-col gap-3 sm:gap-4 mb-4">
                 <div className="flex-1 min-w-0">
                   <Input
                     placeholder="Search flashcards..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className="min-h-[48px]"
                   />
                 </div>
-                <div className="w-full sm:w-48">
+                <div className="w-full sm:w-56">
                   <Select value={filterCategory} onValueChange={setFilterCategory}>
-                    <SelectTrigger>
+                    <SelectTrigger className="min-h-[48px]">
                       <SelectValue placeholder="Filter by category" />
                     </SelectTrigger>
                     <SelectContent>

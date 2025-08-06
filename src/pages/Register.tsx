@@ -67,22 +67,23 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-6">
-      <Card className="w-full max-w-md mx-auto">
+    <div className="min-h-screen flex items-center justify-center bg-background p-3 sm:p-4 lg:p-6">
+      <Card className="w-full max-w-md mx-auto shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-          <p className="text-muted-foreground">Sign up for German Learning</p>
+          <CardTitle className="text-xl sm:text-2xl font-bold">Create Account</CardTitle>
+          <p className="text-sm sm:text-base text-muted-foreground">Sign up for German Learning</p>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
                 <Input
                   id="firstName"
                   placeholder="First name"
                   {...register('firstName')}
                   autoComplete="given-name"
+                  className="min-h-[48px] text-base"
                   aria-invalid={errors.firstName ? 'true' : 'false'}
                 />
                 {errors.firstName && (
@@ -92,12 +93,13 @@ const Register = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
                 <Input
                   id="lastName"
                   placeholder="Last name"
                   {...register('lastName')}
                   autoComplete="family-name"
+                  className="min-h-[48px] text-base"
                   aria-invalid={errors.lastName ? 'true' : 'false'}
                 />
                 {errors.lastName && (
@@ -109,13 +111,14 @@ const Register = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="Enter your email"
                 {...register('email')}
                 autoComplete="email"
+                className="min-h-[48px] text-base"
                 aria-invalid={errors.email ? 'true' : 'false'}
               />
               {errors.email && (
@@ -126,13 +129,14 @@ const Register = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="Create a password"
                 {...register('password')}
                 autoComplete="new-password"
+                className="min-h-[48px] text-base"
                 aria-invalid={errors.password ? 'true' : 'false'}
               />
               {errors.password && (
@@ -140,19 +144,20 @@ const Register = () => {
                   {errors.password.message}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Password must contain at least 8 characters with uppercase, lowercase, number, and special character.
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 placeholder="Confirm your password"
                 {...register('confirmPassword')}
                 autoComplete="new-password"
+                className="min-h-[48px] text-base"
                 aria-invalid={errors.confirmPassword ? 'true' : 'false'}
               />
               {errors.confirmPassword && (
@@ -162,16 +167,16 @@ const Register = () => {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full min-h-[48px] text-base font-medium" disabled={isLoading}>
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
 
-          <div className="text-center text-sm mt-6">
+          <div className="text-center text-sm sm:text-base mt-4 sm:mt-6">
             <span className="text-muted-foreground">Already have an account? </span>
             <Link 
               to="/login" 
-              className="text-primary hover:underline font-medium"
+              className="text-primary hover:underline font-medium break-words"
             >
               Sign in
             </Link>

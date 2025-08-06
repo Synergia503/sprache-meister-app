@@ -61,13 +61,14 @@ export const ExerciseHeader = ({ title, exercise }: ExerciseHeaderProps) => {
   }, []);
 
   return (
-    <div className="flex justify-between items-center mb-6">
-      <h1 className="text-3xl font-bold">{title}</h1>
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0">
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{title}</h1>
       {exercise && (
         <Button 
           variant="outline" 
           onClick={handleDownloadPDF}
           disabled={isGenerating}
+          className="w-full sm:w-auto min-h-[48px]"
         >
           <Download className="h-4 w-4 mr-2" />
           {isGenerating ? t('exercises.generating') : t('exercises.generatePDF')}

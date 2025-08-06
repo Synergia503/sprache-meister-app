@@ -288,10 +288,10 @@ const Profile = () => {
   ];
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center gap-3 mb-4 sm:mb-6">
-        <User className="h-6 sm:h-8 w-6 sm:w-8" />
-        <h1 className="text-2xl sm:text-3xl font-bold">{t('profile.title')}</h1>
+    <div className="p-3 sm:p-4 lg:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <User className="h-5 sm:h-6 lg:h-8 w-5 sm:w-6 lg:w-8" />
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t('profile.title')}</h1>
       </div>
 
       {/* Profile Picture */}
@@ -302,16 +302,16 @@ const Profile = () => {
             {t('profile.profilePicture')}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
+        <CardContent className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
             <div className="relative">
               <img
                 src={profilePicture}
                 alt="Profile"
-                className="w-20 h-20 rounded-full object-cover border-2 border-border"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-border"
               />
-              <label className="absolute -bottom-1 -right-1 p-1 bg-primary text-primary-foreground rounded-full cursor-pointer hover:bg-primary/90">
-                <Camera className="h-3 w-3" />
+              <label className="absolute -bottom-1 -right-1 p-1.5 bg-primary text-primary-foreground rounded-full cursor-pointer hover:bg-primary/90">
+                <Camera className="h-3 w-3 sm:h-4 sm:w-4" />
                 <input
                   type="file"
                   accept="image/*"
@@ -320,9 +320,9 @@ const Profile = () => {
                 />
               </label>
             </div>
-            <div>
-              <p className="font-medium">{personalInfo.firstName} {personalInfo.lastName}</p>
-              <p className="text-sm text-muted-foreground">{t('profile.clickCameraToChange')}</p>
+            <div className="text-center sm:text-left">
+              <p className="font-medium text-sm sm:text-base">{personalInfo.firstName} {personalInfo.lastName}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{t('profile.clickCameraToChange')}</p>
             </div>
           </div>
         </CardContent>

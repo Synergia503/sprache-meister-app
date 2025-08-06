@@ -61,28 +61,27 @@ export const WordInputForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-3 sm:space-y-4">
+          <p className="text-sm sm:text-base text-muted-foreground">
             {description}
           </p>
           
           {words.map((word, index) => (
-            <div key={index} className="flex flex-col sm:flex-row gap-2">
+            <div key={index} className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Input
                 placeholder={`${placeholder} ${index + 1}`}
                 value={word}
                 onChange={(e) => updateWord(index, e.target.value)}
-                className="flex-1 min-w-0"
+                className="flex-1 min-w-0 min-h-[48px]"
               />
               {words.length > 1 && (
                 <Button
                   variant="outline"
-                  size="icon"
                   onClick={() => removeWordField(index)}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto min-h-[48px] px-4"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -90,9 +89,9 @@ export const WordInputForm = ({
             </div>
           ))}
           
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {words.length < 20 && (
-              <Button variant="outline" onClick={addWordField} className="w-full sm:w-auto">
+              <Button variant="outline" onClick={addWordField} className="w-full sm:w-auto min-h-[48px]">
                 <Plus className="h-4 w-4 mr-2" />
                 {t('wordInputForm.addWord')}
               </Button>
@@ -100,7 +99,7 @@ export const WordInputForm = ({
             <Button 
               onClick={handleGenerate} 
               disabled={isLoading || !apiKey}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto min-h-[48px]"
             >
               {t('wordInputForm.generateExercise')}
             </Button>

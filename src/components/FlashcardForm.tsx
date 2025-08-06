@@ -41,58 +41,62 @@ export const FlashcardForm = ({ flashcard, onSave, onCancel }: FlashcardFormProp
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{flashcard ? 'Edit Flashcard' : 'Add New Flashcard'}</CardTitle>
+        <CardTitle className="text-lg sm:text-xl">{flashcard ? 'Edit Flashcard' : 'Add New Flashcard'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="german">German Word/Phrase</Label>
+            <Label htmlFor="german" className="text-sm font-medium">German Word/Phrase</Label>
             <Input
               id="german"
               value={german}
               onChange={(e) => setGerman(e.target.value)}
               placeholder="e.g., der Hund"
+              className="min-h-[48px]"
               required
             />
           </div>
           
           <div>
-            <Label htmlFor="english">English Translation</Label>
+            <Label htmlFor="english" className="text-sm font-medium">English Translation</Label>
             <Input
               id="english"
               value={english}
               onChange={(e) => setEnglish(e.target.value)}
               placeholder="e.g., the dog"
+              className="min-h-[48px]"
               required
             />
           </div>
           
           <div>
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category" className="text-sm font-medium">Category</Label>
             <Input
               id="category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               placeholder="e.g., Animals"
+              className="min-h-[48px]"
             />
           </div>
           
           <div>
-            <Label htmlFor="example">Example Sentence (Optional)</Label>
+            <Label htmlFor="example" className="text-sm font-medium">Example Sentence (Optional)</Label>
             <Textarea
               id="example"
               value={example}
               onChange={(e) => setExample(e.target.value)}
               placeholder="e.g., Der Hund läuft im Park."
               rows={3}
+              className="min-h-[48px]"
             />
           </div>
           
-          <div className="flex gap-2">
-            <Button type="submit">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button type="submit" className="w-full sm:w-auto min-h-[48px]">
               {flashcard ? 'Update' : 'Add'} Flashcard
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto min-h-[48px]">
               Cancel
             </Button>
           </div>

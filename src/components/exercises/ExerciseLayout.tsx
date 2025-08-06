@@ -20,7 +20,7 @@ export const ExerciseLayout = ({
   currentExercise
 }: ExerciseLayoutProps) => {
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-4 lg:p-6">
       <ExerciseHeader title={title} exercise={currentExercise} />
       {children}
       <PreviousExercises 
