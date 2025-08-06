@@ -37,7 +37,6 @@ const VocabularyContext = createContext<VocabularyContextType | undefined>(
   undefined
 );
 
-// Updated mock data with language-agnostic structure
 const createMockWords = (
   targetLanguage: Language,
   nativeLanguage: Language
@@ -254,9 +253,26 @@ const createMockWords = (
       },
     ],
   },
-  // ...
-  // Add 15 more with the same structure to reach 25
-  // You can copy, change `id`, `targetWord`, `nativeWord`, etc.
+  {
+    id: "11",
+    targetLanguage,
+    nativeLanguage,
+    targetWord: "Kreativität",
+    nativeWord: "Creativity",
+    categories: ["culture", "humor"],
+    sampleSentence: "Er hatte eine kreative Idee.",
+    dateAdded: new Date("2024-01-02"),
+    isFavorite: true,
+    lastLearningDate: new Date("2024-01-08"),
+    learningHistory: [
+      {
+        exerciseType: "same-meaning",
+        success: true,
+        date: new Date("2024-01-08"),
+        timeSpent: 50,
+      },
+    ],
+  },
 ];
 
 export const VocabularyProvider: React.FC<{ children: ReactNode }> = ({
